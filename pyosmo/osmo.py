@@ -1,18 +1,31 @@
-__author__ = 'olli-pekka puolitaival'
-
 import random
 
+from model import Model
+from history import OsmoHistory
+import time
+from pyosmo.algorithm.random import RandomAlgorithm
 
-class Osmo:
+
+class Osmo(object):
     """ Osmo tester core """
-    functions = dict()  # functions[function_name] = link_of_instance
-    debug = True
-    tests_in_a_suite = 10
-    steps_in_a_test = 10
 
-    def __init__(self, model):
+    def __init__(self, model, seed=None):
         """ Osmo need at least one model to work """
-        self.add_model(model)
+        self.model = Model()
+        self.model.add_model(model)
+        self.history = OsmoHistory()
+        self.tests_in_a_suite = 10
+        self.steps_in_a_test = 10
+        self.debug = False
+        # Use random as default algorithm
+        self.algorithm = RandomAlgorithm()
+
+        if seed is None:
+            self.seed = random.randint(0, 10000)
+        else:
+            self.seed = seed
+        self.random = random.Random(self.seed)
+        print("Using seed: {}".format(self.seed))
 
     def p(self, text):
         """ Print debugging texts if debug is enabled """
@@ -24,54 +37,40 @@ class Osmo:
 
     def add_model(self, model):
         """ Add model for osmo """
-        try:
-            model.__class__
-        except AttributeError:
-            # If not instance of class, create instance of it
-            model = model()
-        for function in dir(model):
-            if '__' not in function:
-                self.functions[function] = model
-        self.p('Loaded model: {}'.format(model.__class__))
-        self.p('Functions: {}'.format(self.functions))
+        self.model.add_model(model)
 
-    def _execute_optional(self, function):
-        """ Execute if function is available """
-        if function in self.functions:
-            return self._execute(function)
-
-    def _execute(self, function):
-        """ Execute a function and return its return value """
-        try:
-            return getattr(self.functions[function], function)()
-        except AttributeError:
-            raise Exception("Osmo cannot find function {}.{} from model".format(self.functions[function], function))
-
-    def _get_list_of_available_steps(self):
-        available_steps = []
-        for function in self.functions.keys():
-            if function.startswith('guard_'):
-                if self._execute(function):
-                    step_name = function[6:]
-                    if 'step_{}'.format(step_name) in self.functions:
-                        available_steps.append(step_name)
-                    else:
-                        raise Exception('OSMO cannot find {} for {}'.format(step_name, function))
-        if len(available_steps) == 0:
-            raise Exception('Cannot find any available states')
-        return available_steps
+    def _execute_step(self, ending):
+        """
+        Execute step and save it to the history
+        :param ending: letter after step_
+        :return:
+        """
+        step_name = 'step_{}'.format(ending)
+        start_time = time.time()
+        self.model.execute(step_name)
+        self.history.add_step(step_name, time.time() - start_time)
 
     def generate(self):
         """ Generate / run tests """
-        self._execute_optional('before_suite')
+
+        # Initialize algorithm
+        self.algorithm.inititalize(self.random, self.model)
+
+        self.model.execute_optional('before_suite')
+        if not self.tests_in_a_suite:
+            raise Exception("Empty model!")
+
         for _ in range(self.tests_in_a_suite):
-            self._execute_optional('before_test')
+            self.history.start_new_test()
+            self.model.execute_optional('before_test')
             for _ in range(self.steps_in_a_test):
-                selected = random.choice(self._get_list_of_available_steps())
-                self._execute_optional('pre_{}'.format(selected))
-                self._execute('step_{}'.format(selected))
-                self._execute_optional('post_{}'.format(selected))
-            self._execute_optional('after_test')
-        self._execute_optional('after_suite')
-
-
+                # Use algorithm to select the step
+                ending = self.algorithm.choose(self.history, self.model.get_list_of_available_steps())
+                self.model.execute_optional('pre_{}'.format(ending))
+                self._execute_step(ending)
+                self.model.execute_optional('post_{}'.format(ending))
+                # General after step which is run after each step
+                self.model.execute_optional('after')
+            self.model.execute_optional('after_test')
+        self.model.execute_optional('after_suite')
+        self.history.stop()
