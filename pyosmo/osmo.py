@@ -1,8 +1,8 @@
 import random
-
-from model import Model
-from history import OsmoHistory
 import time
+
+from pyosmo.model import Model
+from pyosmo.history import OsmoHistory
 from pyosmo.algorithm.random import RandomAlgorithm
 
 

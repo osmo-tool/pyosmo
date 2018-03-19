@@ -20,7 +20,7 @@ setup(name='pyosmo',
       author_email=OWNER_EMAILS,
       maintainer=OWNER_NAMES,
       maintainer_email=OWNER_EMAILS,
-      packages=find_packages(include=["pyosmo"]),
+      packages=find_packages(include=["pyosmo", "pyosmo.*"]),
       include_package_data=True,
       license="MIT",
       install_requires=[]
