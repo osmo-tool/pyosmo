@@ -40,13 +40,21 @@ class Osmo(object):
 
     def set_algorithm(self, algorithm):
         """
-        Set algorithm for config osmo.
+        Set algorithm for configuration of osmo.
 
         :param algorithm: Algorithm object.
         :return: Nothing
         """
         self.config.algorithm = algorithm
         self.algorithm = algorithm
+
+    def stop_on_fail(self, value):
+        """
+        Set stop_on_fail value for configuration of osmo.
+
+        :return: Nothing
+        """
+        self.config.stop_on_fail = value
 
     def add_model(self, model):
         """ Add model for osmo """
@@ -71,7 +79,7 @@ class Osmo(object):
         """
         if self.current_test_number == self.tests_in_a_suite:
             return True
-        elif self.config.stop_on_failure and self.failed_tests:
+        elif self.config.stop_on_fail and self.failed_tests:
             return True
         return False
 
@@ -92,7 +100,8 @@ class Osmo(object):
             try:
                 for _ in range(self.steps_in_a_test):
                     # Use algorithm to select the step
-                    ending = self.algorithm.choose(self.history, self.model.get_list_of_available_steps())
+                    ending = self.algorithm.choose(self.history,
+                                                   self.model.get_list_of_available_steps())
                     self.model.execute_optional('pre_{}'.format(ending))
                     self._execute_step(ending)
                     self.model.execute_optional('post_{}'.format(ending))

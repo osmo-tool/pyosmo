@@ -7,11 +7,11 @@ class OsmoConfig(object):
         self._algorithm = RandomAlgorithm()
 
     @property
-    def stop_on_failure(self):
+    def stop_on_fail(self):
         return self._stop_on_failure
 
-    @stop_on_failure.setter
-    def stop_on_failure(self, value):
+    @stop_on_fail.setter
+    def stop_on_fail(self, value):
         self._stop_on_failure = value
 
     @property
