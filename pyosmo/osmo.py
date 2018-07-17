@@ -56,6 +56,14 @@ class Osmo(object):
         """
         self.config.stop_on_fail = value
 
+    def stop_test_on_exception(self, value):
+        """
+        Set stop_test_on_exception for configuration of osmo.
+
+        :return: Nothing
+        """
+        self.config.stop_test_on_exception = value
+
     def add_model(self, model):
         """ Add model for osmo """
         self.model.add_model(model)
@@ -97,18 +105,27 @@ class Osmo(object):
             self.history.start_new_test()
             self.current_test_number += 1
             self.model.execute_optional('before_test')
-            try:
-                for _ in range(self.steps_in_a_test):
-                    # Use algorithm to select the step
-                    ending = self.algorithm.choose(self.history,
-                                                   self.model.get_list_of_available_steps())
-                    self.model.execute_optional('pre_{}'.format(ending))
-                    self._execute_step(ending)
-                    self.model.execute_optional('post_{}'.format(ending))
-                    # General after step which is run after each step
-                    self.model.execute_optional('after')
-            except Exception:
-                self.failed_tests += 1
+            for _ in range(self.steps_in_a_test):
+                # Use algorithm to select the step
+                ending = self.algorithm.choose(self.history,
+                                               self.model.get_list_of_available_steps())
+                self.model.execute_optional('pre_{}'.format(ending))
+                try:
+                    returnvalue = self._execute_step(ending)
+                    returnvalue = returnvalue if returnvalue is not None else True
+                    if not returnvalue:
+                        self.p("Step {} returned false. Stopping this test.".format(ending))
+                        self.failed_tests += 1
+                        break
+                except Exception as error:
+                    self.p(error)
+                    self.failed_tests += 1
+                    if self.config.stop_test_on_exception:
+                        self.p("Step {} raised an exception. Stopping this test.".format(ending))
+                        break
+                self.model.execute_optional('post_{}'.format(ending))
+                # General after step which is run after each step
+                self.model.execute_optional('after')
             self.model.execute_optional('after_test')
         self.model.execute_optional('after_suite')
         self.history.stop()
