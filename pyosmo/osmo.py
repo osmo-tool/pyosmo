@@ -2,8 +2,8 @@ import random
 import time
 
 from pyosmo.model import Model
+from pyosmo.config import OsmoConfig
 from pyosmo.history import OsmoHistory
-from pyosmo.algorithm.random import RandomAlgorithm
 
 
 class Osmo(object):
@@ -14,11 +14,10 @@ class Osmo(object):
         self.model = Model()
         self.model.add_model(model)
         self.history = OsmoHistory()
-        self.tests_in_a_suite = 10
-        self.steps_in_a_test = 10
+        self._config = OsmoConfig()
+        self.current_test_number = 0
+        self.failed_tests = 0
         self.debug = False
-        # Use random as default algorithm
-        self.algorithm = RandomAlgorithm()
 
         if seed is None:
             self.seed = random.randint(0, 10000)
@@ -35,6 +34,75 @@ class Osmo(object):
     def set_debug(self, debug):
         self.debug = debug
 
+    @property
+    def config(self):
+        return self._config
+
+    @config.setter
+    def config(self, value):
+        if not isinstance(value, OsmoConfig):
+            raise AttributeError("config needs to be OsmoConfig.")
+        self._config = value
+
+    def set_algorithm(self, algorithm):
+        """
+        Set algorithm for configuration of osmo.
+
+        :param algorithm: Algorithm object.
+        :return: Nothing
+        """
+        self._config.algorithm = algorithm
+
+    @property
+    def algorithm(self):
+        return self._config.algorithm
+
+    @algorithm.setter
+    def algorithm(self, value):
+        self._config.algorithm = value
+
+    @property
+    def tests_in_a_suite(self):
+        return self._config.tests_in_a_suite
+
+    @tests_in_a_suite.setter
+    def tests_in_a_suite(self, value):
+        self._config.tests_in_a_suite = value
+
+    @property
+    def steps_in_a_test(self):
+        return self._config.steps_in_a_test
+
+    @steps_in_a_test.setter
+    def steps_in_a_test(self, value):
+        self._config.steps_in_a_test = value
+
+    @property
+    def stop_on_fail(self):
+        """
+        Set stop_on_fail value for configuration of osmo.
+
+        :return: Nothing
+        """
+        return self._config.stop_on_fail
+
+    @stop_on_fail.setter
+    def stop_on_fail(self, value):
+        self._config.stop_on_fail = value
+
+    @property
+    def stop_test_on_exception(self):
+        """
+        Set stop_test_on_exception for configuration of osmo.
+
+        :return: Nothing
+        """
+        return self._config.stop_test_on_exception
+
+    @stop_test_on_exception.setter
+    def stop_test_on_exception(self, value):
+        self._config.stop_test_on_exception = value
+
     def add_model(self, model):
         """ Add model for osmo """
         self.model.add_model(model)
@@ -50,6 +118,18 @@ class Osmo(object):
         self.model.execute(step_name)
         self.history.add_step(step_name, time.time() - start_time)
 
+    def should_end_suite(self):
+        """
+        Check if suite should be ended.
+
+        :return: Boolean
+        """
+        if self.current_test_number == self.tests_in_a_suite:
+            return True
+        elif self.stop_on_fail and self.failed_tests:
+            return True
+        return False
+
     def generate(self):
         """ Generate / run tests """
 
@@ -60,14 +140,28 @@ class Osmo(object):
         if not self.tests_in_a_suite:
             raise Exception("Empty model!")
 
-        for _ in range(self.tests_in_a_suite):
+        while not self.should_end_suite():
             self.history.start_new_test()
+            self.current_test_number += 1
             self.model.execute_optional('before_test')
             for _ in range(self.steps_in_a_test):
                 # Use algorithm to select the step
-                ending = self.algorithm.choose(self.history, self.model.get_list_of_available_steps())
+                ending = self.algorithm.choose(self.history,
+                                               self.model.get_list_of_available_steps())
                 self.model.execute_optional('pre_{}'.format(ending))
-                self._execute_step(ending)
+                try:
+                    returnvalue = self._execute_step(ending)
+                    returnvalue = returnvalue if returnvalue is not None else True
+                    if not returnvalue:
+                        self.p("Step {} returned false. Stopping this test.".format(ending))
+                        self.failed_tests += 1
+                        break
+                except Exception as error:
+                    self.p(error)
+                    self.failed_tests += 1
+                    if self.stop_test_on_exception:
+                        self.p("Step {} raised an exception. Stopping this test.".format(ending))
+                        break
                 self.model.execute_optional('post_{}'.format(ending))
                 # General after step which is run after each step
                 self.model.execute_optional('after')
