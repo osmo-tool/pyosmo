@@ -3,6 +3,7 @@
 from pyosmo.config import OsmoConfig
 from pyosmo.osmo import Osmo
 
+
 class TestModel(object):
     def __init__(self):
         self.index = 0
@@ -18,8 +19,8 @@ def test_set_configs():
     osmo = Osmo(model)
     assert osmo.config.stop_test_on_exception is True
     assert osmo.config.stop_on_fail is True
-    osmo.stop_on_fail(False)
-    osmo.stop_test_on_exception(False)
+    osmo.stop_on_fail = False
+    osmo.stop_test_on_exception = False
     assert osmo.config.stop_test_on_exception is False
     assert osmo.config.stop_on_fail is False
 
@@ -43,7 +44,7 @@ def test_configs_effects():
     assert model.index == 5
     model.index = 0
     osmo.current_test_number = 0
-    osmo.stop_on_fail(False)
-    osmo.stop_test_on_exception(False)
+    osmo.stop_on_fail = False
+    osmo.stop_test_on_exception = False
     osmo.generate()
     assert model.index == 8

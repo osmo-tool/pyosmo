@@ -14,14 +14,10 @@ class Osmo(object):
         self.model = Model()
         self.model.add_model(model)
         self.history = OsmoHistory()
-        self.config = OsmoConfig()
-        self.tests_in_a_suite = 10
-        self.steps_in_a_test = 10
+        self._config = OsmoConfig()
         self.current_test_number = 0
         self.failed_tests = 0
         self.debug = False
-        # Use random as default algorithm
-        self.algorithm = self.config.algorithm
 
         if seed is None:
             self.seed = random.randint(0, 10000)
@@ -38,6 +34,16 @@ class Osmo(object):
     def set_debug(self, debug):
         self.debug = debug
 
+    @property
+    def config(self):
+        return self._config
+
+    @config.setter
+    def config(self, value):
+        if not isinstance(value, OsmoConfig):
+            raise AttributeError("config needs to be OsmoConfig.")
+        self._config = value
+
     def set_algorithm(self, algorithm):
         """
         Set algorithm for configuration of osmo.
@@ -45,24 +51,57 @@ class Osmo(object):
         :param algorithm: Algorithm object.
         :return: Nothing
         """
-        self.config.algorithm = algorithm
-        self.algorithm = algorithm
+        self._config.algorithm = algorithm
 
-    def stop_on_fail(self, value):
+    @property
+    def algorithm(self):
+        return self._config.algorithm
+
+    @algorithm.setter
+    def algorithm(self, value):
+        self._config.algorithm = value
+
+    @property
+    def tests_in_a_suite(self):
+        return self._config.tests_in_a_suite
+
+    @tests_in_a_suite.setter
+    def tests_in_a_suite(self, value):
+        self._config.tests_in_a_suite = value
+
+    @property
+    def steps_in_a_test(self):
+        return self._config.steps_in_a_test
+
+    @steps_in_a_test.setter
+    def steps_in_a_test(self, value):
+        self._config.steps_in_a_test = value
+
+    @property
+    def stop_on_fail(self):
         """
         Set stop_on_fail value for configuration of osmo.
 
         :return: Nothing
         """
-        self.config.stop_on_fail = value
+        return self._config.stop_on_fail
 
-    def stop_test_on_exception(self, value):
+    @stop_on_fail.setter
+    def stop_on_fail(self, value):
+        self._config.stop_on_fail = value
+
+    @property
+    def stop_test_on_exception(self):
         """
         Set stop_test_on_exception for configuration of osmo.
 
         :return: Nothing
         """
-        self.config.stop_test_on_exception = value
+        return self._config.stop_test_on_exception
+
+    @stop_test_on_exception.setter
+    def stop_test_on_exception(self, value):
+        self._config.stop_test_on_exception = value
 
     def add_model(self, model):
         """ Add model for osmo """
@@ -87,7 +126,7 @@ class Osmo(object):
         """
         if self.current_test_number == self.tests_in_a_suite:
             return True
-        elif self.config.stop_on_fail and self.failed_tests:
+        elif self.stop_on_fail and self.failed_tests:
             return True
         return False
 
@@ -120,7 +159,7 @@ class Osmo(object):
                 except Exception as error:
                     self.p(error)
                     self.failed_tests += 1
-                    if self.config.stop_test_on_exception:
+                    if self.stop_test_on_exception:
                         self.p("Step {} raised an exception. Stopping this test.".format(ending))
                         break
                 self.model.execute_optional('post_{}'.format(ending))
