@@ -1,4 +1,4 @@
-from base import osmoAlgorithm
+from algorithm.base import osmoAlgorithm
 
 
 class RandomAlgorithm(osmoAlgorithm):
