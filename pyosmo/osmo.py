@@ -9,10 +9,12 @@ from pyosmo.history import OsmoHistory
 class Osmo(object):
     """ Osmo tester core """
 
-    def __init__(self, model, seed=None):
+    def __init__(self, model=None, seed=None):
         """ Osmo need at least one model to work """
+        self._checkModel(model)
         self.model = Model()
-        self.model.add_model(model)
+        if model:
+            self.model.add_model(model)
         self.history = OsmoHistory()
         self._config = OsmoConfig()
         self.current_test_number = 0
@@ -33,6 +35,11 @@ class Osmo(object):
 
     def set_debug(self, debug):
         self.debug = debug
+
+    def _checkModel(self, model):
+        """ Check that model is valid"""
+        if type(model) == type(Osmo):
+            raise Exception("Osmo model need to be instance of model, not just class")
 
     @property
     def config(self):
@@ -105,6 +112,7 @@ class Osmo(object):
 
     def add_model(self, model):
         """ Add model for osmo """
+        self._checkModel(model)
         self.model.add_model(model)
 
     def _execute_step(self, ending):
@@ -146,6 +154,7 @@ class Osmo(object):
             self.model.execute_optional('before_test')
             for _ in range(self.steps_in_a_test):
                 # Use algorithm to select the step
+                self.model.execute_optional('before')
                 ending = self.algorithm.choose(self.history,
                                                self.model.get_list_of_available_steps())
                 self.model.execute_optional('pre_{}'.format(ending))
@@ -161,7 +170,7 @@ class Osmo(object):
                     self.failed_tests += 1
                     if self.stop_test_on_exception:
                         self.p("Step {} raised an exception. Stopping this test.".format(ending))
-                        break
+                        raise error
                 self.model.execute_optional('post_{}'.format(ending))
                 # General after step which is run after each step
                 self.model.execute_optional('after')
