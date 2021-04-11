@@ -58,7 +58,7 @@ def test_guard():
     osmo = Osmo(TestModel())
     osmo.generate()
     for tc in osmo.history.test_cases:
-        for step in tc.steps:
+        for step in tc.steps_log:
             assert 'not' not in step.name
 
 
