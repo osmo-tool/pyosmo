@@ -1,4 +1,4 @@
-from osmo import Osmo
+from pyosmo.osmo import Osmo
 
 
 class TestModel:
