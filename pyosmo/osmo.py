@@ -9,7 +9,7 @@ from pyosmo.history import OsmoHistory
 class Osmo(object):
     """ Osmo tester core """
 
-    def __init__(self, model=None, seed=None):
+    def __init__(self, model, seed=None):
         """ Osmo need at least one model to work """
         self._checkModel(model)
         self.model = Model()

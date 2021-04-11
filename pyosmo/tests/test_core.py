@@ -60,3 +60,27 @@ def test_guard():
     for tc in osmo.history.test_cases:
         for step in tc.steps:
             assert 'not' not in step.name
+
+
+def test_split_model_with_same_name_functions():
+    class TestModel1:
+        def __init__(self):
+            self.step_execute = False
+
+        def step_first(self):
+            self.step_execute = True
+
+    class TestModel2:
+        def __init__(self):
+            self.step_execute = False
+
+        def step_first(self):
+            self.step_execute = True
+
+    tm1 = TestModel1()
+    tm2 = TestModel2()
+    osmo = Osmo(tm1)
+    osmo.add_model(tm2)
+    osmo.generate()
+    assert tm1.step_execute, "Osmo did not execute step in first model"
+    assert tm2.step_execute, "Osmo did not execute step in second model"
