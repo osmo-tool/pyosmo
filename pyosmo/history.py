@@ -1,15 +1,19 @@
 import time
 
 
-class TestStep(object):
-    def __init__(self, identifier, duration):
-        self._name = identifier
+class TestStepLog(object):
+    def __init__(self, step, duration):
+        self._step = step
         self._timestamp = time.time()
         self._duration = duration
 
     @property
+    def step(self):
+        return self._step
+
+    @property
     def name(self):
-        return self._name
+        return self._step.name
 
     @property
     def timestamp(self):
@@ -22,12 +26,12 @@ class TestStep(object):
 
 class TestCase(object):
     def __init__(self):
-        self.steps = list()
+        self.steps_log = list()
         self._start_time = time.time()
         self._stop_time = None
 
-    def add_step(self, step):
-        self.steps.append(step)
+    def add_step(self, step_log):
+        self.steps_log.append(step_log)
 
     def stop(self):
         self._stop_time = time.time()
@@ -62,7 +66,7 @@ class OsmoHistory(object):
         # Start a new test case
         self.current_test_case = TestCase()
 
-    def add_step(self, step_name, duration):
+    def add_step(self, step, duration):
         """
         Add a step to the history
         :param step: complete name of the step
@@ -70,7 +74,7 @@ class OsmoHistory(object):
         """
         if self.current_test_case is None:
             raise Exception("There is no current test case!!")
-        self.current_test_case.add_step(TestStep(step_name, duration))
+        self.current_test_case.add_step(TestStepLog(step, duration))
 
     def stop(self):
         if self.stop_time:
@@ -93,12 +97,12 @@ class OsmoHistory(object):
 
     @property
     def total_amount_of_steps(self):
-        return sum([len(tc.steps) for tc in self.test_cases])
+        return sum([len(tc.steps_log) for tc in self.test_cases])
 
     def get_usage_count_of_test(self, test_name):
         counter = 0
         for test_case in self.test_cases:
-            for step in test_case.steps:
+            for step in test_case.steps_log:
                 if step.name == test_name:
                     counter += 1
         return counter
@@ -108,7 +112,7 @@ class OsmoHistory(object):
         stats = dict()
         ret = ''
         for test_case in self.test_cases:
-            for step in test_case.steps:
+            for step in test_case.steps_log:
                 if step.name in stats.keys():
                     stats[step.name] = stats[step.name] + 1
                 else:
@@ -128,10 +132,10 @@ class OsmoHistory(object):
         ret += 'Duration: {:.2f}s\n'.format(self.duration)
         return ret
 
-    def get_count_in_current_test_case(self, ending):
+    def get_count_in_current_test_case(self, step):
         count = 0
-        for temp in self.current_test_case.steps:
-            if ending in temp.name:
+        for step_log in self.current_test_case.steps_log:
+            if step_log.step == step:
                 count += 1
         return count
 
@@ -141,7 +145,7 @@ class OsmoHistory(object):
         for test_case in self.test_cases:
             tc_index += 1
             ret += '{}. test case {:.2f}s\n'.format(tc_index, test_case.duration)
-            for step in test_case.steps:
+            for step in test_case.steps_log:
                 ret += '{} {:.2f}s {}\n'.format(step.timestamp, step.duration, step.name)
             ret += '\n'
         return ret

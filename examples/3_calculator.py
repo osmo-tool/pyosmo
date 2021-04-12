@@ -6,6 +6,7 @@ class Calculator:
     """
     Calculator "implementation" which will be tested
     """
+
     def __init__(self):
         self.result_number = 0
 
@@ -87,6 +88,7 @@ class PositiveCalculator:
     @staticmethod
     def after_suite():
         print('END')
+
 
 # Add model to the osmo
 osmo = Osmo(PositiveCalculator())

@@ -9,7 +9,7 @@ from pyosmo.history import OsmoHistory
 class Osmo(object):
     """ Osmo tester core """
 
-    def __init__(self, model=None, seed=None):
+    def __init__(self, model, seed=None):
         """ Osmo need at least one model to work """
         self._checkModel(model)
         self.model = Model()
@@ -115,16 +115,15 @@ class Osmo(object):
         self._checkModel(model)
         self.model.add_model(model)
 
-    def _execute_step(self, ending):
+    def _execute_step(self, step):
         """
         Execute step and save it to the history
         :param ending: letter after step_
         :return:
         """
-        step_name = 'step_{}'.format(ending)
         start_time = time.time()
-        self.model.execute(step_name)
-        self.history.add_step(step_name, time.time() - start_time)
+        step.execute()
+        self.history.add_step(step, time.time() - start_time)
 
     def should_end_suite(self):
         """
@@ -138,8 +137,11 @@ class Osmo(object):
             return True
         return False
 
-    def generate(self):
+    def generate(self, step_count=None):
         """ Generate / run tests """
+
+        if step_count is not None:
+            self._config.steps_in_a_test = step_count
 
         # Initialize algorithm
         self.algorithm.inititalize(self.random, self.model)
@@ -155,23 +157,18 @@ class Osmo(object):
             for _ in range(self.steps_in_a_test):
                 # Use algorithm to select the step
                 self.model.execute_optional('before')
-                ending = self.algorithm.choose(self.history,
-                                               self.model.get_list_of_available_steps())
-                self.model.execute_optional('pre_{}'.format(ending))
+                step = self.algorithm.choose(self.history,
+                                             self.model.get_list_of_available_steps())
+                self.model.execute_optional('pre_{}'.format(step))
                 try:
-                    returnvalue = self._execute_step(ending)
-                    returnvalue = returnvalue if returnvalue is not None else True
-                    if not returnvalue:
-                        self.p("Step {} returned false. Stopping this test.".format(ending))
-                        self.failed_tests += 1
-                        break
+                    self._execute_step(step)
                 except Exception as error:
                     self.p(error)
                     self.failed_tests += 1
                     if self.stop_test_on_exception:
-                        self.p("Step {} raised an exception. Stopping this test.".format(ending))
+                        self.p("Step {} raised an exception. Stopping this test.".format(step))
                         raise error
-                self.model.execute_optional('post_{}'.format(ending))
+                self.model.execute_optional('post_{}'.format(step.name))
                 # General after step which is run after each step
                 self.model.execute_optional('after')
             self.model.execute_optional('after_test')

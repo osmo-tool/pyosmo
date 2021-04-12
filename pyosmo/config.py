@@ -6,7 +6,7 @@ class OsmoConfig(object):
         self._stop_on_failure = True
         self._algorithm = RandomAlgorithm()
         self._stop_test_on_exception = True
-        self._steps_in_a_test = 1
+        self._steps_in_a_test = 20
         self._tests_in_a_suite = 1
 
     @property
