@@ -5,6 +5,8 @@ pyosmo is python version of OSMO tester
 
 Original OSMO tester can be found here: https://github.com/mukatee/osmo
 
+Idea of model based testing is described in [introduction](doc/introduction.md)
+
 ## Example model
 
 ```python
