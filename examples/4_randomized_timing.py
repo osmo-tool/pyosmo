@@ -25,7 +25,6 @@ class PositiveCalculator:
         wait_ms = random.randint(200, 3000)
         print('Waiting for: {}ms between steps'.format(wait_ms))
         time.sleep(wait_ms / 1000)
-        print('')
 
 
 osmo = Osmo(PositiveCalculator())

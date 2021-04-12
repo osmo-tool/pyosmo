@@ -22,7 +22,6 @@ class TestModel:
 
     def after_test(self):
         print('Test ends')
-        print('')
 
     def after_suite(self):
         print('END')

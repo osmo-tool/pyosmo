@@ -9,22 +9,19 @@ from pyosmo.history import OsmoHistory
 class Osmo(object):
     """ Osmo tester core """
 
-    def __init__(self, model, seed=None):
+    def __init__(self, model=None):
         """ Osmo need at least one model to work """
-        self._checkModel(model)
         self.model = Model()
         if model:
-            self.model.add_model(model)
+            self.add_model(model)
         self.history = OsmoHistory()
         self._config = OsmoConfig()
-        self.current_test_number = 0
-        self.failed_tests = 0
         self.debug = False
+        self.random = None
+        self.seed = None
 
-        if seed is None:
-            self.seed = random.randint(0, 10000)
-        else:
-            self.seed = seed
+    def set_seed(self, seed=None):
+        self.seed = seed
         self.random = random.Random(self.seed)
         print("Using seed: {}".format(self.seed))
 
@@ -68,21 +65,11 @@ class Osmo(object):
     def algorithm(self, value):
         self._config.algorithm = value
 
-    @property
-    def tests_in_a_suite(self):
-        return self._config.tests_in_a_suite
+    def set_test_end_condition(self, end_condition):
+        self._config.test_end_condition = end_condition
 
-    @tests_in_a_suite.setter
-    def tests_in_a_suite(self, value):
-        self._config.tests_in_a_suite = value
-
-    @property
-    def steps_in_a_test(self):
-        return self._config.steps_in_a_test
-
-    @steps_in_a_test.setter
-    def steps_in_a_test(self, value):
-        self._config.steps_in_a_test = value
+    def set_suite_end_condition(self, end_condition):
+        self._config.test_suite_end_condition = end_condition
 
     @property
     def stop_on_fail(self):
@@ -122,39 +109,28 @@ class Osmo(object):
         :return:
         """
         start_time = time.time()
-        step.execute()
-        self.history.add_step(step, time.time() - start_time)
+        try:
+            step.execute()
+        except:
+            raise
+        finally:
+            self.history.add_step(step, time.time() - start_time)
 
-    def should_end_suite(self):
-        """
-        Check if suite should be ended.
-
-        :return: Boolean
-        """
-        if self.current_test_number == self.tests_in_a_suite:
-            return True
-        elif self.stop_on_fail and self.failed_tests:
-            return True
-        return False
-
-    def generate(self, step_count=None):
+    def generate(self, seed=random.randint(0, 10000)):
         """ Generate / run tests """
 
-        if step_count is not None:
-            self._config.steps_in_a_test = step_count
-
+        self.set_seed(seed)
         # Initialize algorithm
         self.algorithm.inititalize(self.random, self.model)
 
         self.model.execute_optional('before_suite')
-        if not self.tests_in_a_suite:
+        if not len(self.model.all_steps):
             raise Exception("Empty model!")
 
-        while not self.should_end_suite():
+        while True:
             self.history.start_new_test()
-            self.current_test_number += 1
             self.model.execute_optional('before_test')
-            for _ in range(self.steps_in_a_test):
+            while True:
                 # Use algorithm to select the step
                 self.model.execute_optional('before')
                 step = self.algorithm.choose(self.history,
@@ -164,13 +140,19 @@ class Osmo(object):
                     self._execute_step(step)
                 except Exception as error:
                     self.p(error)
-                    self.failed_tests += 1
                     if self.stop_test_on_exception:
                         self.p("Step {} raised an exception. Stopping this test.".format(step))
                         raise error
                 self.model.execute_optional('post_{}'.format(step.name))
                 # General after step which is run after each step
                 self.model.execute_optional('after')
+
+                if self._config.test_end_condition.end_test(self.history, self.model):
+                    break
             self.model.execute_optional('after_test')
+
+            if self._config.test_suite_end_condition.end_suite(self.history, self.model):
+                break
+
         self.model.execute_optional('after_suite')
         self.history.stop()

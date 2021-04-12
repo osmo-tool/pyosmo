@@ -1,13 +1,12 @@
-# pyosmo
-A simple model-based testing tool for python
+from pyosmo.algorithm.random import RandomAlgorithm
+from pyosmo.end_conditions.length import Length
+from pyosmo.osmo import Osmo
 
-pyosmo is python version of OSMO tester
+"""
+Same example as in README.md but in executable format
+"""
 
-Original OSMO tester can be found here: https://github.com/mukatee/osmo
 
-## Example model
-
-```python
 class ExampleModel:
 
     def __init__(self):
@@ -38,16 +37,3 @@ osmo.set_algorithm(RandomAlgorithm())
 osmo.set_test_end_condition(Length(100))
 osmo.set_suite_end_condition(Length(100))
 osmo.generate(seed=333)
-```
-
-## Tests
-
-Test are made for pytest. Install it first:
-```
-pip install pytest
-```
-
-Then run tests:
-```
-pytest pyosmo/tests/
-```

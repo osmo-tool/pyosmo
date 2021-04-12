@@ -22,20 +22,13 @@ still be run if a step raises an exception.
 ### algorithm
 The algorithm used for test generation. Default is RandomAlgorithm.
 
-### tests_in_a_suite
-Integer. Set how many tests will be generated/run in a suite.
-
-### steps_in_a_test
-Integer. Set how many steps will be generated into a single test.
-
 ## APIs in Osmo
 The Osmo object contains the following apis to access the configuration
 object directly:
 
 ### config
 Gets the OsmoConfig object. If set to a new OsmoConfig object, linking
-stop_on_fail, stop_test_on_exception, tests_in_a_suite
-and steps_in_a_test is done automatically in the setter.
+stop_on_fail, stop_test_on_exception is done automatically in the setter.
 
 ### stop_on_fail
 Set the stop_on_fail configuration value.
@@ -45,9 +38,3 @@ Set the stop_test_on_exception configuration value.
 
 ### set_algorithm
 Attribute that points to the algorithm object in the configuration
-
-### tests_in_a_suite
-Integer. Set how many tests will be generated/run in a suite.
-
-### steps_in_a_test
-Integer. Set how many steps will be generated into a single test.

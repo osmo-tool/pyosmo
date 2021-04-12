@@ -1,3 +1,4 @@
+from pyosmo.end_conditions.length import Length
 from pyosmo.osmo import Osmo
 import random
 
@@ -93,9 +94,9 @@ class PositiveCalculator:
 # Add model to the osmo
 osmo = Osmo(PositiveCalculator())
 # Setup test amount per suite
-osmo.tests_in_a_suite = 1
+osmo.set_suite_end_condition(Length(1))
 # Set steps amount in test case
 # Try to add bigger number of test steps to see when rare bug is cached
-osmo.steps_in_a_test = 100
+osmo.set_test_end_condition(Length(100))
 # Run model
 osmo.generate()

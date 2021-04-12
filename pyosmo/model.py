@@ -10,8 +10,6 @@ class Function:
     def execute(self):
         try:
             return getattr(self.object_instance, self.function_name)()
-        except TypeError as e:
-            print('aa')
         except AttributeError:
             raise Exception(
                 "Osmo cannot find function {}.{} from model".format(self.object_instance, self.function_name))

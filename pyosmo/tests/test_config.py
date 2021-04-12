@@ -1,6 +1,7 @@
 # pylint: disable=no-self-use
 
 from pyosmo.config import OsmoConfig
+from pyosmo.end_conditions.length import Length
 from pyosmo.osmo import Osmo
 
 
@@ -35,20 +36,25 @@ def test_config_object():
     assert cfg.stop_on_fail is False
 
 
-def test_configs_effects():
+def test_exception_raise_effects():
     model = TestModel()
     osmo = Osmo(model)
-    osmo.steps_in_a_test = 8
-    osmo.tests_in_a_suite = 1
+    osmo.set_test_end_condition(Length(8))
+    osmo.set_suite_end_condition(Length(1))
     try:
         osmo.generate()
     except:
         # Osmo is raisin error so need to catch it here
         pass
     assert model.index == 5
+
+
+def test_exception_catch_effects():
+    model = TestModel()
+    osmo = Osmo(model)
+    osmo.set_test_end_condition(Length(8))
+    osmo.set_suite_end_condition(Length(1))
     model.index = 0
-    osmo.current_test_number = 0
-    osmo.stop_on_fail = False
     osmo.stop_test_on_exception = False
     osmo.generate()
     assert model.index == 8

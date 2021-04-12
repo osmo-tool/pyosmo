@@ -31,7 +31,13 @@ class TestCase(object):
         self._stop_time = None
 
     def add_step(self, step_log):
+        if self._stop_time is not None:
+            raise Exception("Test case is already stopped, cannot add more test steps!")
         self.steps_log.append(step_log)
+
+    @property
+    def steps_count(self):
+        return len(self.steps_log)
 
     def stop(self):
         self._stop_time = time.time()
@@ -55,16 +61,19 @@ class OsmoHistory(object):
         self.test_cases = list()
         self.stop_time = None
         self.start_time = time.time()
-        self.current_test_case = None
 
     def start_new_test(self):
         # Stop test case timer
         if self.current_test_case:
             self.current_test_case.stop()
-            # Store previous test case
-            self.test_cases.append(self.current_test_case)
         # Start a new test case
-        self.current_test_case = TestCase()
+        self.test_cases.append(TestCase())
+
+    @property
+    def current_test_case(self):
+        if self.test_cases:
+            return self.test_cases[-1]
+        return None
 
     def add_step(self, step, duration):
         """
@@ -84,8 +93,6 @@ class OsmoHistory(object):
 
         if self.current_test_case:
             self.current_test_case.stop()
-            self.test_cases.append(self.current_test_case)
-            self.current_test_case = None
 
     @property
     def duration(self):
@@ -132,7 +139,7 @@ class OsmoHistory(object):
         ret += 'Duration: {:.2f}s\n'.format(self.duration)
         return ret
 
-    def get_count_in_current_test_case(self, step):
+    def count_in_current_test_case(self, step):
         count = 0
         for step_log in self.current_test_case.steps_log:
             if step_log.step == step:

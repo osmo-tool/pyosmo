@@ -1,4 +1,5 @@
 from pyosmo.algorithm.weighted import WeightedAlgorithm
+from pyosmo.end_conditions.length import Length
 from pyosmo.osmo import Osmo
 
 
@@ -32,8 +33,8 @@ def test_weighted_algorithm():
 
     model = HistoryTest()
     osmo = Osmo(model)
-    osmo.tests_in_a_suite = 1
-    osmo.steps_in_a_test = 1000
+    osmo.set_suite_end_condition(Length(1))
+    osmo.set_test_end_condition(Length(1000))
     osmo.algorithm = WeightedAlgorithm()
     osmo.generate()
 
