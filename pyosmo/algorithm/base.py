@@ -1,4 +1,7 @@
-class osmoAlgorithm(object):
+from abc import abstractmethod
+
+
+class OsmoAlgorithm:
     random = None
     model = None
 
@@ -14,5 +17,6 @@ class osmoAlgorithm(object):
         self.random = random
         self.model = model
 
+    @abstractmethod
     def choose(self, history, choices):
         raise Exception("This is just abstract class, not implementation")

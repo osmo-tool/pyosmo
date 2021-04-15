@@ -1,4 +1,4 @@
-from pyosmo.algorithm.base import osmoAlgorithm
+from pyosmo.algorithm.base import OsmoAlgorithm
 
 
 class Choice(object):
@@ -12,7 +12,7 @@ class Choice(object):
         return self.count_in_history * (1 / self.weight)
 
 
-class WeightedAlgorithm(osmoAlgorithm):
+class WeightedAlgorithm(OsmoAlgorithm):
     def choose(self, history, choices):
         choice_list = list()
         for choice in choices:

@@ -1,3 +1,4 @@
+from pyosmo.end_conditions.endless import Endless
 from pyosmo.end_conditions.length import Length
 from pyosmo.osmo import Osmo
 import random
@@ -79,7 +80,7 @@ class PositiveCalculator:
 
     def after(self):
         """ This happend after each test step """
-        print('assert')
+        print('assert {} == {}'.format(self.calculator.result(), self.expected_count))
         assert self.calculator.result() == self.expected_count
 
     def after_test(self):
@@ -94,9 +95,9 @@ class PositiveCalculator:
 # Add model to the osmo
 osmo = Osmo(PositiveCalculator())
 # Setup test amount per suite
-osmo.set_suite_end_condition(Length(1))
+osmo.set_suite_end_condition(Length(10))
 # Set steps amount in test case
 # Try to add bigger number of test steps to see when rare bug is cached
-osmo.set_test_end_condition(Length(100))
+osmo.set_test_end_condition(Length(1))
 # Run model
 osmo.generate()
