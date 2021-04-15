@@ -21,7 +21,11 @@ class Osmo(object):
         self.seed = None
 
     def set_seed(self, seed=None):
-        self.seed = seed
+        if seed is None:
+            # Generate new seed if not given
+            self.seed = random.randint(0, 10000)
+        else:
+            self.seed = seed
         self.random = random.Random(self.seed)
         print("Using seed: {}".format(self.seed))
 
@@ -116,7 +120,7 @@ class Osmo(object):
         finally:
             self.history.add_step(step, time.time() - start_time)
 
-    def generate(self, seed=random.randint(0, 10000)):
+    def generate(self, seed=None):
         """ Generate / run tests """
 
         self.set_seed(seed)
