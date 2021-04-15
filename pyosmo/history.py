@@ -52,6 +52,9 @@ class TestCase(object):
 
     @property
     def duration(self):
+        if self._stop_time is None:
+            # Test is still running
+            return time.time() - self._start_time
         return self._stop_time - self._start_time
 
 
@@ -96,6 +99,9 @@ class OsmoHistory(object):
 
     @property
     def duration(self):
+        if self.stop_time is None:
+            # Test is still running
+            return time.time() - self.start_time
         return self.stop_time - self.start_time
 
     @property
