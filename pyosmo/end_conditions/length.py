@@ -1,4 +1,7 @@
-class Length:
+from pyosmo.end_conditions.base import OsmoEndCondition
+
+
+class Length(OsmoEndCondition):
     """
     Stops testing when count is filled
     """

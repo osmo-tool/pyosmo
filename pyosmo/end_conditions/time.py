@@ -1,5 +1,7 @@
+from pyosmo.end_conditions.base import OsmoEndCondition
 
-class Time:
+
+class Time(OsmoEndCondition):
     """
     Stops testing when time is out
     """

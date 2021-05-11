@@ -1,11 +1,12 @@
 import time
+from random import randint
 
 import pytest
 
 from pyosmo.end_conditions.length import Length
+from pyosmo.end_conditions.logical import And, Or
 from pyosmo.end_conditions.time import Time
 from pyosmo.osmo import Osmo
-from random import randint
 
 
 class TestModel:
@@ -19,7 +20,7 @@ class TestModel:
         self.counter += 1
 
 
-@pytest.mark.parametrize("steps", [randint(1, 100) for _ in range(5)])
+@pytest.mark.parametrize("steps", [randint(1, 100) for _ in range(3)])
 @pytest.mark.parametrize("tests", [randint(1, 10) for _ in range(3)])
 def test_length_end_condition(steps, tests):
     model = TestModel()
@@ -54,3 +55,21 @@ def test_test_suite_time_end_condition():
     duration = end_time - start_time
     assert duration < time_in_sec + 0.1
     assert duration > time_in_sec - 0.1
+
+
+def test_logical_and():
+    model = TestModel()
+    osmo = Osmo(model)
+    osmo.set_test_end_condition(And(Length(1), Length(2), Length(3)))
+    osmo.set_suite_end_condition(And(Length(2), Length(3), Length(4)))
+    osmo.generate()
+    assert model.counter == 3 * 4
+
+
+def test_logical_or():
+    model = TestModel()
+    osmo = Osmo(model)
+    osmo.set_test_end_condition(Or(Length(1), Length(2), Length(3)))
+    osmo.set_suite_end_condition(Or(Length(2), Length(3), Length(4)))
+    osmo.generate()
+    assert model.counter == 2
