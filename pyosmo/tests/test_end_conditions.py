@@ -5,6 +5,7 @@ import pytest
 
 from pyosmo.end_conditions.length import Length
 from pyosmo.end_conditions.logical import And, Or
+from pyosmo.end_conditions.step_coverage import StepCoverage
 from pyosmo.end_conditions.time import Time
 from pyosmo.osmo import Osmo
 
@@ -73,3 +74,13 @@ def test_logical_or():
     osmo.set_suite_end_condition(Or(Length(2), Length(3), Length(4)))
     osmo.generate()
     assert model.counter == 2
+
+
+def test_step_coverage():
+    model = TestModel()
+    osmo = Osmo(model)
+    osmo.set_test_end_condition(StepCoverage(1))
+    osmo.set_suite_end_condition(Length(1))
+    osmo.generate()
+    assert osmo.history.get_step_count("step_first") > 0
+    assert osmo.history.get_step_count("step_second") > 0

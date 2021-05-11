@@ -13,7 +13,7 @@ class TestStepLog(object):
 
     @property
     def name(self):
-        return self._step.name
+        return self._step.function_name
 
     @property
     def timestamp(self):
@@ -38,6 +38,14 @@ class TestCase(object):
     @property
     def steps_count(self):
         return len(self.steps_log)
+
+    def get_step_count(self, test_name):
+        """ Counts how many times the step is really called during whole history """
+        counter = 0
+        for step in self.steps_log:
+            if step.name == test_name:
+                counter += 1
+        return counter
 
     def stop(self):
         self._stop_time = time.time()
@@ -74,6 +82,7 @@ class OsmoHistory(object):
 
     @property
     def current_test_case(self):
+        """ The test case which is running or generating at the moment """
         if self.test_cases:
             return self.test_cases[-1]
         return None
@@ -82,6 +91,7 @@ class OsmoHistory(object):
         """
         Add a step to the history
         :param step: complete name of the step
+        :param duration: step duration
         :return:
         """
         if self.current_test_case is None:
@@ -91,11 +101,9 @@ class OsmoHistory(object):
     def stop(self):
         if self.stop_time:
             return
-
-        self.stop_time = time.time()
-
         if self.current_test_case:
             self.current_test_case.stop()
+        self.stop_time = time.time()
 
     @property
     def duration(self):
@@ -112,13 +120,9 @@ class OsmoHistory(object):
     def total_amount_of_steps(self):
         return sum([len(tc.steps_log) for tc in self.test_cases])
 
-    def get_usage_count_of_test(self, test_name):
-        counter = 0
-        for test_case in self.test_cases:
-            for step in test_case.steps_log:
-                if step.name == test_name:
-                    counter += 1
-        return counter
+    def get_step_count(self, test_name):
+        """ Counts how many times the step is really called during whole history """
+        return sum([test_case.get_step_count(test_name) for test_case in self.test_cases])
 
     @property
     def step_stats(self):
@@ -148,7 +152,7 @@ class OsmoHistory(object):
     def count_in_current_test_case(self, step):
         count = 0
         for step_log in self.current_test_case.steps_log:
-            if step_log.step == step:
+            if step_log.step.function_name == step.function_name:
                 count += 1
         return count
 

@@ -38,9 +38,9 @@ def test_weighted_algorithm():
     osmo.algorithm = WeightedAlgorithm()
     osmo.generate()
 
-    step_first_count = osmo.history.get_usage_count_of_test("step_first")
-    step_second_count = osmo.history.get_usage_count_of_test("step_second")
-    step_third_count = osmo.history.get_usage_count_of_test("step_third")
+    step_first_count = osmo.history.get_step_count("step_first")
+    step_second_count = osmo.history.get_step_count("step_second")
+    step_third_count = osmo.history.get_step_count("step_third")
 
     compare_first = step_first_count * (1.0 / model.weight_first())
     compare_second = step_second_count * (1.0 / model.weight_second())
