@@ -1,10 +1,9 @@
-from pyosmo.algorithm.random import RandomAlgorithm
-from pyosmo.end_conditions.length import Length
-from pyosmo.osmo import Osmo
-
 """
 Same example as in README.md but in executable format
 """
+from pyosmo.algorithm.random import RandomAlgorithm
+from pyosmo.end_conditions.length import Length
+from pyosmo.osmo import Osmo
 
 
 class ExampleModel:

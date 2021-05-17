@@ -1,7 +1,7 @@
 import time
 
 
-class TestStepLog(object):
+class TestStepLog:
     def __init__(self, step, duration):
         self._step = step
         self._timestamp = time.time()
@@ -24,7 +24,7 @@ class TestStepLog(object):
         return self._duration
 
 
-class TestCase(object):
+class TestCase:
     def __init__(self):
         self.steps_log = list()
         self._start_time = time.time()
@@ -66,7 +66,7 @@ class TestCase(object):
         return self._stop_time - self._start_time
 
 
-class OsmoHistory(object):
+class OsmoHistory:
 
     def __init__(self):
         self.test_cases = list()

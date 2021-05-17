@@ -6,22 +6,28 @@ class TestModel:
     def __init__(self):
         pass
 
-    def guard_first(self):
+    @staticmethod
+    def guard_first():
         return True
 
-    def step_first(self):
+    @staticmethod
+    def step_first():
         print("1. step")
 
-    def before_suite(self):
+    @staticmethod
+    def before_suite():
         print('START')
 
-    def before_test(self):
+    @staticmethod
+    def before_test():
         print('Test starts')
 
-    def after_test(self):
+    @staticmethod
+    def after_test():
         print('Test ends')
 
-    def after_suite(self):
+    @staticmethod
+    def after_suite():
         print('END')
 
 
@@ -45,6 +51,7 @@ class TestModel2:
     @staticmethod
     def post_second():
         print("<--")
+
 
 osmo = Osmo(TestModel())
 osmo.add_model(TestModel2())

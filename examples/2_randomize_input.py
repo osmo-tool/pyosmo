@@ -1,3 +1,4 @@
+# pylint: disable=bare-except
 import random
 import time
 
@@ -6,8 +7,7 @@ def system_under_testing(data):
     if data < 900:
         # Flaky bug here
         return "error"
-    else:
-        return data * 2
+    return data * 2
 
 
 def test():
@@ -26,9 +26,7 @@ def test():
     assert output == (2 * data)
 
 
-'''
-Loop test to see how easily test can find a bug
-'''
+# Loop test to see how easily test can find a bug
 index = 0
 while True:
     index += 1

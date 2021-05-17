@@ -1,6 +1,7 @@
-from pyosmo.osmo import Osmo
 import random
 import time
+
+from pyosmo.osmo import Osmo
 
 
 class PositiveCalculator:

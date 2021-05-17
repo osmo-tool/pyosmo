@@ -1,3 +1,4 @@
+# pylint: disable=bare-except
 import random
 import time
 
@@ -6,7 +7,7 @@ from pyosmo.config import OsmoConfig
 from pyosmo.history import OsmoHistory
 
 
-class Osmo(object):
+class Osmo:
     """ Osmo tester core """
 
     def __init__(self, model=None):
@@ -37,9 +38,10 @@ class Osmo(object):
     def set_debug(self, debug):
         self.debug = debug
 
-    def _checkModel(self, model):
+    @staticmethod
+    def _check_model(model):
         """ Check that model is valid"""
-        if type(model) == type(Osmo):
+        if not hasattr(model, '__class__'):
             raise Exception("Osmo model need to be instance of model, not just class")
 
     @property
@@ -103,13 +105,13 @@ class Osmo(object):
 
     def add_model(self, model):
         """ Add model for osmo """
-        self._checkModel(model)
+        self._check_model(model)
         self.model.add_model(model)
 
     def _execute_step(self, step):
         """
         Execute step and save it to the history
-        :param ending: letter after step_
+        :param step: Test step
         :return:
         """
         start_time = time.time()

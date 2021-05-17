@@ -1,6 +1,3 @@
-from typing import List, Any
-
-
 class Function:
 
     def __init__(self, function_name, object_instance):
@@ -52,13 +49,9 @@ class TestStep(Function):
             return Function(name, self.object_instance)
         return None
 
-    def __str__(self):
-        return super().__str__()
 
-
-class Model(object):
+class Model:
     """ The whole model that osmo has in "mind" which may contain multiple partial models """
-    sub_models: List[Any]
     default_weight = 50
 
     def __init__(self):
@@ -107,7 +100,7 @@ class Model(object):
             if step.guard_function is None or step.guard_function.execute():
                 available_steps.append(step)
 
-        if len(available_steps) == 0:
+        if not available_steps:
             raise Exception('Cannot find any available states')
         return available_steps
 

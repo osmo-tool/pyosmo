@@ -1,7 +1,7 @@
-from pyosmo.end_conditions.endless import Endless
+import random
+
 from pyosmo.end_conditions.length import Length
 from pyosmo.osmo import Osmo
-import random
 
 
 class Calculator:

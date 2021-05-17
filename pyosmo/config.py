@@ -1,9 +1,11 @@
+# pylint: disable=too-few-public-methods
 from pyosmo.algorithm.random import RandomAlgorithm
 from pyosmo.end_conditions.length import Length
 
 
-class OsmoConfig(object):
+class OsmoConfig:
     """ Osmo run configutaion object """
+
     def __init__(self):
         self.stop_on_fail = True
         self.algorithm = RandomAlgorithm()

@@ -1,7 +1,7 @@
 from pyosmo.end_conditions.base import OsmoEndCondition
 
 
-class LogicalEndCondition():
+class LogicalEndCondition:
     def __init__(self, *args):
         if len(args) < 2:
             raise Exception("And operator needs at least two OsmoEndConditions!")

@@ -1,4 +1,5 @@
 # pyosmo
+
 A simple model-based testing tool for python
 
 pyosmo is python version of OSMO tester
@@ -42,14 +43,22 @@ osmo.set_suite_end_condition(Length(100))
 osmo.generate(seed=333)
 ```
 
-## Tests
+## Pyosmo development
 
-Test are made for pytest. Install it first:
-```
-pip install pytest
+Install tools needed for development
+
+```bash
+pip install -r requirements.txt
 ```
 
-Then run tests:
-```
+Run osmo tests:
+
+```bash
 pytest pyosmo/tests/
+```
+
+Run pylint
+
+```bash
+pylint *
 ```

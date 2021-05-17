@@ -10,8 +10,8 @@ class OsmoAlgorithm:
 
     def inititalize(self, random, model):
         """
-
-        :param seed: used seed
+        Initialize Osmo algorithm
+        :param random: Used random
         :param model: The test model
         """
         self.random = random

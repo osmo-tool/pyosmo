@@ -1,11 +1,11 @@
-# pylint: disable=no-self-use
+# pylint: disable=no-self-use,bare-except
 
 from pyosmo.config import OsmoConfig
 from pyosmo.end_conditions.length import Length
 from pyosmo.osmo import Osmo
 
 
-class TestModel(object):
+class TestModel:
     def __init__(self):
         self.index = 0
 

@@ -1,7 +1,7 @@
 from pyosmo.algorithm.base import OsmoAlgorithm
 
 
-class Choice(object):
+class Choice:
     def __init__(self, ending, count_in_history, weight):
         self.ending = ending
         self.count_in_history = count_in_history
