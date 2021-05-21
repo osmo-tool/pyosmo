@@ -2,9 +2,9 @@
 import random
 import time
 
-from pyosmo.model import Model
 from pyosmo.config import OsmoConfig
 from pyosmo.history import OsmoHistory
+from pyosmo.model import Model
 
 
 class Osmo:
@@ -17,7 +17,6 @@ class Osmo:
             self.add_model(model)
         self.history = OsmoHistory()
         self._config = OsmoConfig()
-        self.debug = False
         self.random = None
         self.seed = None
 
@@ -29,14 +28,6 @@ class Osmo:
             self.seed = seed
         self.random = random.Random(self.seed)
         print("Using seed: {}".format(self.seed))
-
-    def p(self, text):
-        """ Print debugging texts if debug is enabled """
-        if self.debug:
-            print(text)
-
-    def set_debug(self, debug):
-        self.debug = debug
 
     @staticmethod
     def _check_model(model):
@@ -71,37 +62,27 @@ class Osmo:
     def algorithm(self, value):
         self._config.algorithm = value
 
+    @property
+    def test_failure_strategy(self):
+        return self._config.test_failure_strategy
+
+    @test_failure_strategy.setter
+    def test_failure_strategy(self, value):
+        self._config.test_failure_strategy = value
+
+    @property
+    def test_suite_failure_strategy(self):
+        return self._config.test_suite_failure_strategy
+
+    @test_suite_failure_strategy.setter
+    def test_suite_failure_strategy(self, value):
+        self._config.test_suite_failure_strategy = value
+
     def set_test_end_condition(self, end_condition):
         self._config.test_end_condition = end_condition
 
     def set_suite_end_condition(self, end_condition):
         self._config.test_suite_end_condition = end_condition
-
-    @property
-    def stop_on_fail(self):
-        """
-        Set stop_on_fail value for configuration of osmo.
-
-        :return: Nothing
-        """
-        return self._config.stop_on_fail
-
-    @stop_on_fail.setter
-    def stop_on_fail(self, value):
-        self._config.stop_on_fail = value
-
-    @property
-    def stop_test_on_exception(self):
-        """
-        Set stop_test_on_exception for configuration of osmo.
-
-        :return: Nothing
-        """
-        return self._config.stop_test_on_exception
-
-    @stop_test_on_exception.setter
-    def stop_test_on_exception(self, value):
-        self._config.stop_test_on_exception = value
 
     def add_model(self, model):
         """ Add model for osmo """
@@ -117,10 +98,10 @@ class Osmo:
         start_time = time.time()
         try:
             step.execute()
-        except:
-            raise
-        finally:
             self.history.add_step(step, time.time() - start_time)
+        except Exception as error:
+            self.history.add_step(step, time.time() - start_time, error)
+            raise error
 
     def generate(self, seed=None):
         """ Generate / run tests """
@@ -134,31 +115,30 @@ class Osmo:
             raise Exception("Empty model!")
 
         while True:
-            self.history.start_new_test()
-            self.model.execute_optional('before_test')
-            while True:
-                # Use algorithm to select the step
-                self.model.execute_optional('before')
-                step = self.algorithm.choose(self.history,
-                                             self.model.get_list_of_available_steps())
-                self.model.execute_optional('pre_{}'.format(step))
-                try:
-                    self._execute_step(step)
-                except Exception as error:
-                    self.p(error)
-                    if self.stop_test_on_exception:
-                        self.p("Step {} raised an exception. Stopping this test.".format(step))
-                        raise error
-                self.model.execute_optional('post_{}'.format(step.name))
-                # General after step which is run after each step
-                self.model.execute_optional('after')
+            try:
+                self.history.start_new_test()
+                self.model.execute_optional('before_test')
+                while True:
+                    # Use algorithm to select the step
+                    self.model.execute_optional('before')
+                    step = self.algorithm.choose(self.history,
+                                                 self.model.get_list_of_available_steps())
+                    self.model.execute_optional('pre_{}'.format(step))
+                    try:
+                        self._execute_step(step)
+                    except BaseException as error:
+                        self.config.test_failure_strategy.failure_in_test(self.history, self.model, error)
+                    self.model.execute_optional('post_{}'.format(step.name))
+                    # General after step which is run after each step
+                    self.model.execute_optional('after')
 
-                if self._config.test_end_condition.end_test(self.history, self.model):
+                    if self._config.test_end_condition.end_test(self.history, self.model):
+                        break
+                self.model.execute_optional('after_test')
+
+                if self._config.test_suite_end_condition.end_suite(self.history, self.model):
                     break
-            self.model.execute_optional('after_test')
-
-            if self._config.test_suite_end_condition.end_suite(self.history, self.model):
-                break
-
+            except BaseException as error:
+                self.config.test_suite_failure_strategy.failure_in_suite(self.history, self.model, error)
         self.model.execute_optional('after_suite')
         self.history.stop()

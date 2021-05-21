@@ -2,10 +2,11 @@ import time
 
 
 class TestStepLog:
-    def __init__(self, step, duration):
+    def __init__(self, step, duration, error=None):
         self._step = step
         self._timestamp = time.time()
         self._duration = duration
+        self._error = error
 
     @property
     def step(self):
@@ -87,16 +88,17 @@ class OsmoHistory:
             return self.test_cases[-1]
         return None
 
-    def add_step(self, step, duration):
+    def add_step(self, step, duration, error=None):
         """
         Add a step to the history
         :param step: complete name of the step
         :param duration: step duration
+        :param error: Error if happened during the test case
         :return:
         """
         if self.current_test_case is None:
             raise Exception("There is no current test case!!")
-        self.current_test_case.add_step(TestStepLog(step, duration))
+        self.current_test_case.add_step(TestStepLog(step, duration, error))
 
     def stop(self):
         if self.stop_time:
