@@ -45,6 +45,19 @@ osmo.generate(seed=333)
 
 ## Pyosmo development
 
+Enable debug logging
+
+```python
+import logging, sys
+
+# initalize osmo with model
+
+logger = logging.getLogger('osmo')
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler(sys.stdout))
+osmo.generate()
+```
+
 Install tools needed for development
 
 ```bash

@@ -1,10 +1,14 @@
 # pylint: disable=bare-except
+import logging
 import random
 import time
 
 from pyosmo.config import OsmoConfig
 from pyosmo.history import OsmoHistory
 from pyosmo.model import Model
+
+logger = logging.getLogger('osmo')
+logger.setLevel(logging.INFO)
 
 
 class Osmo:
@@ -27,7 +31,7 @@ class Osmo:
         else:
             self.seed = seed
         self.random = random.Random(self.seed)
-        print("Using seed: {}".format(self.seed))
+        logger.info("Using seed: {}".format(self.seed))
 
     @staticmethod
     def _check_model(model):
@@ -86,6 +90,7 @@ class Osmo:
 
     def add_model(self, model):
         """ Add model for osmo """
+        logger.debug("Add model:{}".format(model))
         self._check_model(model)
         self.model.add_model(model)
 
@@ -95,6 +100,7 @@ class Osmo:
         :param step: Test step
         :return:
         """
+        logger.debug('Execute step: {}'.format(step))
         start_time = time.time()
         try:
             step.execute()
@@ -105,7 +111,7 @@ class Osmo:
 
     def generate(self, seed=None):
         """ Generate / run tests """
-
+        logger.debug('Start generation..')
         self.set_seed(seed)
         # Initialize algorithm
         self.algorithm.inititalize(self.random, self.model)

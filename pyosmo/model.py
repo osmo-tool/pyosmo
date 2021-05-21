@@ -1,3 +1,8 @@
+import logging
+
+logger = logging.getLogger('osmo')
+
+
 class Function:
 
     def __init__(self, function_name, object_instance):
@@ -12,14 +17,14 @@ class Function:
                 "Osmo cannot find function {}.{} from model".format(self.object_instance, self.function_name))
 
     def __str__(self):
-        return "{}.{}()".format(self.object_instance, self.function_name)
+        return "{}.{}()".format(type(self.object_instance).__name__, self.function_name)
 
 
 class TestStep(Function):
 
-    def __init__(self, function_name, model):
+    def __init__(self, function_name, object_instance):
         assert function_name.startswith('step_'), 'Wrong name function'
-        super().__init__(function_name, model)
+        super().__init__(function_name, object_instance)
 
     @property
     def name(self):
@@ -89,8 +94,8 @@ class Model:
 
     def execute_optional(self, function_name):
         """ Execute all this name functions if available """
-
         for function in self.all_functions_by_name(function_name):
+            logger.debug('Execute: {}'.format(function))
             return function.execute()
 
     def get_list_of_available_steps(self):
