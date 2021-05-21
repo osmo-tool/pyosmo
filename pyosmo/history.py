@@ -136,8 +136,8 @@ class OsmoHistory:
                     stats[step.name] = stats[step.name] + 1
                 else:
                     stats[step.name] = 1
-        for key in stats.keys():
-            ret += '{}:{}\n'.format(key, stats[key])
+        for key, value in stats.items():
+            ret += '{}:{}\n'.format(key, value)
         return ret
 
     @property

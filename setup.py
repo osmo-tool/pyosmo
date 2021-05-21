@@ -1,5 +1,7 @@
+# pylint: disable=no-name-in-module,import-error
 import os
 from distutils.core import setup
+
 from setuptools import find_packages
 
 DESCRIPTION = "pyosmo - a model-based testing tool"

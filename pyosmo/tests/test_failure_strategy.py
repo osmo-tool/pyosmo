@@ -1,3 +1,4 @@
+# pylint: disable=bare-except
 from pyosmo.end_conditions.length import Length
 from pyosmo.error_strategy.always_ignore import AlwaysIgnore
 from pyosmo.error_strategy.always_raise import AlwaysRaise

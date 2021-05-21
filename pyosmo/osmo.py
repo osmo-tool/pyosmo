@@ -1,4 +1,4 @@
-# pylint: disable=bare-except
+# pylint: disable=bare-except,broad-except
 import logging
 import random
 import time
@@ -117,7 +117,7 @@ class Osmo:
         self.algorithm.inititalize(self.random, self.model)
 
         self.model.execute_optional('before_suite')
-        if not len(self.model.all_steps):
+        if not self.model.all_steps:
             raise Exception("Empty model!")
 
         while True:
