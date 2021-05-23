@@ -41,7 +41,6 @@ class OsmoHistory:
         """ The test case which is running or generating at the moment """
         return self.test_cases[-1] if self.test_cases else None
 
-
     @property
     def duration(self):
         if self.stop_time is None:
@@ -85,14 +84,6 @@ class OsmoHistory:
         ret += 'Test steps: {}\n'.format(self.total_amount_of_steps)
         ret += 'Duration: {:.2f}s\n'.format(self.duration)
         return ret
-
-    def count_in_current_test_case(self, step):
-        return self.current_test_case.get_step_count(step)
-        count = 0
-        for step_log in self.current_test_case.steps_log:
-            if step_log.step.function_name == step.function_name:
-                count += 1
-        return count
 
     def __str__(self):
         ret = ''
