@@ -95,9 +95,9 @@ class PositiveCalculator:
 # Add model to the osmo
 osmo = Osmo(PositiveCalculator())
 # Setup test amount per suite
-osmo.set_suite_end_condition(Length(10))
+osmo.test_end_condition = Length(10)
 # Set steps amount in test case
 # Try to add bigger number of test steps to see when rare bug is cached
-osmo.set_test_end_condition(Length(1))
+osmo.test_end_condition = Length(1)
 # Run model
 osmo.generate()

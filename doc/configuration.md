@@ -36,5 +36,5 @@ Set the stop_on_fail configuration value.
 ### stop_test_on_exception
 Set the stop_test_on_exception configuration value.
 
-### set_algorithm
+### algorithm
 Attribute that points to the algorithm object in the configuration

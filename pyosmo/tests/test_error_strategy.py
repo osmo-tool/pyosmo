@@ -16,10 +16,10 @@ class JustFailModel:
 
 def test_always_raise():
     osmo = Osmo(JustFailModel(AssertionError('Failing test_stop_on_failure')))
-    osmo.set_test_end_condition(Length(100))
-    osmo.set_suite_end_condition(Length(100))
-    osmo.test_failure_strategy = AlwaysRaise()
-    osmo.test_suite_failure_strategy = AlwaysRaise()
+    osmo.test_end_condition = Length(100)
+    osmo.test_suite_end_condition = Length(100)
+    osmo.test_error_strategy = AlwaysRaise()
+    osmo.test_suite_error_strategy = AlwaysRaise()
     try:
         osmo.generate()
     except:
@@ -29,10 +29,10 @@ def test_always_raise():
 
 def test_always_ignore():
     osmo = Osmo(JustFailModel(AssertionError('Failing test_always_ignore')))
-    osmo.set_test_end_condition(Length(100))
-    osmo.set_suite_end_condition(Length(10))
-    osmo.test_failure_strategy = AlwaysIgnore()
-    osmo.test_suite_failure_strategy = AlwaysIgnore()
+    osmo.test_end_condition = Length(100)
+    osmo.test_suite_end_condition = Length(10)
+    osmo.test_error_strategy = AlwaysIgnore()
+    osmo.test_suite_error_strategy = AlwaysIgnore()
     try:
         osmo.generate()
     except:
@@ -42,10 +42,10 @@ def test_always_ignore():
 
 def test_allow_count():
     osmo = Osmo(JustFailModel(AssertionError('Failing test_stop_on_failure')))
-    osmo.set_test_end_condition(Length(10))
-    osmo.set_suite_end_condition(Length(10))
-    osmo.test_failure_strategy = AllowCount(3)
-    osmo.test_suite_failure_strategy = AllowCount(3)
+    osmo.test_end_condition = Length(10)
+    osmo.test_suite_end_condition = Length(10)
+    osmo.test_error_strategy = AllowCount(3)
+    osmo.test_suite_error_strategy = AllowCount(3)
     try:
         osmo.generate()
     except:

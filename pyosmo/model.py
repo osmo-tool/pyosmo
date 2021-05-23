@@ -64,14 +64,6 @@ class Model:
         self.sub_models = list()
         self.debug = False
 
-    def p(self, text):
-        """ Print debugging texts if debug is enabled """
-        if self.debug:
-            print(text)
-
-    def set_debug(self, debug):
-        self.debug = debug
-
     @property
     def all_steps(self):
         return [TestStep(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
@@ -90,7 +82,7 @@ class Model:
             model = model()
 
         self.sub_models.append(model)
-        self.p('Loaded model: {}'.format(model.__class__))
+        logger.debug('Loaded model: {}'.format(model.__class__))
 
     def execute_optional(self, function_name):
         """ Execute all this name functions if available """

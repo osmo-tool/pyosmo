@@ -33,8 +33,8 @@ def test_weighted_algorithm():
 
     model = HistoryTest()
     osmo = Osmo(model)
-    osmo.set_suite_end_condition(Length(1))
-    osmo.set_test_end_condition(Length(1000))
+    osmo.test_end_condition = Length(1)
+    osmo.test_end_condition = Length(1000)
     osmo.algorithm = WeightedAlgorithm()
     osmo.generate()
 
