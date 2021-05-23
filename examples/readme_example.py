@@ -32,8 +32,8 @@ class ExampleModel:
 
 osmo = Osmo()
 osmo.add_model(ExampleModel())
-osmo.set_algorithm(RandomAlgorithm())
+osmo.algorithm = RandomAlgorithm()
 osmo.test_end_condition = Length(10)
 osmo.test_end_condition = Length(10)
-
-osmo.generate(seed=333)
+osmo.seed = 333
+osmo.generate()

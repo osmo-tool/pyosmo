@@ -18,7 +18,7 @@ class WeightedAlgorithm(OsmoAlgorithm):
         for choice in choices:
             choice_list.append(Choice(
                 choice,
-                history.count_in_current_test_case(choice),
+                history.get_step_count(choice),
                 self.model.get_step_weight(choice)
             ))
         compare_values = [x.compare_value for x in choice_list]

@@ -69,6 +69,14 @@ class Model:
         return [TestStep(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
                 hasattr(getattr(sub_model, f), '__call__') and f.startswith('step_')]
 
+    def get_step_by_name(self, name):
+        """ Get step by function name """
+        steps = [TestStep(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
+                 hasattr(getattr(sub_model, f), '__call__') and f == name]
+        if steps:
+            return steps[0]
+        return None
+
     def all_functions_by_name(self, name):
         return [Function(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
                 hasattr(getattr(sub_model, f), '__call__') and f == name]

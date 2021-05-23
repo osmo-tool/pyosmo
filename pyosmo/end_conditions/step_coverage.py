@@ -13,20 +13,20 @@ class StepCoverage(OsmoEndCondition):
 
     def end_test(self, history, model):
         """ Stops test case when defined number of test steps are executed """
-        step_names = [x.function_name for x in model.all_steps]
+        all_steps = model.all_steps
         steps_used = 0
-        for step_name in step_names:
-            if history.current_test_case.get_step_count(step_name) > 0:
+        for step in all_steps:
+            if history.current_test_case.get_step_count(step) > 0:
                 steps_used += 1
-        current_coverage = steps_used / len(step_names)
+        current_coverage = steps_used / len(all_steps)
         return current_coverage >= self.coverage
 
     def end_suite(self, history, model):
         """ Stops test suite when defined number of test cases are executed """
-        step_names = [x.function_name for x in model.all_steps]
+        all_steps = model.all_steps
         steps_used = 0
-        for step_name in step_names:
-            if history.get_step_count(step_name) > 0:
+        for step in all_steps:
+            if history.get_step_count(step) > 0:
                 steps_used += 1
-        current_coverage = steps_used / len(step_names)
+        current_coverage = steps_used / len(all_steps)
         return current_coverage >= self.coverage

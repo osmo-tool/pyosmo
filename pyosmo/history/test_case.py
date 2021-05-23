@@ -1,5 +1,7 @@
 import time
 
+from pyosmo.model import TestStep
+
 
 class TestCase:
     def __init__(self):
@@ -21,9 +23,10 @@ class TestCase:
         """ How many errors happened during this test case """
         return len(list(filter(lambda x: x.error is not None, self.steps_log)))
 
-    def get_step_count(self, test_name):
+    def get_step_count(self, step):
         """ Counts how many times the step is really called during whole history """
-        return len(list(filter(lambda x: x.name == test_name is not None, self.steps_log)))
+        assert isinstance(step, TestStep)
+        return len(list(filter(lambda x: x.step.name == step.name is not None, self.steps_log)))
 
     def stop(self):
         self._stop_time = time.time()
