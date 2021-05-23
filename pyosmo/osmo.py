@@ -4,7 +4,7 @@ import random
 import time
 
 from pyosmo.config import OsmoConfig
-from pyosmo.history import OsmoHistory
+from pyosmo.history.history import OsmoHistory
 from pyosmo.model import Model
 
 logger = logging.getLogger('osmo')

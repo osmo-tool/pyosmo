@@ -1,70 +1,7 @@
 import time
 
-
-class TestStepLog:
-    def __init__(self, step, duration, error=None):
-        self._step = step
-        self._timestamp = time.time()
-        self._duration = duration
-        self._error = error
-
-    @property
-    def step(self):
-        return self._step
-
-    @property
-    def name(self):
-        return self._step.function_name
-
-    @property
-    def timestamp(self):
-        return self._timestamp
-
-    @property
-    def duration(self):
-        return self._duration
-
-
-class TestCase:
-    def __init__(self):
-        self.steps_log = list()
-        self._start_time = time.time()
-        self._stop_time = None
-
-    def add_step(self, step_log):
-        if self._stop_time is not None:
-            raise Exception("Test case is already stopped, cannot add more test steps!")
-        self.steps_log.append(step_log)
-
-    @property
-    def steps_count(self):
-        return len(self.steps_log)
-
-    def get_step_count(self, test_name):
-        """ Counts how many times the step is really called during whole history """
-        counter = 0
-        for step in self.steps_log:
-            if step.name == test_name:
-                counter += 1
-        return counter
-
-    def stop(self):
-        self._stop_time = time.time()
-
-    @property
-    def start_time(self):
-        return self._start_time
-
-    @property
-    def stop_time(self):
-        return self._stop_time
-
-    @property
-    def duration(self):
-        if self._stop_time is None:
-            # Test is still running
-            return time.time() - self._start_time
-        return self._stop_time - self._start_time
+from pyosmo.history.test_case import TestCase
+from pyosmo.history.test_step_log import TestStepLog
 
 
 class OsmoHistory:
@@ -80,6 +17,11 @@ class OsmoHistory:
             self.current_test_case.stop()
         # Start a new test case
         self.test_cases.append(TestCase())
+
+    @property
+    def error_count(self):
+        """ Total count of errors in all tests cases """
+        return sum([x.error_count for x in self.test_cases])
 
     @property
     def current_test_case(self):

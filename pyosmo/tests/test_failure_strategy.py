@@ -1,5 +1,6 @@
 # pylint: disable=bare-except
 from pyosmo.end_conditions.length import Length
+from pyosmo.error_strategy.allow_count import AllowCount
 from pyosmo.error_strategy.always_ignore import AlwaysIgnore
 from pyosmo.error_strategy.always_raise import AlwaysRaise
 from pyosmo.osmo import Osmo
@@ -37,3 +38,16 @@ def test_always_ignore():
     except:
         pass
     assert osmo.history.total_amount_of_steps == 10 * 100
+
+
+def test_allow_count():
+    osmo = Osmo(JustFailModel(AssertionError('Failing test_stop_on_failure')))
+    osmo.set_test_end_condition(Length(10))
+    osmo.set_suite_end_condition(Length(10))
+    osmo.test_failure_strategy = AllowCount(3)
+    osmo.test_suite_failure_strategy = AllowCount(3)
+    try:
+        osmo.generate()
+    except:
+        pass
+    assert osmo.history.total_amount_of_steps == 3 + 1
