@@ -1,8 +1,6 @@
 """
-Same example as in README.md but in executable format
+Simple example model
 """
-from pyosmo.algorithm.random import RandomAlgorithm
-from pyosmo.end_conditions.length import Length
 from pyosmo.osmo import Osmo
 
 
@@ -30,10 +28,7 @@ class ExampleModel:
         print("+ {}".format(self._counter))
 
 
-osmo = Osmo()
-osmo.add_model(ExampleModel())
-osmo.algorithm = RandomAlgorithm()
-osmo.test_end_condition = Length(10)
-osmo.test_end_condition = Length(10)
-osmo.seed = 333
+# Initialize Osmo with model
+osmo = Osmo(ExampleModel())
+# Generate tests
 osmo.generate()
