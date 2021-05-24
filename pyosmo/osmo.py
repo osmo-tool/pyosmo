@@ -7,7 +7,6 @@ from pyosmo.history.history import OsmoHistory
 from pyosmo.model import Model
 
 logger = logging.getLogger('osmo')
-logger.setLevel(logging.INFO)
 
 
 class Osmo(OsmoConfig):
