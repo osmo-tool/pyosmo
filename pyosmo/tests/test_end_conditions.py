@@ -79,7 +79,7 @@ def test_logical_or():
 def test_step_coverage():
     model = TestModel()
     osmo = Osmo(model)
-    osmo.test_end_condition = StepCoverage(1)
+    osmo.test_end_condition = StepCoverage(100)
     osmo.test_suite_end_condition = Length(1)
     osmo.generate()
     assert osmo.history.get_step_count(osmo.model.get_step_by_name("step_first")) > 0

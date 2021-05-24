@@ -6,10 +6,10 @@ class StepCoverage(OsmoEndCondition):
     Stops testing when count is filled
     """
 
-    def __init__(self, coverage):
-        if coverage > 1 or coverage < 0:
-            raise Exception("Coverage is {} and it need to be >0 and <1".format(coverage))
-        self.coverage = coverage
+    def __init__(self, coverage_percent):
+        if coverage_percent > 100 or coverage_percent < 0:
+            raise Exception("Coverage is {} and it need to be >0 and <1".format(coverage_percent))
+        self.coverage = coverage_percent / 100
 
     def end_test(self, history, model):
         """ Stops test case when defined number of test steps are executed """
