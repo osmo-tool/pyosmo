@@ -49,6 +49,7 @@ osmo.generate()
 ## Offline model-based testing (MBT)
 
 This means that the model will generate test cases which can be executed later using your existing test infrastructure.
+[Checkout the example](examples/offline_mbt/README.md)
 
 Pros:
 
