@@ -1,6 +1,6 @@
 # pylint: disable=bare-except
 
-from pyosmo.osmo import Osmo
+from pyosmo import Osmo
 
 
 def test_empty_model():

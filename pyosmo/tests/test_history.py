@@ -1,6 +1,6 @@
-from pyosmo.algorithm.weighted import WeightedAlgorithm
-from pyosmo.end_conditions.length import Length
-from pyosmo.osmo import Osmo
+from pyosmo.algorithm import WeightedAlgorithm
+from pyosmo.end_conditions import Length
+from pyosmo import Osmo
 
 
 def test_weighted_algorithm():

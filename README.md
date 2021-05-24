@@ -85,8 +85,8 @@ Cons:
 
 ```python
 from pyosmo.osmo import Osmo
-from pyosmo.end_conditions.step_coverage import StepCoverage
-from pyosmo.end_conditions.length import Length
+from pyosmo.end_conditions import StepCoverage
+from pyosmo.end_conditions import Length
 
 # This ues same example model than defined above
 osmo = Osmo(ExampleModel())
@@ -105,7 +105,7 @@ osmo.generate()
 ```python
 import datetime
 from pyosmo.osmo import Osmo
-from pyosmo.end_conditions.time import Time
+from pyosmo.end_conditions import Time
 
 osmo = Osmo(ExampleModel())
 # Run model for ten hours
@@ -113,3 +113,11 @@ osmo.test_end_condition = Time(int(datetime.timedelta(hours=10).total_seconds())
 osmo.test_suite_end_condition = Length(1)
 osmo.generate()
 ```
+
+## Run with pytest
+
+
+## Performance testing 
+
+When system behaviour is modelled in online models you can use [https://locust.io/](https://locust.io/) 
+to run multiple models parallel for stress test purposes. It may need 

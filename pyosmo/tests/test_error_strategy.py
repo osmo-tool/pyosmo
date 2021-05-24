@@ -1,9 +1,7 @@
 # pylint: disable=bare-except
-from pyosmo.end_conditions.length import Length
-from pyosmo.error_strategy.allow_count import AllowCount
-from pyosmo.error_strategy.always_ignore import AlwaysIgnore
-from pyosmo.error_strategy.always_raise import AlwaysRaise
-from pyosmo.osmo import Osmo
+from pyosmo import Osmo
+from pyosmo.end_conditions import Length
+from pyosmo.error_strategy import AllowCount, AlwaysIgnore, AlwaysRaise
 
 
 class JustFailModel:

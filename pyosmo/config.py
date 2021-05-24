@@ -3,7 +3,7 @@ import logging
 import random
 
 from pyosmo.algorithm.base import OsmoAlgorithm
-from pyosmo.algorithm.random import RandomAlgorithm
+from pyosmo.algorithm import RandomAlgorithm
 from pyosmo.end_conditions.base import OsmoEndCondition
 from pyosmo.end_conditions.length import Length
 from pyosmo.error_strategy.always_raise import AlwaysRaise

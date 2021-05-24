@@ -3,11 +3,8 @@ from random import randint
 
 import pytest
 
-from pyosmo.end_conditions.length import Length
-from pyosmo.end_conditions.logical import And, Or
-from pyosmo.end_conditions.step_coverage import StepCoverage
-from pyosmo.end_conditions.time import Time
-from pyosmo.osmo import Osmo
+from pyosmo.end_conditions import Length, And, Or, StepCoverage, Time
+from pyosmo import Osmo
 
 
 class TestModel:

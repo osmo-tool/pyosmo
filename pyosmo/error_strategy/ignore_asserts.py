@@ -1,7 +1,7 @@
 from pyosmo.error_strategy.base import OsmoErrorStrategy
 
 
-class AlwaysIgnore(OsmoErrorStrategy):
+class IgnoreAsserts(OsmoErrorStrategy):
     """
     Ignore assertion errors
     """
