@@ -30,3 +30,9 @@ Run pylint
 ```bash
 pylint *
 ```
+
+Run flake8
+
+```bash
+flake8 --max-line-length 120 --ignore=E722,F401
+```
