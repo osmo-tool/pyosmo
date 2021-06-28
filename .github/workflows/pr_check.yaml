@@ -1,0 +1,19 @@
+name: "Pylint checks"
+
+on:
+  push:
+    paths-ignore:
+      - 'doc/**'
+  pull_request:
+    branches:
+      - main
+jobs:
+  pylint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: install pylint
+        run: pip install -U pip && pip install pylint
+      - name: run pylint
+        run: pylint *
