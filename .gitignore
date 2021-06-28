@@ -57,3 +57,7 @@ target/
 .idea
 
 .DS_Store
+
+.hammett*
+.mutmut*
+pyosmo/config.py.bak
