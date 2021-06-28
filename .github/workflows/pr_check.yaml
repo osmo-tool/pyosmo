@@ -1,4 +1,4 @@
-name: "Pylint checks"
+name: "Test code"
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: install pylint
-        run: pip install -U pip && pip install pylint
+      - name: install dependencies
+        run: pip install -U pip && pip install pylint pytest
       - name: run pylint
         run: pylint *
