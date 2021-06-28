@@ -5,35 +5,35 @@ from pyosmo.end_conditions import Length
 from pyosmo import Osmo
 
 
-class TestException(Exception):
+class TempException(Exception):
     pass
 
 
-class TestModel:
+class OneStepModel:
     def __init__(self):
         self.index = 0
 
     def step_one(self):
         self.index += 1
         if self.index == 5:
-            raise TestException("Should happen!")
+            raise TempException("Should happen!")
 
 
 def test_exception_raise_effects():
-    model = TestModel()
+    model = OneStepModel()
     osmo = Osmo(model)
     osmo.test_end_condition = Length(8)
     osmo.test_suite_end_condition = Length(1)
     try:
         osmo.generate()
-    except TestException:
+    except TempException:
         # Osmo is raisin test exception so need to catch it here
         pass
     assert model.index == 5
 
 
 def test_wrong_config_objects():
-    osmo = Osmo(TestModel())
+    osmo = Osmo(OneStepModel())
     try:
         osmo.test_end_condition = RandomAlgorithm()
     except AttributeError:

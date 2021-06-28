@@ -7,7 +7,7 @@ from pyosmo.end_conditions import Length, And, Or, StepCoverage, Time
 from pyosmo import Osmo
 
 
-class TestModel:
+class TempModel:
     def __init__(self):
         self.counter = 0
 
@@ -21,7 +21,7 @@ class TestModel:
 @pytest.mark.parametrize("steps", [randint(1, 100) for _ in range(3)])
 @pytest.mark.parametrize("tests", [randint(1, 10) for _ in range(3)])
 def test_length_end_condition(steps, tests):
-    model = TestModel()
+    model = TempModel()
     osmo = Osmo(model)
     osmo.test_end_condition = Length(tests)
     osmo.test_suite_end_condition = Length(steps)
@@ -31,7 +31,7 @@ def test_length_end_condition(steps, tests):
 
 def test_test_time_end_condition():
     time_in_sec = 2
-    osmo = Osmo(TestModel())
+    osmo = Osmo(TempModel())
     osmo.test_end_condition = Time(time_in_sec)
     osmo.test_suite_end_condition = Length(1)
     start_time = time.time()
@@ -44,7 +44,7 @@ def test_test_time_end_condition():
 
 def test_test_suite_time_end_condition():
     time_in_sec = 2
-    osmo = Osmo(TestModel())
+    osmo = Osmo(TempModel())
     osmo.test_end_condition = Length(1)
     osmo.test_suite_end_condition = Time(time_in_sec)
     start_time = time.time()
@@ -56,7 +56,7 @@ def test_test_suite_time_end_condition():
 
 
 def test_logical_and():
-    model = TestModel()
+    model = TempModel()
     osmo = Osmo(model)
     osmo.test_end_condition = And(Length(1), Length(2), Length(3))
     osmo.test_suite_end_condition = And(Length(2), Length(3), Length(4))
@@ -65,7 +65,7 @@ def test_logical_and():
 
 
 def test_logical_or():
-    model = TestModel()
+    model = TempModel()
     osmo = Osmo(model)
     osmo.test_end_condition = Or(Length(1), Length(2), Length(3))
     osmo.test_suite_end_condition = Or(Length(2), Length(3), Length(4))
@@ -74,7 +74,7 @@ def test_logical_or():
 
 
 def test_step_coverage():
-    model = TestModel()
+    model = TempModel()
     osmo = Osmo(model)
     osmo.test_end_condition = StepCoverage(100)
     osmo.test_suite_end_condition = Length(1)
