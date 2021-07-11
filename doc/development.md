@@ -1,6 +1,6 @@
-## Pyosmo development
+# Pyosmo development
 
-Enable debug logging
+### Enable debug logging
 
 ```python
 import logging, sys
@@ -13,26 +13,32 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 osmo.generate()
 ```
 
-Install tools needed for development
+### Install tools needed for development
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Run osmo tests:
+### Run osmo tests:
 
 ```bash
 pytest pyosmo/tests/
 ```
 
-Run pylint
+### Run pylint
 
 ```bash
 pylint *
 ```
 
-Run flake8
+### Run flake8
 
 ```bash
 flake8 --max-line-length 120 --ignore=E722,F401
+```
+
+### Run mutation testing
+*Read more about the tool in https://github.com/boxed/mutmut*
+```bash
+mutmut run
 ```
