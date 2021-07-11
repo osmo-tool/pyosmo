@@ -18,8 +18,8 @@ class TempModel:
         self.counter += 1
 
 
-@pytest.mark.parametrize("steps", [randint(1, 100) for _ in range(3)])
-@pytest.mark.parametrize("tests", [randint(1, 10) for _ in range(3)])
+@pytest.mark.parametrize("steps", [randint(1, 100) for _ in range(2)])
+@pytest.mark.parametrize("tests", [randint(1, 10) for _ in range(2)])
 def test_length_end_condition(steps, tests):
     model = TempModel()
     osmo = Osmo(model)
@@ -30,7 +30,7 @@ def test_length_end_condition(steps, tests):
 
 
 def test_test_time_end_condition():
-    time_in_sec = 2
+    time_in_sec = 1
     osmo = Osmo(TempModel())
     osmo.test_end_condition = Time(time_in_sec)
     osmo.test_suite_end_condition = Length(1)
@@ -43,7 +43,7 @@ def test_test_time_end_condition():
 
 
 def test_test_suite_time_end_condition():
-    time_in_sec = 2
+    time_in_sec = 1
     osmo = Osmo(TempModel())
     osmo.test_end_condition = Length(1)
     osmo.test_suite_end_condition = Time(time_in_sec)

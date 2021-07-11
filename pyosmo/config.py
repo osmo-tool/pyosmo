@@ -2,8 +2,8 @@
 import logging
 import random
 
-from pyosmo.algorithm.base import OsmoAlgorithm
 from pyosmo.algorithm import RandomAlgorithm
+from pyosmo.algorithm.base import OsmoAlgorithm
 from pyosmo.end_conditions.base import OsmoEndCondition
 from pyosmo.end_conditions.length import Length
 from pyosmo.error_strategy.always_raise import AlwaysRaise
@@ -16,11 +16,11 @@ class OsmoConfig:
     """ Osmo run configutaion object """
 
     def __init__(self):
-        self._seed = random.randint(0, 10000)
+        self._seed = random.randint(0, 10000)  # pragma: no mutate
         self._random = random.Random(self.seed)
         self._algorithm = RandomAlgorithm()
-        self._test_end_condition = Length(10)
-        self._test_suite_end_condition = Length(1)
+        self._test_end_condition = Length(10)  # pragma: no mutate
+        self._test_suite_end_condition = Length(1)  # pragma: no mutate
         self._test_error_strategy = AlwaysRaise()
         self._test_suite_error_strategy = AlwaysRaise()
 

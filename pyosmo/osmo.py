@@ -79,10 +79,9 @@ class Osmo(OsmoConfig):
                     if self.test_end_condition.end_test(self.history, self.model):
                         break
                 self.model.execute_optional('after_test')
-
-                if self.test_suite_end_condition.end_suite(self.history, self.model):
-                    break
             except BaseException as error:
                 self.test_suite_error_strategy.failure_in_suite(self.history, self.model, error)
+            if self.test_suite_end_condition.end_suite(self.history, self.model):
+                break
         self.model.execute_optional('after_suite')
         self.history.stop()
