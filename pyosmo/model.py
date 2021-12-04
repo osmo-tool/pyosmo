@@ -1,4 +1,6 @@
 import logging
+from functools import cached_property
+from typing import List
 
 logger = logging.getLogger('osmo')
 
@@ -14,10 +16,10 @@ class Function:
             return getattr(self.object_instance, self.function_name)()
         except AttributeError as e:
             raise Exception(
-                "Osmo cannot find function {}.{} from model".format(self.object_instance, self.function_name)) from e
+                f"Osmo cannot find function {self.object_instance}.{self.function_name} from model") from e
 
     def __str__(self):
-        return "{}.{}()".format(type(self.object_instance).__name__, self.function_name)
+        return f"{type(self.object_instance).__name__}.{self.function_name}()"
 
 
 class TestStep(Function):
@@ -33,11 +35,17 @@ class TestStep(Function):
 
     @property
     def guard_name(self):
-        return 'guard_{}'.format(self.name)
+        return f'guard_{self.name}'
+
+    @cached_property
+    def weight(self):
+        if self.weight_function is not None:
+            return float(self.weight_function.execute())
+        return 1  # The default value
 
     @property
     def weight_name(self):
-        return 'weight_{}'.format(self.name)
+        return f'weight_{self.name}'
 
     @property
     def weight_function(self):
@@ -57,11 +65,10 @@ class TestStep(Function):
 
 class Model:
     """ The whole model that osmo has in "mind" which may contain multiple partial models """
-    default_weight = 50
 
     def __init__(self):
         # Format: functions[function_name] = link_of_instance
-        self.sub_models = list()
+        self.sub_models = []
         self.debug = False
 
     @property
@@ -77,9 +84,9 @@ class Model:
             return steps[0]
         return None
 
-    def all_functions_by_name(self, name):
-        return [Function(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
-                hasattr(getattr(sub_model, f), '__call__') and f == name]
+    def functions_by_name(self, name: str) -> iter:
+        return (Function(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
+                hasattr(getattr(sub_model, f), '__call__') and f == name)
 
     def add_model(self, model):
         """ Add model for osmo """
@@ -90,15 +97,15 @@ class Model:
             model = model()
 
         self.sub_models.append(model)
-        logger.debug('Loaded model: {}'.format(model.__class__))
+        logger.debug(f'Loaded model: {model.__class__}')
 
     def execute_optional(self, function_name):
         """ Execute all this name functions if available """
-        for function in self.all_functions_by_name(function_name):
-            logger.debug('Execute: {}'.format(function))
-            return function.execute()
+        for function in self.functions_by_name(function_name):
+            logger.debug(f'Execute: {function}')
+            function.execute()
 
-    def get_list_of_available_steps(self):
+    def available_steps(self) -> List[TestStep]:
         available_steps = []
         for step in self.all_steps:
             # If cannot find guard expect that state is always possible
@@ -108,9 +115,3 @@ class Model:
         if not available_steps:
             raise Exception('Cannot find any available states')
         return available_steps
-
-    def get_step_weight(self, step):
-        if step.weight_function:
-            return float(step.weight_function.execute())
-        # Return default weight
-        return self.default_weight

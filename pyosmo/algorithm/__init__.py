@@ -1,2 +1,2 @@
-from .weighted import WeightedAlgorithm
 from .random import RandomAlgorithm
+from .weighted import WeightedAlgorithm

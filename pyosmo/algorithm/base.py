@@ -8,7 +8,7 @@ class OsmoAlgorithm:
     def __init__(self):
         pass
 
-    def inititalize(self, random, model):
+    def initialize(self, random, model):
         """
         Initialize Osmo algorithm
         :param random: Used random

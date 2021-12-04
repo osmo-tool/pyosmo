@@ -7,7 +7,7 @@ from pyosmo.history.test_step_log import TestStepLog
 class OsmoHistory:
 
     def __init__(self):
-        self.test_cases = list()
+        self.test_cases = []
         self.stop_time = None
         self.start_time = time.time()
 
@@ -62,16 +62,16 @@ class OsmoHistory:
 
     @property
     def step_stats(self):
-        stats = dict()
+        stats = {}
         ret = ''
         for test_case in self.test_cases:
             for step in test_case.steps_log:
-                if step.name in stats.keys():
+                if step.name in stats:
                     stats[step.name] = stats[step.name] + 1
                 else:
                     stats[step.name] = 1
         for key, value in stats.items():
-            ret += '{}:{}\n'.format(key, value)
+            ret += f'{key}:{value}\n'
         return ret
 
     @property
@@ -80,9 +80,9 @@ class OsmoHistory:
             raise Exception("Cannot get summary of ongoing test")
         ret = ''
         ret += 'Osmo summary:\n'
-        ret += 'Test cases: {}\n'.format(self.test_case_count)
-        ret += 'Test steps: {}\n'.format(self.total_amount_of_steps)
-        ret += 'Duration: {:.2f}s\n'.format(self.duration)
+        ret += f'Test cases: {self.test_case_count}\n'
+        ret += f'Test steps: {self.total_amount_of_steps}\n'
+        ret += f'Duration: {self.duration:.2f}s\n'
         return ret
 
     def __str__(self):
@@ -90,8 +90,8 @@ class OsmoHistory:
         tc_index = 0
         for test_case in self.test_cases:
             tc_index += 1
-            ret += '{}. test case {:.2f}s\n'.format(tc_index, test_case.duration)
+            ret += f'{tc_index}. test case {test_case.duration:.2f}s\n'
             for step in test_case.steps_log:
-                ret += '{} {:.2f}s {}\n'.format(step.timestamp, step.duration, step.name)
+                ret += f'{step.timestamp} {step.duration:.2f}s {step.name}\n'
             ret += '\n'
         return ret

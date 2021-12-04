@@ -8,7 +8,7 @@ class StepCoverage(OsmoEndCondition):
 
     def __init__(self, coverage_percent):
         if coverage_percent > 100 or coverage_percent < 0:
-            raise Exception("Coverage is {} and it need to be >0 and <1".format(coverage_percent))
+            raise Exception(f"Coverage is {coverage_percent} and it need to be >0 and <1")
         self.coverage = coverage_percent / 100
 
     def end_test(self, history, model):

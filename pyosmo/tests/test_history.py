@@ -1,11 +1,11 @@
+from pyosmo import Osmo
 from pyosmo.algorithm import WeightedAlgorithm
 from pyosmo.end_conditions import Length
-from pyosmo import Osmo
 
 
 def test_weighted_algorithm():
     class HistoryTest:
-        steps = list()
+        steps = []
 
         def __init__(self):
             pass
@@ -26,7 +26,7 @@ def test_weighted_algorithm():
 
         @staticmethod
         def weight_third():
-            return 4
+            return 3
 
         def step_third(self):
             self.steps.append('step_third')
@@ -42,9 +42,4 @@ def test_weighted_algorithm():
     step_second_count = osmo.history.get_step_count(osmo.model.get_step_by_name("step_second"))
     step_third_count = osmo.history.get_step_count(osmo.model.get_step_by_name("step_third"))
 
-    compare_first = step_first_count * (1.0 / model.weight_first())
-    compare_second = step_second_count * (1.0 / model.weight_second())
-    compare_third = step_third_count * (1.0 / model.weight_third())
-
-    assert abs(compare_first - compare_second) < 2
-    assert abs(compare_first - compare_third) < 2
+    assert step_first_count < step_second_count < step_third_count

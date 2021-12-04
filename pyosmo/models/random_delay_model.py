@@ -1,5 +1,5 @@
-import time
 import random
+import time
 
 
 class RandomDelayModel:
@@ -16,4 +16,6 @@ class RandomDelayModel:
         self.max = max_delay
 
     def after(self):
-        time.sleep(random.uniform(self.min, self.max))
+        delay = random.uniform(self.min, self.max)
+        print(f'Sleeping {delay}')
+        time.sleep(delay)
