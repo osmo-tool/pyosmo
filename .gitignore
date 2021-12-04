@@ -61,3 +61,4 @@ target/
 .hammett*
 .mutmut*
 pyosmo/config.py.bak
+.pytest_cache

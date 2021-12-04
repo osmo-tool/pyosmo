@@ -122,6 +122,14 @@ osmo.generate()
 
 ## Run with pytest
 
+```python
+def test_smoke():
+    osmo = Osmo(ExampleModel())
+    osmo.test_end_condition = Length(10)
+    osmo.test_suite_end_condition = Length(1)
+    osmo.algorithm = RandomAlgorithm()
+    osmo.generate()
+```
 
 ## Performance testing 
 

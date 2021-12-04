@@ -5,7 +5,7 @@ from pyosmo.model import TestStep
 
 class TestCase:
     def __init__(self):
-        self.steps_log = list()
+        self.steps_log = []
         self._start_time = time.time()
         self._stop_time = None
 

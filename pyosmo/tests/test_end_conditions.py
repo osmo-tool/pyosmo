@@ -3,8 +3,8 @@ from random import randint
 
 import pytest
 
-from pyosmo.end_conditions import Length, And, Or, StepCoverage, Time
 from pyosmo import Osmo
+from pyosmo.end_conditions import Length, And, Or, StepCoverage, Time
 
 
 class TempModel:

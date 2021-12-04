@@ -1,8 +1,8 @@
 # pylint: disable=no-self-use,bare-except,try-except-raise
 
+from pyosmo import Osmo
 from pyosmo.algorithm import RandomAlgorithm
 from pyosmo.end_conditions import Length
-from pyosmo import Osmo
 
 
 class TempException(Exception):
