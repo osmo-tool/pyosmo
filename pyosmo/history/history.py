@@ -66,7 +66,7 @@ class OsmoHistory:
         ret = ''
         for test_case in self.test_cases:
             for step in test_case.steps_log:
-                if step.name in stats.keys():
+                if step.name in stats:
                     stats[step.name] = stats[step.name] + 1
                 else:
                     stats[step.name] = 1
