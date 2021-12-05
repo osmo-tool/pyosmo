@@ -1,19 +1,22 @@
 import logging
-from functools import cached_property
 from typing import List
 
 logger = logging.getLogger('osmo')
 
 
-class Function:
+class ModelFunction:
+    """ Generic function class containing basic functionality of model functions"""
 
     def __init__(self, function_name, object_instance):
         self.function_name = function_name
         self.object_instance = object_instance  # Instance of model class
+
+    @property
+    def default_weight(self):
         try:
-            self.default_weight = self.object_instance.weight
+            return self.object_instance.weight
         except AttributeError:
-            self.default_weight = 0
+            return 0
 
     @property
     def func(self):
@@ -30,7 +33,7 @@ class Function:
         return f"{type(self.object_instance).__name__}.{self.function_name}()"
 
 
-class TestStep(Function):
+class TestStep(ModelFunction):
 
     def __init__(self, function_name, object_instance):
         assert function_name.startswith('step_'), 'Wrong name function'
@@ -47,20 +50,17 @@ class TestStep(Function):
 
     @property
     def weight(self):
-        if self.weight_function is not None:
-            return float(self.weight_function.execute())
-        return self.weight_param
-
-    @cached_property
-    def weight_param(self) -> int:
+        weight_function = self.return_function_if_exits(f'weight_{self.name}')
+        if weight_function is not None:
+            return float(weight_function.execute())
         if 'weight' in dir(self.func):
             return self.func.weight  # Noqa
         return self.default_weight  # Default value
 
     @property
-    def weight_function(self):
-        """ return guard function if exists """
-        return self.return_function_if_exits(f'weight_{self.name}')
+    def is_available(self):
+        """ Check if step is available right now """
+        return True if self.guard_function is None else self.guard_function.execute()
 
     @property
     def guard_function(self):
@@ -69,11 +69,11 @@ class TestStep(Function):
 
     def return_function_if_exits(self, name):
         if name in dir(self.object_instance):
-            return Function(name, self.object_instance)
+            return ModelFunction(name, self.object_instance)
         return None
 
 
-class Model:
+class OsmoModel:
     """ The whole model that osmo has in "mind" which may contain multiple partial models """
 
     def __init__(self):
@@ -86,16 +86,16 @@ class Model:
         return (TestStep(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
                 hasattr(getattr(sub_model, f), '__call__') and f.startswith('step_'))
 
-    def get_step_by_name(self, name):
+    def get_step_by_name(self, name) -> TestStep:
         """ Get step by function name """
-        steps = [TestStep(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
-                 hasattr(getattr(sub_model, f), '__call__') and f == name]
-        if steps:
-            return steps[0]
-        return None
+        steps = (TestStep(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
+                 hasattr(getattr(sub_model, f), '__call__') and f == name)
+        for step in steps:
+            return step
+        return None  # noqa
 
     def functions_by_name(self, name: str) -> iter:
-        return (Function(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
+        return (ModelFunction(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
                 hasattr(getattr(sub_model, f), '__call__') and f == name)
 
     def add_model(self, model):
@@ -109,19 +109,13 @@ class Model:
         self.sub_models.append(model)
         logger.debug(f'Loaded model: {model.__class__}')
 
-    def execute_optional(self, function_name):
+    def execute_optional(self, function_name) -> None:
         """ Execute all this name functions if available """
         for function in self.functions_by_name(function_name):
             logger.debug(f'Execute: {function}')
             function.execute()
 
+    @property
     def available_steps(self) -> List[TestStep]:
-        available_steps = []
-        for step in self.all_steps:
-            # If cannot find guard expect that state is always possible
-            if step.guard_function is None or step.guard_function.execute():
-                available_steps.append(step)
-
-        if not available_steps:
-            raise Exception('Cannot find any available states')
-        return available_steps
+        """ Return iterator for all available steps """
+        return list(filter(lambda x: x.is_available, self.all_steps))
