@@ -13,7 +13,7 @@ class StepCoverage(OsmoEndCondition):
 
     def end_test(self, history, model):
         """ Stops test case when defined number of test steps are executed """
-        all_steps = model.all_steps
+        all_steps = list(model.all_steps)
         steps_used = 0
         for step in all_steps:
             if history.current_test_case.get_step_count(step) > 0:
