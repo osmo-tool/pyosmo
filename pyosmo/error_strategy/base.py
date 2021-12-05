@@ -10,9 +10,9 @@ class OsmoErrorStrategy:
     """
 
     @abstractmethod
-    def failure_in_test(self, history: OsmoHistory, model: OsmoModel, error: Exception):
+    def failure_in_test(self, history: OsmoHistory, model: OsmoModel, error: BaseException):
         raise Exception("This is not implemented!")
 
     @abstractmethod
-    def failure_in_suite(self, history: OsmoHistory, model: OsmoModel, error: Exception):
+    def failure_in_suite(self, history: OsmoHistory, model: OsmoModel, error: BaseException):
         raise Exception("This is not implemented!")
