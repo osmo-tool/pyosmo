@@ -16,13 +16,13 @@ class StepCoverage(OsmoEndCondition):
     def end_test(self, history: OsmoHistory, model: OsmoModel) -> bool:
         """ Stops test case when defined number of test steps are executed """
         all_steps = len(list(model.all_steps))
-        used_steps = len(list(filter(lambda s: history.current_test_case.is_used(s), model.all_steps)))
+        used_steps = sum([1 for s in model.all_steps if history.current_test_case.is_used(s)])
         current_coverage = used_steps / all_steps
         return current_coverage >= self.coverage
 
     def end_suite(self, history: OsmoHistory, model: OsmoModel) -> bool:
         """ Stops test suite when defined number of test cases are executed """
         all_steps = len(list(model.all_steps))
-        used_steps = len(list(filter(lambda s: history.is_used(s), model.all_steps)))
+        used_steps = sum([1 for s in model.all_steps if history.current_test_case.is_used(s)])
         current_coverage = used_steps / all_steps
         return current_coverage >= self.coverage
