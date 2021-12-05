@@ -1,7 +1,8 @@
-import time
+from datetime import datetime
 
 from pyosmo.history.test_case import TestCase
 from pyosmo.history.test_step_log import TestStepLog
+from pyosmo.osmomodel import TestStep
 
 
 class OsmoHistory:
@@ -9,7 +10,7 @@ class OsmoHistory:
     def __init__(self):
         self.test_cases = []
         self.stop_time = None
-        self.start_time = time.time()
+        self.start_time = datetime.now()
 
     def start_new_test(self):
         # Stop test case timer
@@ -23,7 +24,7 @@ class OsmoHistory:
             return
         if self.current_test_case:
             self.current_test_case.stop()
-        self.stop_time = time.time()
+        self.stop_time = datetime.now()
 
     def add_step(self, step, duration, error=None):
         """ Add a step to the history """
@@ -45,7 +46,7 @@ class OsmoHistory:
     def duration(self):
         if self.stop_time is None:
             # Test is still running
-            return time.time() - self.start_time
+            return datetime.now() - self.start_time
         return self.stop_time - self.start_time
 
     @property
@@ -56,9 +57,16 @@ class OsmoHistory:
     def total_amount_of_steps(self):
         return sum([len(tc.steps_log) for tc in self.test_cases])
 
-    def get_step_count(self, step):
+    def is_used(self, step: TestStep) -> bool:
+        """ is used at least once """
+        for tc in self.test_cases:
+            if tc.is_used(step):
+                return True
+        return False
+
+    def get_step_count(self, step: TestStep):
         """ Counts how many times the step is really called during whole history """
-        return sum([test_case.get_step_count(step) for test_case in self.test_cases])
+        return sum((test_case.get_step_count(step) for test_case in self.test_cases))
 
     @property
     def step_stats(self):

@@ -1,5 +1,8 @@
 from abc import abstractmethod
 
+from pyosmo.history.history import OsmoHistory
+from pyosmo.osmomodel import OsmoModel
+
 
 class OsmoErrorStrategy:
     """
@@ -7,9 +10,9 @@ class OsmoErrorStrategy:
     """
 
     @abstractmethod
-    def failure_in_test(self, history, model, error):
+    def failure_in_test(self, history: OsmoHistory, model: OsmoModel, error: BaseException):
         raise Exception("This is not implemented!")
 
     @abstractmethod
-    def failure_in_suite(self, history, model, error):
+    def failure_in_suite(self, history: OsmoHistory, model: OsmoModel, error: BaseException):
         raise Exception("This is not implemented!")

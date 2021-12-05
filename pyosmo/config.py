@@ -13,7 +13,7 @@ logger = logging.getLogger('osmo')
 
 
 class OsmoConfig:
-    """ Osmo run configutaion object """
+    """ Osmo run configuration object """
 
     def __init__(self):
         self._seed = randint(0, 10000)  # pragma: no mutate

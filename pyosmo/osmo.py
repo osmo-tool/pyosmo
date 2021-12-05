@@ -4,7 +4,8 @@ import time
 
 from pyosmo.config import OsmoConfig
 from pyosmo.history.history import OsmoHistory
-from pyosmo.model import Model, TestStep
+from pyosmo.osmomodel import OsmoModel, TestStep
+
 logger = logging.getLogger('osmo')
 
 
@@ -14,13 +15,13 @@ class Osmo(OsmoConfig):
     def __init__(self, model: object = None):
         """ Osmo need at least one model to work """
         super().__init__()
-        self.model = Model()
+        self.model = OsmoModel()
         if model:
             self.add_model(model)
         self.history = OsmoHistory()
 
     @staticmethod
-    def _check_model(model):
+    def _check_model(model: object):
         """ Check that model is valid"""
         if not hasattr(model, '__class__'):
             raise Exception("Osmo model need to be instance of model, not just class")
@@ -68,8 +69,7 @@ class Osmo(OsmoConfig):
                 while True:
                     # Use algorithm to select the step
                     self.model.execute_optional('before')
-                    step = self.algorithm.choose(self.history,
-                                                 self.model.available_steps())
+                    step = self.algorithm.choose(self.history, self.model.available_steps)
                     self.model.execute_optional(f'pre_{step}')
                     try:
                         self._run_step(step)

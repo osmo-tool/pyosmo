@@ -1,4 +1,5 @@
 import time
+from datetime import timedelta
 from random import randint
 
 import pytest
@@ -32,7 +33,7 @@ def test_length_end_condition(steps, tests):
 def test_test_time_end_condition():
     time_in_sec = 1
     osmo = Osmo(TempModel())
-    osmo.test_end_condition = Time(time_in_sec)
+    osmo.test_end_condition = Time(timedelta(seconds=time_in_sec))
     osmo.test_suite_end_condition = Length(1)
     start_time = time.time()
     osmo.generate()
@@ -46,7 +47,7 @@ def test_test_suite_time_end_condition():
     time_in_sec = 1
     osmo = Osmo(TempModel())
     osmo.test_end_condition = Length(1)
-    osmo.test_suite_end_condition = Time(time_in_sec)
+    osmo.test_suite_end_condition = Time(timedelta(seconds=time_in_sec))
     start_time = time.time()
     osmo.generate()
     end_time = time.time()
