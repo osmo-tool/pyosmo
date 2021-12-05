@@ -5,7 +5,6 @@ import time
 from pyosmo.config import OsmoConfig
 from pyosmo.history.history import OsmoHistory
 from pyosmo.model import Model, TestStep
-
 logger = logging.getLogger('osmo')
 
 

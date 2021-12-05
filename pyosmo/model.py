@@ -10,10 +10,18 @@ class Function:
     def __init__(self, function_name, object_instance):
         self.function_name = function_name
         self.object_instance = object_instance  # Instance of model class
+        try:
+            self.default_weight = self.object_instance.weight
+        except AttributeError:
+            self.default_weight = 0
+
+    @property
+    def func(self):
+        return getattr(self.object_instance, self.function_name)
 
     def execute(self):
         try:
-            return getattr(self.object_instance, self.function_name)()
+            return self.func()
         except AttributeError as e:
             raise Exception(
                 f"Osmo cannot find function {self.object_instance}.{self.function_name} from model") from e
@@ -37,20 +45,22 @@ class TestStep(Function):
     def guard_name(self):
         return f'guard_{self.name}'
 
-    @cached_property
+    @property
     def weight(self):
         if self.weight_function is not None:
             return float(self.weight_function.execute())
-        return 1  # The default value
+        return self.weight_param
 
-    @property
-    def weight_name(self):
-        return f'weight_{self.name}'
+    @cached_property
+    def weight_param(self) -> int:
+        if 'weight' in dir(self.func):
+            return self.func.weight  # Noqa
+        return self.default_weight  # Default value
 
     @property
     def weight_function(self):
         """ return guard function if exists """
-        return self.return_function_if_exits(self.weight_name)
+        return self.return_function_if_exits(f'weight_{self.name}')
 
     @property
     def guard_function(self):
@@ -72,9 +82,9 @@ class Model:
         self.debug = False
 
     @property
-    def all_steps(self):
-        return [TestStep(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
-                hasattr(getattr(sub_model, f), '__call__') and f.startswith('step_')]
+    def all_steps(self) -> iter:
+        return (TestStep(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
+                hasattr(getattr(sub_model, f), '__call__') and f.startswith('step_'))
 
     def get_step_by_name(self, name):
         """ Get step by function name """
