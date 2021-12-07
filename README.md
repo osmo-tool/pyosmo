@@ -1,3 +1,5 @@
+[![Test code](https://github.com/OPpuolitaival/pyosmo/actions/workflows/pr_check.yaml/badge.svg)](https://github.com/OPpuolitaival/pyosmo/actions/workflows/pr_check.yaml)
+
 # pyosmo
 
 A simple model-based testing (MBT) tool for python
