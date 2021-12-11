@@ -45,7 +45,7 @@ class CalculatorTestModel:
         print(f"{self.expected_number} / {numb} = {self.expected_number / numb}")
         self.expected_number /= numb
 
-    @weight(0.1)  # this happens 10 times less ofthen usually
+    @pyosmo.weight(0.1)  # this happens 10 times less ofthen usually
     def step_clear(self):
         self.expected_number = 0
         print(0)
