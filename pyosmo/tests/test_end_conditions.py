@@ -1,4 +1,4 @@
-import time
+from datetime import datetime
 from datetime import timedelta
 from random import randint
 
@@ -35,12 +35,12 @@ def test_test_time_end_condition():
     osmo = Osmo(TempModel())
     osmo.test_end_condition = Time(timedelta(seconds=time_in_sec))
     osmo.test_suite_end_condition = Length(1)
-    start_time = time.time()
+    start_time = datetime.now()
     osmo.generate()
-    end_time = time.time()
+    end_time = datetime.now()
     duration = end_time - start_time
-    assert duration < time_in_sec + 0.1
-    assert duration > time_in_sec - 0.1
+    assert duration < timedelta(seconds=time_in_sec + 0.1)
+    assert duration > timedelta(seconds=time_in_sec - 0.1)
 
 
 def test_test_suite_time_end_condition():
@@ -48,12 +48,12 @@ def test_test_suite_time_end_condition():
     osmo = Osmo(TempModel())
     osmo.test_end_condition = Length(1)
     osmo.test_suite_end_condition = Time(timedelta(seconds=time_in_sec))
-    start_time = time.time()
+    start_time = datetime.now()
     osmo.generate()
-    end_time = time.time()
+    end_time = datetime.now()
     duration = end_time - start_time
-    assert duration < time_in_sec + 0.1
-    assert duration > time_in_sec - 0.1
+    assert duration < timedelta(seconds=time_in_sec + 0.1)
+    assert duration > timedelta(seconds=time_in_sec - 0.1)
 
 
 def test_logical_and():

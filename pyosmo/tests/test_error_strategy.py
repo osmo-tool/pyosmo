@@ -20,7 +20,7 @@ def test_always_raise():
     osmo.test_suite_error_strategy = AlwaysRaise()
     try:
         osmo.generate()
-    except:
+    except AssertionError:
         pass
     assert osmo.history.total_amount_of_steps == 1
 

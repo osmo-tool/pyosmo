@@ -2,7 +2,7 @@ from typing import List
 
 from pyosmo.algorithm.base import OsmoAlgorithm
 from pyosmo.history.history import OsmoHistory
-from pyosmo.osmomodel import TestStep
+from pyosmo.model import TestStep
 
 
 class WeightedAlgorithm(OsmoAlgorithm):

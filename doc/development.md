@@ -34,7 +34,7 @@ pylint *
 ### Run flake8
 
 ```bash
-flake8 --max-line-length 120 --ignore=E722,F401
+flake8 --max-line-length 120 --ignore=E722,F401,E402
 ```
 
 ### Run mutation testing

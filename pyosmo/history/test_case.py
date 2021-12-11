@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from pyosmo.history.test_step_log import TestStepLog
-from pyosmo.osmomodel import TestStep
+from pyosmo.model import TestStep
 
 
 class OsmoTestCaseRecord:
@@ -9,8 +9,6 @@ class OsmoTestCaseRecord:
         self.steps_log = []
         self._start_time = None
         self._stop_time = None
-
-    def start(self) -> None:
         self._start_time = datetime.now()
 
     def stop(self) -> None:
@@ -20,7 +18,7 @@ class OsmoTestCaseRecord:
         return self._start_time is not None
 
     def is_running(self) -> bool:
-        return self.start_time is not None and self._stop_time is None
+        return self._stop_time is not None
 
     def add_step(self, step_log: TestStepLog) -> None:
         if self.is_running():

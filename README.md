@@ -12,8 +12,16 @@ Idea of model based testing is described in [introduction](doc/introduction.md)
 
 ## Install
 
+using pip
 ```bash
 pip install pyosmo
+```
+
+or using git clone
+
+```bash
+git clone git@github.com:OPpuolitaival/pyosmo.git
+python -m pip install -e .
 ```
 
 ## Example model
@@ -133,7 +141,7 @@ def test_smoke():
     osmo.generate()
 ```
 
-## Performance testing 
+## Performance testing
 
-When system behaviour is modelled in online models you can use [https://locust.io/](https://locust.io/) 
+When system behaviour is modelled in online models you can use [https://locust.io/](https://locust.io/)
 to run multiple models parallel for stress test purposes. It may need 

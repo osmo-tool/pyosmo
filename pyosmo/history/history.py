@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from pyosmo.history.test_case import OsmoTestCaseRecord
 from pyosmo.history.test_step_log import TestStepLog
-from pyosmo.osmomodel import TestStep
+from pyosmo.model import TestStep
 
 
 class OsmoHistory:
