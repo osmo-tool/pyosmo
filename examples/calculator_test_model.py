@@ -1,7 +1,7 @@
 # pylint: disable=no-self-use
 from random import Random
 
-from pyosmo import weight
+import pyosmo
 from pyosmo.algorithm import WeightedAlgorithm
 from pyosmo.end_conditions import Length
 from pyosmo.osmo import Osmo
@@ -26,7 +26,7 @@ class CalculatorTestModel:
         print(f"{self.expected_number} - {numb} = {self.expected_number - numb}")
         self.expected_number -= numb
 
-    @weight(2)  # This happens two times more often than normally
+    @pyosmo.weight(2)  # This happens two times more often than normally
     def step_plus(self):
         numb = int(self.random.random() * 10)
         print(f"{self.expected_number} + {numb} = {self.expected_number + numb}")
@@ -60,5 +60,7 @@ if __name__ == '__main__':
     osmo = Osmo(CalculatorTestModel())
     osmo.test_end_condition = Length(100)
     osmo.algorithm = WeightedAlgorithm()
+
     # Generate tests
     osmo.generate()
+    osmo.history.print_summary()

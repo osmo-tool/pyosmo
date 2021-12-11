@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from pyosmo.history.test_case import TestCase
+from pyosmo.history.test_case import OsmoTestCaseRecord
 from pyosmo.history.test_step_log import TestStepLog
 from pyosmo.osmomodel import TestStep
 
@@ -14,22 +14,22 @@ class OsmoHistory:
 
     def start_new_test(self):
         # Stop test case timer
-        if self.current_test_case:
+        if self.current_test_case and self.current_test_case.is_running:
             self.current_test_case.stop()
         # Start a new test case
-        self.test_cases.append(TestCase())
+        self.test_cases.append(OsmoTestCaseRecord())
 
-    def stop(self):
+    def stop(self) -> None:
         if self.stop_time:
             return
         if self.current_test_case:
             self.current_test_case.stop()
         self.stop_time = datetime.now()
 
-    def add_step(self, step, duration, error=None):
+    def add_step(self, step: TestStep, duration: timedelta, error: Exception = None):
         """ Add a step to the history """
         if self.current_test_case is None:
-            raise Exception("There is no current test case!!")
+            raise Exception("There is no active test case!!")
         self.current_test_case.add_step(TestStepLog(step, duration, error))
 
     @property
@@ -38,7 +38,7 @@ class OsmoHistory:
         return sum([x.error_count for x in self.test_cases])
 
     @property
-    def current_test_case(self):
+    def current_test_case(self) -> OsmoTestCaseRecord:
         """ The test case which is running or generating at the moment """
         return self.test_cases[-1] if self.test_cases else None
 
@@ -82,16 +82,15 @@ class OsmoHistory:
             ret += f'{key}:{value}\n'
         return ret
 
-    @property
-    def summary(self):
+    def print_summary(self):
         if self.stop_time is None:
             raise Exception("Cannot get summary of ongoing test")
-        ret = ''
-        ret += 'Osmo summary:\n'
+        ret = '\n'
+        ret += 'Osmo run summary:\n'
         ret += f'Test cases: {self.test_case_count}\n'
         ret += f'Test steps: {self.total_amount_of_steps}\n'
-        ret += f'Duration: {self.duration:.2f}s\n'
-        return ret
+        ret += f'Duration: {self.duration}\n'
+        print(ret)
 
     def __str__(self):
         ret = ''

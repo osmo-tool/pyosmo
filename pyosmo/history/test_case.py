@@ -1,17 +1,30 @@
 from datetime import datetime, timedelta
 
+from pyosmo.history.test_step_log import TestStepLog
 from pyosmo.osmomodel import TestStep
 
 
-class TestCase:
+class OsmoTestCaseRecord:
     def __init__(self):
         self.steps_log = []
-        self._start_time = datetime.now()
+        self._start_time = None
         self._stop_time = None
 
-    def add_step(self, step_log: TestStep):
-        if self._stop_time is not None:
-            raise Exception("Test case is already stopped, cannot add more test steps!")
+    def start(self) -> None:
+        self._start_time = datetime.now()
+
+    def stop(self) -> None:
+        self._stop_time = datetime.now()
+
+    def is_started(self) -> bool:
+        return self._start_time is not None
+
+    def is_running(self) -> bool:
+        return self.start_time is not None and self._stop_time is None
+
+    def add_step(self, step_log: TestStepLog) -> None:
+        if self.is_running():
+            raise Exception("Test case is not running, cannot add more test steps!")
         self.steps_log.append(step_log)
 
     @property
@@ -33,9 +46,6 @@ class TestCase:
     def get_step_count(self, step: TestStep) -> int:
         """ Counts how many times the step is really called during whole history """
         return len(list(filter(lambda x: x.step.name == step.name is not None, self.steps_log)))
-
-    def stop(self) -> None:
-        self._stop_time = datetime.now()
 
     @property
     def start_time(self):

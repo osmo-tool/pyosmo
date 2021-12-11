@@ -1,6 +1,6 @@
 # pylint: disable=bare-except,broad-except
 import logging
-import time
+from datetime import datetime
 
 from pyosmo.config import OsmoConfig
 from pyosmo.history.history import OsmoHistory
@@ -39,12 +39,12 @@ class Osmo(OsmoConfig):
         :return:
         """
         logger.debug(f'Run step: {step}')
-        start_time = time.time()
+        start_time = datetime.now()
         try:
             step.execute()
-            self.history.add_step(step, time.time() - start_time)
+            self.history.add_step(step, datetime.now() - start_time)
         except Exception as error:
-            self.history.add_step(step, time.time() - start_time, error)
+            self.history.add_step(step, datetime.now() - start_time, error)
             raise error
 
     def run(self):
