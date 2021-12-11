@@ -4,6 +4,10 @@ from typing import List
 logger = logging.getLogger('osmo')
 
 
+class OsmoModel:
+    pass
+
+
 class ModelFunction:
     """ Generic function class containing basic functionality of model functions"""
 
@@ -73,7 +77,7 @@ class TestStep(ModelFunction):
         return None
 
 
-class OsmoModel:
+class OsmoModelCollector:
     """ The whole model that osmo has in "mind" which may contain multiple partial models """
 
     def __init__(self):

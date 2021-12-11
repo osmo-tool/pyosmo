@@ -3,7 +3,7 @@ from random import Random
 from typing import List
 
 from pyosmo.history.history import OsmoHistory
-from pyosmo.osmomodel import OsmoModel, TestStep
+from pyosmo.model import OsmoModelCollector, TestStep
 
 
 class OsmoAlgorithm:
@@ -13,7 +13,7 @@ class OsmoAlgorithm:
     def __init__(self):
         pass
 
-    def initialize(self, random: Random, model: OsmoModel):
+    def initialize(self, random: Random, model: OsmoModelCollector):
         """
         Initialize Osmo algorithm
         :param random: Used random

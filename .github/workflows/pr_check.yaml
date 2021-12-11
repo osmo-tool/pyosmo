@@ -27,7 +27,7 @@ jobs:
       - name: run pylint
         run: pylint *
       - name: run flake8
-        run: flake8 --max-line-length 120 --ignore=E722,F401
+        run: flake8 --max-line-length 120 --ignore=E722,F401,E402
       - name: Test with pytest
         run: |
           pytest pyosmo/tests/

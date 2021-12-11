@@ -4,7 +4,7 @@ from datetime import datetime
 
 from pyosmo.config import OsmoConfig
 from pyosmo.history.history import OsmoHistory
-from pyosmo.osmomodel import OsmoModel, TestStep
+from pyosmo.model import OsmoModelCollector, TestStep
 
 logger = logging.getLogger('osmo')
 
@@ -15,7 +15,7 @@ class Osmo(OsmoConfig):
     def __init__(self, model: object = None):
         """ Osmo need at least one model to work """
         super().__init__()
-        self.model = OsmoModel()
+        self.model = OsmoModelCollector()
         if model:
             self.add_model(model)
         self.history = OsmoHistory()

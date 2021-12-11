@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
 from pyosmo.history.history import OsmoHistory
-from pyosmo.osmomodel import OsmoModel
+from pyosmo.model import OsmoModelCollector
 
 
 class OsmoEndCondition:
@@ -10,9 +10,9 @@ class OsmoEndCondition:
     """
 
     @abstractmethod
-    def end_test(self, history: OsmoHistory, model: OsmoModel) -> bool:
+    def end_test(self, history: OsmoHistory, model: OsmoModelCollector) -> bool:
         raise Exception("This is not implemented!")
 
     @abstractmethod
-    def end_suite(self, history: OsmoHistory, model: OsmoModel) -> bool:
+    def end_suite(self, history: OsmoHistory, model: OsmoModelCollector) -> bool:
         raise Exception("This is not implemented!")

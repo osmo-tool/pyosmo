@@ -1,7 +1,7 @@
 from datetime import datetime
 from datetime import timedelta
 
-from pyosmo.osmomodel import TestStep
+from pyosmo.model import TestStep
 
 
 class TestStepLog:

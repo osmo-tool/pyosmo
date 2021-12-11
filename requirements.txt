@@ -1,3 +1,4 @@
 pytest
 pylint
 flake8
+click

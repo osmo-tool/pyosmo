@@ -17,7 +17,7 @@ def read(fname):
 
 
 setup(name='pyosmo',
-      version='0.1.1',
+      version='0.1.2',
       python_requires='>=3.8',
       description=DESCRIPTION,
       long_description=read('README.md'),
@@ -29,5 +29,7 @@ setup(name='pyosmo',
       packages=find_packages(include=["pyosmo", "pyosmo.*"]),
       include_package_data=True,
       license="MIT",
-      install_requires=[]
-      )
+      install_requires=['click'],
+      entry_points={
+          'console_scripts': ['pyosmo=pyosmo.main:pyosmo_cli'],
+      })
