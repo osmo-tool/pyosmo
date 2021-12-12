@@ -31,10 +31,7 @@ def test_always_ignore():
     osmo.test_suite_end_condition = Length(10)
     osmo.test_error_strategy = AlwaysIgnore()
     osmo.test_suite_error_strategy = AlwaysIgnore()
-    try:
-        osmo.generate()
-    except:
-        pass
+    osmo.generate()
     assert osmo.history.total_amount_of_steps == 10 * 100
 
 
