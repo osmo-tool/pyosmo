@@ -53,6 +53,7 @@ class Osmo(OsmoConfig):
 
     def generate(self):
         """ Generate / run tests """
+        self.history = OsmoHistory()
         logger.debug('Start generation..')
         logger.info(f'Using seed: {self.seed}')
         # Initialize algorithm
