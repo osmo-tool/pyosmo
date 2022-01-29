@@ -26,5 +26,4 @@ class WeightedBalancingAlgorithm(OsmoAlgorithm):
         history_normalized_weights = [float(i) / max(history_counts) for i in history_counts]
 
         total_weights = [a - b if a - b != 0 else 0.1 for (a, b) in zip(normalized_weights, history_normalized_weights)]
-        normalized_weights2 = [float(i) / max(total_weights) for i in total_weights]
-        return self.random.choices(choices, weights=normalized_weights2)[0]
+        return self.random.choices(choices, weights=total_weights)[0]
