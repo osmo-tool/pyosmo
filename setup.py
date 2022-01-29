@@ -17,7 +17,7 @@ def read(fname):
 
 
 setup(name='pyosmo',
-      version='0.1.2',
+      version='0.1.3',
       python_requires='>=3.8',
       description=DESCRIPTION,
       long_description=read('README.md'),
