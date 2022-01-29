@@ -46,8 +46,12 @@ class WeightTestModel2:
     def step_first(self):
         self.steps.append('step_first')
 
+    # Weight is 10 because of class basic weight
     def step_second(self):
         self.steps.append('step_second')
+
+    def step_third(self):
+        self.steps.append('step_third')
 
 
 def test_weighted_algorithm_class_default():
@@ -68,7 +72,8 @@ def test_weighted_algorithm_class_default():
 def test_weighted_balancing_algorithm_class_default():
     model = WeightTestModel2()
     osmo = Osmo(model)
-    osmo.test_end_condition = Length(1)
+    osmo.seed = 123
+    osmo.test_suite_end_condition = Length(1)
     osmo.test_end_condition = Length(100)
     osmo.algorithm = WeightedBalancingAlgorithm()
     osmo.generate()
