@@ -1,6 +1,6 @@
 # pylint: disable=no-self-use
 
-import pyosmo.models.osmo_model
+import pyosmo
 
 
 @pyosmo.weight(10)  # Set default weight for this class steps
