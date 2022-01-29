@@ -4,15 +4,29 @@
 
 A simple model-based testing (MBT) tool for python
 
-pyosmo is python version of OSMO tester
+Original OSMO tester can be found from: https://github.com/mukatee/osmo
 
-Original OSMO tester can be found here: https://github.com/mukatee/osmo
+## Motivation
 
-Idea of model based testing is described in [introduction](doc/introduction.md)
+Pyosmo is very useful tool when need to test system under testing logic very carefully or long time with automation.
+This tool maximises the MBT tool flexibility and power by using the the pure python code as modelling language.
+
+From traditional testing tools perspective pyosmo provides automated test case creation based on programmed model. In
+practise parametrized test cases (for
+example: [pytest parametrized fixtures](https://docs.pytest.org/en/6.2.x/parametrize.html))
+are providing a bit similar functionality than simple test model can do. With true model it is able to plan a lot more
+complex scenarions.
+
+From traditional [Model-based testing](https://en.wikipedia.org/wiki/Model-based_testing) tools perspective pyosmo is
+providing much more flexible modelling language and simple integration to the system under testing or test generator.
+Traditionally MBT tools have been using graphical modelling language which leads the stat explosion when test data is
+included to the model. In pyosmo the model is pure python. Then it is able to model anything that is able to code with
+python. All python libraries are helping the modelling work.
 
 ## Install
 
 using pip
+
 ```bash
 pip install pyosmo
 ```
@@ -27,10 +41,10 @@ python -m pip install -e .
 ## Example model
 
 ```python
-from pyosmo.osmo import Osmo
+import pyosmo
 
 
-class ExampleModel:
+class ExampleCalculatorModel:
 
     def __init__(self):
         print('starting')
@@ -44,20 +58,20 @@ class ExampleModel:
 
     def step_decrease(self):
         self._counter -= 1
-        print("- {}".format(self._counter))
+        print(f"- {self._counter}")
 
     def guard_increase(self):
         return self._counter < 100
 
     def step_increase(self):
         self._counter += 1
-        print("+ {}".format(self._counter))
+        print(f"+ {self._counter}")
 
 
 # Initialize Osmo with model
-osmo = Osmo(ExampleModel())
+osmo = pyosmo.Osmo(ExampleCalculatorModel())
 # Generate tests
-osmo.generate()
+osmo.run()
 ```
 
 # Select your approach
@@ -100,16 +114,14 @@ Cons:
 ## Regression testing
 
 ```python
-from pyosmo.osmo import Osmo
-from pyosmo.end_conditions import StepCoverage
-from pyosmo.end_conditions import Length
+import pyosmo
 
 # This ues same example model than defined above
-osmo = Osmo(ExampleModel())
+osmo = pyosmo.Osmo(ExampleCalculatorModel())
 # Make sure that osmo go trough whole model in every test case
-osmo.test_end_condition = StepCoverage(100)
+osmo.test_end_condition = pyosmo.end_conditions.StepCoverage(100)
 # Do some test cases, which test do not take too long
-osmo.test_suite_end_condition = Length(3)
+osmo.test_suite_end_condition = pyosmo.end_conditions.Length(3)
 # Give seed to make sure that test is same every time
 osmo.seed = 333
 # Run osmo
@@ -120,24 +132,25 @@ osmo.generate()
 
 ```python
 import datetime
-from pyosmo.osmo import Osmo
-from pyosmo.end_conditions import Time
+import pyosmo
 
-osmo = Osmo(ExampleModel())
+osmo = pyosmo.Osmo(ExampleCalculatorModel())
 # Run model for ten hours
-osmo.test_end_condition = Time(int(datetime.timedelta(hours=10).total_seconds()))
-osmo.test_suite_end_condition = Length(1)
+osmo.test_end_condition = pyosmo.end_conditions.Time(int(datetime.timedelta(hours=10).total_seconds()))
+osmo.test_suite_end_condition = pyosmo.end_conditions.Length(1)
 osmo.generate()
 ```
 
 ## Run with pytest
 
 ```python
+import pyosmo
+# You can use your existing fixtures normally
 def test_smoke():
-    osmo = Osmo(ExampleModel())
-    osmo.test_end_condition = Length(10)
-    osmo.test_suite_end_condition = Length(1)
-    osmo.algorithm = RandomAlgorithm()
+    osmo = pyosmo.Osmo(ExampleCalculatorModel())
+    osmo.test_end_condition = pyosmo.end_conditions.Length(10)
+    osmo.test_suite_end_condition = pyosmo.end_conditions.Length(1)
+    osmo.algorithm = pyosmo.algorithm.RandomAlgorithm()
     osmo.generate()
 ```
 
