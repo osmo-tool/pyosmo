@@ -4,10 +4,6 @@ from typing import List
 logger = logging.getLogger('osmo')
 
 
-class OsmoModel:
-    pass
-
-
 class ModelFunction:
     """ Generic function class containing basic functionality of model functions"""
 

@@ -17,25 +17,12 @@ class OsmoConfig:
 
     def __init__(self):
         self._seed = randint(0, 10000)  # pragma: no mutate
-        self._random = Random(self.seed)
+        self._random = Random(self._seed)
         self._algorithm = RandomAlgorithm()
         self._test_end_condition = Length(10)  # pragma: no mutate
         self._test_suite_end_condition = Length(1)  # pragma: no mutate
         self._test_error_strategy = AlwaysRaise()
         self._test_suite_error_strategy = AlwaysRaise()
-
-    @property
-    def seed(self) -> int:
-        return self._seed
-
-    @seed.setter
-    def seed(self, value: int):
-        """ Set test generation algorithm """
-        logger.debug(f'Set seed: {value}')
-        if not isinstance(value, int):
-            raise AttributeError("config needs to be OsmoConfig.")
-        self._seed = value
-        self._random = Random(self._seed)
 
     @property
     def random(self) -> Random:

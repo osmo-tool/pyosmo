@@ -1,6 +1,7 @@
 # pylint: disable=bare-except,broad-except
 import logging
 from datetime import datetime
+from random import Random
 
 from pyosmo.config import OsmoConfig
 from pyosmo.history.history import OsmoHistory
@@ -20,6 +21,22 @@ class Osmo(OsmoConfig):
             self.add_model(model)
         self.history = OsmoHistory()
 
+    @property
+    def seed(self) -> int:
+        return self._seed
+
+    @seed.setter
+    def seed(self, value: int):
+        """ Set test generation algorithm """
+        logger.debug(f'Set seed: {value}')
+        if not isinstance(value, int):
+            raise AttributeError("config needs to be OsmoConfig.")
+        self._seed = value
+        self._random = Random(self._seed)
+        # update osmo_random in all models
+        for model in self.model.sub_models:
+            model.osmo_random = self._random
+
     @staticmethod
     def _check_model(model: object):
         """ Check that model is valid"""
@@ -30,6 +47,8 @@ class Osmo(OsmoConfig):
         """ Add model for osmo """
         logger.debug(f'Add model:{model}')
         self._check_model(model)
+        # Set osmo_random
+        model.osmo_random = self._random
         self.model.add_model(model)
 
     def _run_step(self, step: TestStep):

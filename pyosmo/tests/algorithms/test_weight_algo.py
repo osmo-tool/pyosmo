@@ -53,7 +53,8 @@ class WeightTestModel2:
 def test_weighted_algorithm_class_default():
     model = WeightTestModel2()
     osmo = Osmo(model)
-    osmo.test_end_condition = Length(1)
+    osmo.seed = 123
+    osmo.test_suite_end_condition = Length(1)
     osmo.test_end_condition = Length(100)
     osmo.algorithm = WeightedAlgorithm()
     osmo.generate()
