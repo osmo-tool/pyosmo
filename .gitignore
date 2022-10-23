@@ -62,3 +62,5 @@ target/
 .mutmut*
 pyosmo/config.py.bak
 .pytest_cache
+
+.hypothesis
