@@ -1,8 +1,8 @@
 from datetime import datetime
 from datetime import timedelta
-from random import randint
 
-import pytest
+from hypothesis import given
+from hypothesis.strategies import integers
 
 from pyosmo import Osmo
 from pyosmo.end_conditions import Length, And, Or, StepCoverage, Time
@@ -19,8 +19,7 @@ class TempModel:
         self.counter += 1
 
 
-@pytest.mark.parametrize("steps", [randint(1, 100) for _ in range(2)])
-@pytest.mark.parametrize("tests", [randint(1, 10) for _ in range(2)])
+@given(steps=integers(1, 100), tests=integers(1, 10))
 def test_length_end_condition(steps, tests):
     model = TempModel()
     osmo = Osmo(model)

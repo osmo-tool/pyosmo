@@ -1,4 +1,4 @@
-# pylint: disable=no-self-use,bare-except,try-except-raise
+# pylint: disable=bare-except,try-except-raise
 
 from pyosmo import Osmo
 from pyosmo.algorithm import RandomAlgorithm

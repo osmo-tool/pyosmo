@@ -1,4 +1,4 @@
-# pylint: disable=bare-except,broad-except
+# pylint: disable=bare-except,broad-except,too-many-instance-attributes
 import logging
 from datetime import datetime
 from random import Random

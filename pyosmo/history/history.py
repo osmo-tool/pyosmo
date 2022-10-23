@@ -35,7 +35,7 @@ class OsmoHistory:
     @property
     def error_count(self):
         """ Total count of errors in all tests cases """
-        return sum([x.error_count for x in self.test_cases])
+        return sum(x.error_count for x in self.test_cases)
 
     @property
     def current_test_case(self) -> OsmoTestCaseRecord:
@@ -55,7 +55,7 @@ class OsmoHistory:
 
     @property
     def total_amount_of_steps(self):
-        return sum([len(tc.steps_log) for tc in self.test_cases])
+        return sum(len(tc.steps_log) for tc in self.test_cases)
 
     def is_used(self, step: TestStep) -> bool:
         """ is used at least once """
