@@ -8,7 +8,6 @@ class ExampleModel:
 
     def __init__(self):
         print('starting')
-        self._counter = 0
 
     def before_test(self):
         self._counter = 0
@@ -27,6 +26,8 @@ class ExampleModel:
         self._counter += 1
         print(f"+ {self._counter}")
 
+    def after_test(self):
+        print(f"end. counter={self._counter}")
 
 if __name__ == '__main__':
     # Initialize Osmo with model
