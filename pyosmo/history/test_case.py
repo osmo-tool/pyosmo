@@ -43,7 +43,7 @@ class OsmoTestCaseRecord:
 
     def get_step_count(self, step: TestStep) -> int:
         """ Counts how many times the step is really called during whole history """
-        return len(list(filter(lambda x: x.step.name == step.name is not None, self.steps_log)))
+        return len(list(filter(lambda x: x.step.name == step.name, self.steps_log)))
 
     @property
     def start_time(self):

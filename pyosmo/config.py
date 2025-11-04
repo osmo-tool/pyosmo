@@ -11,12 +11,15 @@ from pyosmo.error_strategy.base import OsmoErrorStrategy
 
 logger = logging.getLogger('osmo')
 
+# Default random seed range
+DEFAULT_SEED_MAX = 10000
+
 
 class OsmoConfig:
     """ Osmo run configuration object """
 
     def __init__(self):
-        self._seed = randint(0, 10000)  # pragma: no mutate
+        self._seed = randint(0, DEFAULT_SEED_MAX)  # pragma: no mutate
         self._random = Random(self._seed)
         self._algorithm = RandomAlgorithm()
         self._test_end_condition = Length(10)  # pragma: no mutate

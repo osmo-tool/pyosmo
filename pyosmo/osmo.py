@@ -11,10 +11,21 @@ logger = logging.getLogger('osmo')
 
 
 class Osmo(OsmoConfig):
-    """ Osmo tester core """
+    """
+    Osmo tester core - Model-Based Testing framework.
+
+    This class provides the main interface for configuring and running
+    model-based tests. It manages test execution, model collection,
+    and test history tracking.
+    """
 
     def __init__(self, model: object = None):
-        """ Osmo need at least one model to work """
+        """
+        Initialize Osmo with an optional model.
+
+        Args:
+            model: Optional model instance containing test steps and guards
+        """
         super().__init__()
         self.model = OsmoModelCollector()
         if model:
@@ -27,10 +38,10 @@ class Osmo(OsmoConfig):
 
     @seed.setter
     def seed(self, value: int):
-        """ Set test generation algorithm """
+        """ Set random seed for test generation """
         logger.debug(f'Set seed: {value}')
         if not isinstance(value, int):
-            raise AttributeError("config needs to be OsmoConfig.")
+            raise AttributeError("Seed value must be an integer.")
         self._seed = value
         self._random = Random(self._seed)
         # update osmo_random in all models
