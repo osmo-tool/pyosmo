@@ -14,14 +14,14 @@ class StepCoverage(OsmoEndCondition):
         self.coverage = coverage_percent / 100
 
     def end_test(self, history: OsmoHistory, model: OsmoModelCollector) -> bool:
-        """ Stops test case when defined number of test steps are executed """
+        """Stops test case when defined number of test steps are executed"""
         all_steps = len(list(model.all_steps))
         used_steps = sum(1 for s in model.all_steps if history.current_test_case.is_used(s))
         current_coverage = used_steps / all_steps
         return current_coverage >= self.coverage
 
     def end_suite(self, history: OsmoHistory, model: OsmoModelCollector) -> bool:
-        """ Stops test suite when defined number of test cases are executed """
+        """Stops test suite when defined number of test cases are executed"""
         all_steps = len(list(model.all_steps))
         used_steps = sum(1 for s in model.all_steps if history.current_test_case.is_used(s))
         current_coverage = used_steps / all_steps

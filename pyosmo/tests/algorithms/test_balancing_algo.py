@@ -1,5 +1,5 @@
 from pyosmo import Osmo
-from pyosmo.algorithm import BalancingRandomAlgorithm, BalancingAlgorithm
+from pyosmo.algorithm import BalancingAlgorithm, BalancingRandomAlgorithm
 from pyosmo.end_conditions import Length
 
 
@@ -7,14 +7,14 @@ class WeightTestModel:
     steps = []
 
     def step_first(self):
-        self.steps.append('step_first')
+        self.steps.append("step_first")
 
     # Available every second time, balancing algoritm need to handle this
     def guard_second(self):
         return len(self.steps) % 2 == 0
 
     def step_second(self):
-        self.steps.append('step_second')
+        self.steps.append("step_second")
 
 
 def test_balancing_random_algorithm():
@@ -31,7 +31,7 @@ def test_balancing_random_algorithm():
     difference = step_first_count - step_second_count
 
     # Difference is less than 20%
-    assert difference < steps_amount * .2
+    assert difference < steps_amount * 0.2
     # Still need to be some difference
     assert difference > 0
 

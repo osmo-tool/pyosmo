@@ -8,11 +8,11 @@ class WeightTestModel1:
 
     @weight(1)
     def step_first(self):
-        self.steps.append('step_first')
+        self.steps.append("step_first")
 
     @weight(2)
     def step_second(self):
-        self.steps.append('step_second')
+        self.steps.append("step_second")
 
     @staticmethod
     def weight_third():
@@ -20,7 +20,7 @@ class WeightTestModel1:
         return 3
 
     def step_third(self):
-        self.steps.append('step_third')
+        self.steps.append("step_third")
 
 
 def test_weighted_algorithm():
@@ -44,14 +44,14 @@ class WeightTestModel2:
 
     @weight(5)
     def step_first(self):
-        self.steps.append('step_first')
+        self.steps.append("step_first")
 
     # Weight is 10 because of class basic weight
     def step_second(self):
-        self.steps.append('step_second')
+        self.steps.append("step_second")
 
     def step_third(self):
-        self.steps.append('step_third')
+        self.steps.append("step_third")
 
 
 def test_weighted_algorithm2():

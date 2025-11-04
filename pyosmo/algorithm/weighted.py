@@ -6,14 +6,14 @@ from pyosmo.model import TestStep
 
 
 class WeightedAlgorithm(OsmoAlgorithm):
-    """ Weighted random algorithm """
+    """Weighted random algorithm"""
 
     def choose(self, history: OsmoHistory, choices: List[TestStep]) -> TestStep:
         return self.random.choices(choices, weights=[c.weight for c in choices])[0]
 
 
 class WeightedBalancingAlgorithm(OsmoAlgorithm):
-    """ Weighted algorithm which balances based on history """
+    """Weighted algorithm which balances based on history"""
 
     def choose(self, history: OsmoHistory, choices: List[TestStep]) -> TestStep:
         weights = [c.weight for c in choices]

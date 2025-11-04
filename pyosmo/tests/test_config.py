@@ -1,11 +1,12 @@
 # pylint: disable=bare-except,try-except-raise
+import contextlib
 
 from pyosmo import Osmo
 from pyosmo.algorithm import RandomAlgorithm
 from pyosmo.end_conditions import Length
 
 
-class TempException(Exception):
+class TempError(Exception):
     pass
 
 
@@ -16,7 +17,7 @@ class OneStepModel:
     def step_one(self):
         self.index += 1
         if self.index == 5:
-            raise TempException("Should happen!")
+            raise TempError("Should happen!")
 
 
 def test_exception_raise_effects():
@@ -24,11 +25,8 @@ def test_exception_raise_effects():
     osmo = Osmo(model)
     osmo.test_end_condition = Length(8)
     osmo.test_suite_end_condition = Length(1)
-    try:
+    with contextlib.suppress(TempError):
         osmo.generate()
-    except TempException:
-        # Osmo is raisin test exception so need to catch it here
-        pass
     assert model.index == 5
 
 

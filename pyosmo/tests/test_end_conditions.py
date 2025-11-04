@@ -1,11 +1,10 @@
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from hypothesis import given
 from hypothesis.strategies import integers
 
 from pyosmo import Osmo
-from pyosmo.end_conditions import Length, And, Or, StepCoverage, Time
+from pyosmo.end_conditions import And, Length, Or, StepCoverage, Time
 
 
 class TempModel:

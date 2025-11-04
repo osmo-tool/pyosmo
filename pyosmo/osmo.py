@@ -7,7 +7,7 @@ from pyosmo.config import OsmoConfig
 from pyosmo.history.history import OsmoHistory
 from pyosmo.model import OsmoModelCollector, TestStep
 
-logger = logging.getLogger('osmo')
+logger = logging.getLogger("osmo")
 
 
 class Osmo(OsmoConfig):
@@ -38,8 +38,8 @@ class Osmo(OsmoConfig):
 
     @seed.setter
     def seed(self, value: int):
-        """ Set random seed for test generation """
-        logger.debug(f'Set seed: {value}')
+        """Set random seed for test generation"""
+        logger.debug(f"Set seed: {value}")
         if not isinstance(value, int):
             raise AttributeError("Seed value must be an integer.")
         self._seed = value
@@ -50,13 +50,13 @@ class Osmo(OsmoConfig):
 
     @staticmethod
     def _check_model(model: object):
-        """ Check that model is valid"""
-        if not hasattr(model, '__class__'):
+        """Check that model is valid"""
+        if not hasattr(model, "__class__"):
             raise Exception("Osmo model need to be instance of model, not just class")
 
     def add_model(self, model: object):
-        """ Add model for osmo """
-        logger.debug(f'Add model:{model}')
+        """Add model for osmo"""
+        logger.debug(f"Add model:{model}")
         self._check_model(model)
         # Set osmo_random
         model.osmo_random = self._random
@@ -68,7 +68,7 @@ class Osmo(OsmoConfig):
         :param step: Test step
         :return:
         """
-        logger.debug(f'Run step: {step}')
+        logger.debug(f"Run step: {step}")
         start_time = datetime.now()
         try:
             step.execute()
@@ -78,44 +78,44 @@ class Osmo(OsmoConfig):
             raise error
 
     def run(self):
-        """ Same as generate but in online usage this sounds more natural"""
+        """Same as generate but in online usage this sounds more natural"""
         self.generate()
 
     def generate(self):
-        """ Generate / run tests """
+        """Generate / run tests"""
         self.history = OsmoHistory()  # Restart the history
-        logger.debug('Start generation..')
-        logger.info(f'Using seed: {self.seed}')
+        logger.debug("Start generation..")
+        logger.info(f"Using seed: {self.seed}")
         # Initialize algorithm
         self.algorithm.initialize(self.random, self.model)
 
-        self.model.execute_optional('before_suite')
+        self.model.execute_optional("before_suite")
         if not self.model.all_steps:
             raise Exception("Empty model!")
 
         while True:
             try:
                 self.history.start_new_test()
-                self.model.execute_optional('before_test')
+                self.model.execute_optional("before_test")
                 while True:
                     # Use algorithm to select the step
-                    self.model.execute_optional('before')
+                    self.model.execute_optional("before")
                     step = self.algorithm.choose(self.history, self.model.available_steps)
-                    self.model.execute_optional(f'pre_{step}')
+                    self.model.execute_optional(f"pre_{step}")
                     try:
                         self._run_step(step)
                     except BaseException as error:
                         self.test_error_strategy.failure_in_test(self.history, self.model, error)
-                    self.model.execute_optional(f'post_{step.name}')
+                    self.model.execute_optional(f"post_{step.name}")
                     # General after step which is run after each step
-                    self.model.execute_optional('after')
+                    self.model.execute_optional("after")
 
                     if self.test_end_condition.end_test(self.history, self.model):
                         break
-                self.model.execute_optional('after_test')
+                self.model.execute_optional("after_test")
             except BaseException as error:
                 self.test_suite_error_strategy.failure_in_suite(self.history, self.model, error)
             if self.test_suite_end_condition.end_suite(self.history, self.model):
                 break
-        self.model.execute_optional('after_suite')
+        self.model.execute_optional("after_suite")
         self.history.stop()

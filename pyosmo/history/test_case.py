@@ -31,18 +31,15 @@ class OsmoTestCaseRecord:
 
     @property
     def error_count(self) -> int:
-        """ How many errors happened during this test case """
+        """How many errors happened during this test case"""
         return len(list(filter(lambda x: x.error is not None, self.steps_log)))
 
     def is_used(self, step: TestStep) -> bool:
-        """ is used at least once """
-        for sl in self.steps_log:
-            if sl.step.name == step.name:
-                return True
-        return False
+        """is used at least once"""
+        return any(sl.step.name == step.name for sl in self.steps_log)
 
     def get_step_count(self, step: TestStep) -> int:
-        """ Counts how many times the step is really called during whole history """
+        """Counts how many times the step is really called during whole history"""
         return len(list(filter(lambda x: x.step.name == step.name, self.steps_log)))
 
     @property
