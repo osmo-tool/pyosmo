@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Optional, Iterator
 
 logger = logging.getLogger('osmo')
 
@@ -50,7 +50,7 @@ class TestStep(ModelFunction):
 
     @property
     def weight(self):
-        weight_function = self.return_function_if_exits(f'weight_{self.name}')
+        weight_function = self.return_function_if_exists(f'weight_{self.name}')
         if weight_function is not None:
             return float(weight_function.execute())
         if 'weight' in dir(self.func):
@@ -63,11 +63,12 @@ class TestStep(ModelFunction):
         return True if self.guard_function is None else self.guard_function.execute()
 
     @property
-    def guard_function(self):
-        """ return guard function if exists """
-        return self.return_function_if_exits(self.guard_name)
+    def guard_function(self) -> Optional['ModelFunction']:
+        """Return guard function if it exists, otherwise None."""
+        return self.return_function_if_exists(self.guard_name)
 
-    def return_function_if_exits(self, name):
+    def return_function_if_exists(self, name: str) -> Optional['ModelFunction']:
+        """Return ModelFunction if method exists in the model instance, otherwise None."""
         if name in dir(self.object_instance):
             return ModelFunction(name, self.object_instance)
         return None
@@ -82,11 +83,11 @@ class OsmoModelCollector:
         self.debug = False
 
     @property
-    def all_steps(self) -> iter:
+    def all_steps(self) -> Iterator[TestStep]:
         return (TestStep(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
                 hasattr(getattr(sub_model, f), '__call__') and f.startswith('step_'))
 
-    def get_step_by_name(self, name) -> TestStep:
+    def get_step_by_name(self, name: str) -> Optional[TestStep]:
         """ Get step by function name """
         steps = (TestStep(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
                  hasattr(getattr(sub_model, f), '__call__') and f == name)
@@ -94,7 +95,7 @@ class OsmoModelCollector:
             return step
         return None  # noqa
 
-    def functions_by_name(self, name: str) -> iter:
+    def functions_by_name(self, name: str) -> Iterator[ModelFunction]:
         return (ModelFunction(f, sub_model) for sub_model in self.sub_models for f in dir(sub_model) if
                 hasattr(getattr(sub_model, f), '__call__') and f == name)
 
