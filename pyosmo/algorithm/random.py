@@ -6,7 +6,7 @@ from pyosmo.model import TestStep
 
 
 class RandomAlgorithm(OsmoAlgorithm):
-    """ Fully random algorithm """
+    """Fully random algorithm"""
 
     def choose(self, history: OsmoHistory, choices: List[TestStep]) -> TestStep:
         return self.random.choice(choices)

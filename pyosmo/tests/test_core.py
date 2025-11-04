@@ -12,7 +12,7 @@ def test_empty_model():
     try:
         osmo = Osmo(EmptyTestModel())
         osmo.generate()
-    except:
+    except Exception:
         exception = True
 
     if not exception:
@@ -61,7 +61,7 @@ def test_guard():
     osmo.generate()
     for tc in osmo.history.test_cases:
         for step in tc.steps_log:
-            assert 'not' not in step.name
+            assert "not" not in step.name
 
 
 def test_split_model_with_same_name_functions():

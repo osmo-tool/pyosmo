@@ -16,11 +16,11 @@ class And(OsmoEndCondition, LogicalEndCondition):
     """
 
     def end_test(self, history: OsmoHistory, model: OsmoModelCollector) -> bool:
-        """ Stops test case when all end conditions are filled """
+        """Stops test case when all end conditions are filled"""
         return False not in (ec.end_test(history, model) for ec in self.endConditions)
 
     def end_suite(self, history: OsmoHistory, model: OsmoModelCollector) -> bool:
-        """ Stops test suite when all end conditions are filled """
+        """Stops test suite when all end conditions are filled"""
         return False not in (ec.end_suite(history, model) for ec in self.endConditions)
 
 
@@ -30,9 +30,9 @@ class Or(OsmoEndCondition, LogicalEndCondition):
     """
 
     def end_test(self, history: OsmoHistory, model: OsmoModelCollector) -> bool:
-        """ Stops test case when all end conditions are filled """
+        """Stops test case when all end conditions are filled"""
         return True in (ec.end_test(history, model) for ec in self.endConditions)
 
     def end_suite(self, history: OsmoHistory, model: OsmoModelCollector) -> bool:
-        """ Stops test suite when all end conditions are filled """
+        """Stops test suite when all end conditions are filled"""
         return True in (ec.end_suite(history, model) for ec in self.endConditions)
