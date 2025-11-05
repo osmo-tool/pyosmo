@@ -34,14 +34,25 @@ class ModelFunction:
 
 
 class TestStep(ModelFunction):
-    def __init__(self, function_name: str, object_instance: object) -> None:
-        assert function_name.startswith("step_"), "Wrong name function"
+    def __init__(
+        self,
+        function_name: str,
+        object_instance: object,
+        step_name: Optional[str] = None,
+        is_decorator_based: bool = False
+    ) -> None:
+        if not is_decorator_based:
+            assert function_name.startswith("step_"), "Wrong name function"
         super().__init__(function_name, object_instance)
+        self._step_name = step_name
+        self._is_decorator_based = is_decorator_based
 
     @property
     def name(self) -> str:
-        """name means the part after 'step_'"""
-        return self.function_name[5:]
+        """name means the part after 'step_' for naming convention or the explicit name for decorators"""
+        if self._step_name:
+            return self._step_name
+        return self.function_name[5:]  # Remove 'step_' prefix
 
     @property
     def guard_name(self) -> str:
@@ -49,16 +60,33 @@ class TestStep(ModelFunction):
 
     @property
     def weight(self) -> float:
+        # Check decorator-based weight first
+        if hasattr(self.func, '_osmo_weight') and self.func._osmo_weight is not None:  # type: ignore[attr-defined]
+            return float(self.func._osmo_weight)  # type: ignore[attr-defined]
+
+        # Check weight function (naming convention)
         weight_function = self.return_function_if_exists(f"weight_{self.name}")
         if weight_function is not None:
             return float(weight_function.execute())
+
+        # Check weight attribute (legacy decorator)
         if "weight" in dir(self.func):
             return float(self.func.weight)  # type: ignore[attr-defined]
+
         return self.default_weight  # Default value
 
     @property
     def is_available(self) -> bool:
         """Check if step is available right now"""
+        # Check if step is disabled by decorator
+        if hasattr(self.func, '_osmo_enabled') and not self.func._osmo_enabled:  # type: ignore[attr-defined]
+            return False
+
+        # Check for inline guard (decorator-based)
+        if hasattr(self.func, '_osmo_guard_inline'):  # type: ignore[attr-defined]
+            return bool(self.func(self.object_instance))  # type: ignore[attr-defined]
+
+        # Check for named guard function
         return True if self.guard_function is None else bool(self.guard_function.execute())
 
     @property
@@ -81,13 +109,31 @@ class OsmoModelCollector:
         self.sub_models: List[object] = []
         self.debug: bool = False
 
+    def _discover_steps(self, sub_model: object) -> Iterator[TestStep]:
+        """Discover steps using both naming convention and decorators."""
+        discovered_step_names = set()
+
+        # First, discover decorator-based steps
+        for attr_name in dir(sub_model):
+            method = getattr(sub_model, attr_name)
+            if callable(method) and hasattr(method, '_osmo_step'):
+                step_name = method._osmo_step_name  # type: ignore[attr-defined]
+                discovered_step_names.add(attr_name)
+                yield TestStep(attr_name, sub_model, step_name, is_decorator_based=True)
+
+        # Then, discover naming convention steps (skip if already found via decorator)
+        for attr_name in dir(sub_model):
+            if attr_name in discovered_step_names:
+                continue
+            if callable(getattr(sub_model, attr_name)) and attr_name.startswith("step_"):
+                yield TestStep(attr_name, sub_model)
+
     @property
     def all_steps(self) -> Iterator[TestStep]:
         return (
-            TestStep(f, sub_model)
+            step
             for sub_model in self.sub_models
-            for f in dir(sub_model)
-            if callable(getattr(sub_model, f)) and f.startswith("step_")
+            for step in self._discover_steps(sub_model)
         )
 
     def get_step_by_name(self, name: str) -> Optional[TestStep]:

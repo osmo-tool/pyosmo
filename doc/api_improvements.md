@@ -8,231 +8,18 @@ This document proposes concrete API improvements for pyosmo to enhance usability
 
 ## Table of Contents
 
-1. [Decorator-Based API](#1-decorator-based-api)
-2. [Requirements System](#2-requirements-system)
-3. [Coverage Tracking](#3-coverage-tracking)
-4. [Reporting API](#4-reporting-api)
-5. [Configuration API](#5-configuration-api)
-6. [History & Statistics API](#6-history--statistics-api)
-7. [Model Validation API](#7-model-validation-api)
-8. [Error Handling Improvements](#8-error-handling-improvements)
-9. [CLI Improvements](#9-cli-improvements)
+1. [Requirements System](#1-requirements-system)
+2. [Coverage Tracking](#2-coverage-tracking)
+3. [Reporting API](#3-reporting-api)
+4. [Configuration API](#4-configuration-api)
+5. [History & Statistics API](#5-history--statistics-api)
+6. [Model Validation API](#6-model-validation-api)
+7. [Error Handling Improvements](#7-error-handling-improvements)
+8. [CLI Improvements](#8-cli-improvements)
 
 ---
 
-## 1. Decorator-Based API
-
-### Rationale
-While naming conventions (step_*, guard_*) work, decorators provide:
-- Better IDE autocomplete and validation
-- Explicit declaration of intent
-- Metadata attachment (requirements, weights, etc.)
-- Runtime validation capabilities
-
-### Current State
-```python
-class Model:
-    def step_login(self): pass
-    def guard_login(self): return True
-    def weight_login(self): return 10
-```
-
-### Proposed Decorator API (Optional, Coexists with Naming Convention)
-
-#### 2.1 Core Decorators
-
-```python
-from pyosmo.decorators import step, guard, weight, pre, post
-
-class Model:
-    @step("login")  # Explicit step name
-    @guard(lambda self: not self.logged_in)  # Inline guard
-    @weight(10)  # Constant weight
-    def user_login(self):  # Method name doesn't need prefix
-        """Log in the user."""
-        self.logged_in = True
-
-    @step
-    def logout(self):  # Name inferred from method name
-        """Log out the user."""
-        self.logged_in = False
-
-    @guard("logout")  # Attach guard to specific step
-    def must_be_logged_in(self) -> bool:
-        return self.logged_in
-
-    @pre("login")  # Pre-step hook
-    def before_login(self):
-        print("About to log in")
-
-    @post("login")  # Post-step hook
-    def after_login(self):
-        print("Logged in successfully")
-```
-
-#### 2.2 Metadata Decorators
-
-```python
-from pyosmo.decorators import requires, variable, state
-
-class ShoppingModel:
-    @step
-    @requires("REQ-101", "REQ-102")  # Requirements traceability
-    def checkout(self):
-        """Complete checkout process."""
-        pass
-
-    @step
-    @variable("cart_size", categories=["empty", "small", "large"])
-    def add_to_cart(self):
-        """Add item to cart."""
-        self.cart.append(Item())
-
-    @state  # Mark as state-providing function
-    def get_state(self) -> str:
-        """Return current model state."""
-        return f"cart={len(self.cart)},user={self.user_id}"
-```
-
-#### 2.3 Decorator Implementation
-
-```python
-# pyosmo/decorators.py enhancements
-from functools import wraps
-from typing import Callable, Optional, List, Union
-
-class StepDecorator:
-    """Decorator for marking test steps."""
-
-    def __init__(
-        self,
-        name: Optional[str] = None,
-        *,
-        weight: Optional[Union[int, float]] = None,
-        enabled: bool = True
-    ):
-        self.name = name
-        self.weight = weight
-        self.enabled = enabled
-
-    def __call__(self, func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-
-        # Attach metadata
-        wrapper._osmo_step = True
-        wrapper._osmo_step_name = self.name or func.__name__
-        wrapper._osmo_weight = self.weight
-        wrapper._osmo_enabled = self.enabled
-
-        return wrapper
-
-def step(
-    name_or_func: Optional[Union[str, Callable]] = None,
-    *,
-    weight: Optional[Union[int, float]] = None,
-    enabled: bool = True
-) -> Union[Callable, StepDecorator]:
-    """Mark a method as a test step.
-
-    Can be used with or without arguments:
-
-        @step
-        def my_step(self): pass
-
-        @step("custom_name")
-        def my_step(self): pass
-
-        @step(weight=10, enabled=False)
-        def my_step(self): pass
-
-    Args:
-        name_or_func: Step name or function (for no-arg usage)
-        weight: Static weight for this step
-        enabled: Whether step is enabled
-
-    Returns:
-        Decorated function or decorator
-    """
-    if callable(name_or_func):
-        # Used without arguments: @step
-        return StepDecorator()(name_or_func)
-    else:
-        # Used with arguments: @step("name")
-        return StepDecorator(name_or_func, weight=weight, enabled=enabled)
-
-
-def guard(
-    step_name_or_func: Union[str, Callable],
-    *,
-    invert: bool = False
-) -> Callable:
-    """Mark a method as a guard for a step.
-
-    Can be used as inline lambda or separate method:
-
-        @step
-        @guard(lambda self: self.ready)
-        def process(self): pass
-
-        @guard("process")
-        def can_process(self) -> bool:
-            return self.ready
-
-    Args:
-        step_name_or_func: Step name or guard function
-        invert: Invert guard logic (step enabled when False)
-
-    Returns:
-        Decorated function
-    """
-    if callable(step_name_or_func):
-        # Inline guard
-        func = step_name_or_func
-        func._osmo_guard_inline = True
-        func._osmo_guard_invert = invert
-        return func
-    else:
-        # Named guard
-        def decorator(func: Callable) -> Callable:
-            func._osmo_guard = True
-            func._osmo_guard_for = step_name_or_func
-            func._osmo_guard_invert = invert
-            return func
-        return decorator
-```
-
-#### 2.4 Backward Compatibility
-
-```python
-# pyosmo/model.py - Enhanced to support both styles
-class OsmoModelCollector:
-    def _discover_steps(self, model: object) -> List[TestStep]:
-        """Discover steps using both naming convention and decorators."""
-        steps = []
-
-        for name in dir(model):
-            method = getattr(model, name)
-
-            # Check decorator-based steps
-            if hasattr(method, '_osmo_step'):
-                step_name = method._osmo_step_name
-                steps.append(self._create_step_from_decorator(model, method, step_name))
-
-            # Check naming convention (backward compatible)
-            elif name.startswith('step_'):
-                step_name = name[5:]  # Remove 'step_' prefix
-                steps.append(self._create_step_from_naming(model, method, step_name))
-
-        return steps
-```
-
-**Implementation Priority**: P2 (Phase 2, Week 4-5)
-
----
-
-## 2. Requirements System
+## 1. Requirements System
 
 ### Proposed API
 
@@ -353,7 +140,7 @@ class RequirementManager:
 
 ---
 
-## 3. Coverage Tracking
+## 2. Coverage Tracking
 
 ### 4.1 State Coverage
 
@@ -432,7 +219,7 @@ osmo.test_end_condition = StepPairCoverage(percentage=90)
 
 ---
 
-## 4. Reporting API
+## 3. Reporting API
 
 ### Proposed Unified Reporting Interface
 
@@ -576,7 +363,7 @@ class HTMLReporter(Reporter):
 
 ---
 
-## 5. Configuration API
+## 4. Configuration API
 
 ### Current Issues
 - Verbose configuration
@@ -660,7 +447,7 @@ osmo.run()
 
 ---
 
-## 6. History & Statistics API
+## 5. History & Statistics API
 
 ### Current Issues
 - Statistics returned as formatted strings
@@ -733,7 +520,7 @@ req_timeline = osmo.history.requirement_coverage_timeline()
 
 ---
 
-## 7. Model Validation API
+## 6. Model Validation API
 
 ### Proposed Static Analysis
 
@@ -810,7 +597,7 @@ pyosmo validate mymodel.py
 
 ---
 
-## 8. Error Handling Improvements
+## 7. Error Handling Improvements
 
 ### Current Issues
 - Bare `except:` clauses
@@ -906,7 +693,7 @@ raise StepExecutionError(
 
 ---
 
-## 9. CLI Improvements
+## 8. CLI Improvements
 
 ### Current Issues
 - Limited commands
@@ -984,7 +771,6 @@ def validate(model_file: str, strict: bool, fix: bool):
 
 | Improvement Area | Priority | Effort | Impact | Phase |
 |------------------|----------|--------|--------|-------|
-| Decorator API | P2 | 1 week | Medium | 2 |
 | Requirements System | P1 | 2 weeks | High | 2 |
 | Coverage Tracking | P1 | 2 weeks | High | 2 |
 | Reporting API | P1 | 1 week | High | 2 |
@@ -994,7 +780,7 @@ def validate(model_file: str, strict: bool, fix: bool):
 | Error Handling | P2 | 3 days | Medium | 3 |
 | CLI Improvements | P2 | 3 days | Medium | 3 |
 
-**Total Estimated Effort**: 8-9 weeks
+**Total Estimated Effort**: 7-8 weeks
 
 ---
 
@@ -1004,13 +790,12 @@ def validate(model_file: str, strict: bool, fix: bool):
 
 All improvements maintain backward compatibility:
 
-1. **Decorators**: Optional, naming convention still works
-2. **Requirements**: New feature, doesn't affect existing code
-3. **Coverage**: Enhanced tracking, doesn't break existing code
-4. **Reporting**: New API, old methods still work
-5. **Configuration**: New fluent API alongside old property setting
-6. **History**: Enhanced API, old methods deprecated with warnings
-7. **CLI**: New commands, old usage still works
+1. **Requirements**: New feature, doesn't affect existing code
+2. **Coverage**: Enhanced tracking, doesn't break existing code
+3. **Reporting**: New API, old methods still work
+4. **Configuration**: New fluent API alongside old property setting
+5. **History**: Enhanced API, old methods deprecated with warnings
+6. **CLI**: New commands, old usage still works
 
 ### Deprecation Timeline
 
