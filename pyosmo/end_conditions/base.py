@@ -1,10 +1,10 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 from pyosmo.history.history import OsmoHistory
 from pyosmo.model import OsmoModelCollector
 
 
-class OsmoEndCondition:
+class OsmoEndCondition(ABC):
     """
     Abstract end condition class
     """

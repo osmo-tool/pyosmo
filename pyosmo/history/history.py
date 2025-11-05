@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from typing import List, Optional
 
 from pyosmo.history.test_case import OsmoTestCaseRecord
 from pyosmo.history.test_step_log import TestStepLog
@@ -6,12 +7,12 @@ from pyosmo.model import TestStep
 
 
 class OsmoHistory:
-    def __init__(self):
-        self.test_cases = []
-        self.stop_time = None
-        self.start_time = datetime.now()
+    def __init__(self) -> None:
+        self.test_cases: List[OsmoTestCaseRecord] = []
+        self.stop_time: Optional[datetime] = None
+        self.start_time: datetime = datetime.now()
 
-    def start_new_test(self):
+    def start_new_test(self) -> None:
         # Stop test case timer
         if self.current_test_case and self.current_test_case.is_running:
             self.current_test_case.stop()
@@ -25,47 +26,47 @@ class OsmoHistory:
             self.current_test_case.stop()
         self.stop_time = datetime.now()
 
-    def add_step(self, step: TestStep, duration: timedelta, error: Exception = None):
+    def add_step(self, step: TestStep, duration: timedelta, error: Optional[Exception] = None) -> None:
         """Add a step to the history"""
         if self.current_test_case is None:
             raise Exception("There is no active test case!!")
         self.current_test_case.add_step(TestStepLog(step, duration, error))
 
     @property
-    def error_count(self):
+    def error_count(self) -> int:
         """Total count of errors in all tests cases"""
         return sum(x.error_count for x in self.test_cases)
 
     @property
-    def current_test_case(self) -> OsmoTestCaseRecord:
+    def current_test_case(self) -> Optional[OsmoTestCaseRecord]:
         """The test case which is running or generating at the moment"""
         return self.test_cases[-1] if self.test_cases else None
 
     @property
-    def duration(self):
+    def duration(self) -> timedelta:
         if self.stop_time is None:
             # Test is still running
             return datetime.now() - self.start_time
         return self.stop_time - self.start_time
 
     @property
-    def test_case_count(self):
+    def test_case_count(self) -> int:
         return len(self.test_cases)
 
     @property
-    def total_amount_of_steps(self):
+    def total_amount_of_steps(self) -> int:
         return sum(len(tc.steps_log) for tc in self.test_cases)
 
     def is_used(self, step: TestStep) -> bool:
         """is used at least once"""
         return any(tc.is_used(step) for tc in self.test_cases)
 
-    def get_step_count(self, step: TestStep):
+    def get_step_count(self, step: TestStep) -> int:
         """Counts how many times the step is really called during whole history"""
         return sum(test_case.get_step_count(step) for test_case in self.test_cases)
 
     @property
-    def step_stats(self):
+    def step_stats(self) -> str:
         stats = {}
         ret = ""
         for test_case in self.test_cases:
@@ -78,7 +79,7 @@ class OsmoHistory:
             ret += f"{key}:{value}\n"
         return ret
 
-    def print_summary(self):
+    def print_summary(self) -> None:
         if self.stop_time is None:
             raise Exception("Cannot get summary of ongoing test")
         ret = "\n"
@@ -88,7 +89,7 @@ class OsmoHistory:
         ret += f"Duration: {self.duration}\n"
         print(ret)
 
-    def __str__(self):
+    def __str__(self) -> str:
         ret = ""
         for tc_index, test_case in enumerate(self.test_cases, start=1):
             ret += f"{tc_index}. test case {test_case.duration:.2f}s\n"

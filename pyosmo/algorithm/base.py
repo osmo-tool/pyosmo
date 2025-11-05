@@ -1,19 +1,20 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from random import Random
-from typing import List
+from typing import List, Optional
 
 from pyosmo.history.history import OsmoHistory
 from pyosmo.model import OsmoModelCollector, TestStep
 
 
-class OsmoAlgorithm:
-    random = None
-    model = None
+class OsmoAlgorithm(ABC):
+    random: Optional[Random]
+    model: Optional[OsmoModelCollector]
 
-    def __init__(self):
-        pass
+    def __init__(self) -> None:
+        self.random = None
+        self.model = None
 
-    def initialize(self, random: Random, model: OsmoModelCollector):
+    def initialize(self, random: Random, model: OsmoModelCollector) -> None:
         """
         Initialize Osmo algorithm
         :param random: Used random

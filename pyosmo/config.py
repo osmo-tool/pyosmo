@@ -18,14 +18,14 @@ DEFAULT_SEED_MAX = 10000
 class OsmoConfig:
     """Osmo run configuration object"""
 
-    def __init__(self):
-        self._seed = randint(0, DEFAULT_SEED_MAX)  # pragma: no mutate
-        self._random = Random(self._seed)
-        self._algorithm = RandomAlgorithm()
-        self._test_end_condition = Length(10)  # pragma: no mutate
-        self._test_suite_end_condition = Length(1)  # pragma: no mutate
-        self._test_error_strategy = AlwaysRaise()
-        self._test_suite_error_strategy = AlwaysRaise()
+    def __init__(self) -> None:
+        self._seed: int = randint(0, DEFAULT_SEED_MAX)  # pragma: no mutate
+        self._random: Random = Random(self._seed)
+        self._algorithm: OsmoAlgorithm = RandomAlgorithm()
+        self._test_end_condition: OsmoEndCondition = Length(10)  # pragma: no mutate
+        self._test_suite_end_condition: OsmoEndCondition = Length(1)  # pragma: no mutate
+        self._test_error_strategy: OsmoErrorStrategy = AlwaysRaise()
+        self._test_suite_error_strategy: OsmoErrorStrategy = AlwaysRaise()
 
     @property
     def random(self) -> Random:

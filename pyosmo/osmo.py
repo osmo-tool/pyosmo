@@ -1,7 +1,8 @@
 # pylint: disable=bare-except,broad-except,too-many-instance-attributes
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from random import Random
+from typing import Optional, Union, List
 
 from pyosmo.config import OsmoConfig
 from pyosmo.history.history import OsmoHistory
@@ -19,17 +20,21 @@ class Osmo(OsmoConfig):
     and test history tracking.
     """
 
-    def __init__(self, model: object = None):
+    def __init__(self, model: Optional[Union[object, List[object]]] = None) -> None:
         """
         Initialize Osmo with an optional model.
 
         Args:
-            model: Optional model instance containing test steps and guards
+            model: Optional model instance or list of model instances containing test steps and guards
         """
         super().__init__()
         self.model = OsmoModelCollector()
         if model:
-            self.add_model(model)
+            if isinstance(model, list):
+                for m in model:
+                    self.add_model(m)
+            else:
+                self.add_model(model)
         self.history = OsmoHistory()
 
     @property
@@ -37,7 +42,7 @@ class Osmo(OsmoConfig):
         return self._seed
 
     @seed.setter
-    def seed(self, value: int):
+    def seed(self, value: int) -> None:
         """Set random seed for test generation"""
         logger.debug(f"Set seed: {value}")
         if not isinstance(value, int):
@@ -46,23 +51,23 @@ class Osmo(OsmoConfig):
         self._random = Random(self._seed)
         # update osmo_random in all models
         for model in self.model.sub_models:
-            model.osmo_random = self._random
+            model.osmo_random = self._random  # type: ignore[attr-defined]
 
     @staticmethod
-    def _check_model(model: object):
+    def _check_model(model: object) -> None:
         """Check that model is valid"""
         if not hasattr(model, "__class__"):
             raise Exception("Osmo model need to be instance of model, not just class")
 
-    def add_model(self, model: object):
+    def add_model(self, model: object) -> None:
         """Add model for osmo"""
         logger.debug(f"Add model:{model}")
         self._check_model(model)
         # Set osmo_random
-        model.osmo_random = self._random
+        model.osmo_random = self._random  # type: ignore[attr-defined]
         self.model.add_model(model)
 
-    def _run_step(self, step: TestStep):
+    def _run_step(self, step: TestStep) -> None:
         """
         Run step and save it to the history
         :param step: Test step
@@ -77,11 +82,11 @@ class Osmo(OsmoConfig):
             self.history.add_step(step, datetime.now() - start_time, error)
             raise error
 
-    def run(self):
+    def run(self) -> None:
         """Same as generate but in online usage this sounds more natural"""
         self.generate()
 
-    def generate(self):
+    def generate(self) -> None:
         """Generate / run tests"""
         self.history = OsmoHistory()  # Restart the history
         logger.debug("Start generation..")

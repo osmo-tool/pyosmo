@@ -8,137 +8,19 @@ This document proposes concrete API improvements for pyosmo to enhance usability
 
 ## Table of Contents
 
-1. [Type Hints & Type Safety](#1-type-hints--type-safety)
-2. [Decorator-Based API](#2-decorator-based-api)
-3. [Requirements System](#3-requirements-system)
-4. [Coverage Tracking](#4-coverage-tracking)
-5. [Reporting API](#5-reporting-api)
-6. [Configuration API](#6-configuration-api)
-7. [History & Statistics API](#7-history--statistics-api)
-8. [Model Validation API](#8-model-validation-api)
-9. [Error Handling Improvements](#9-error-handling-improvements)
-10. [CLI Improvements](#10-cli-improvements)
+1. [Decorator-Based API](#1-decorator-based-api)
+2. [Requirements System](#2-requirements-system)
+3. [Coverage Tracking](#3-coverage-tracking)
+4. [Reporting API](#4-reporting-api)
+5. [Configuration API](#5-configuration-api)
+6. [History & Statistics API](#6-history--statistics-api)
+7. [Model Validation API](#7-model-validation-api)
+8. [Error Handling Improvements](#8-error-handling-improvements)
+9. [CLI Improvements](#9-cli-improvements)
 
 ---
 
-## 1. Type Hints & Type Safety
-
-### Current State
-```python
-# Current: No type hints
-def step_increase(self):
-    self._counter += 1
-```
-
-### Proposed Improvements
-
-#### 1.1 Core API Type Hints
-
-```python
-from typing import Protocol, Callable, Optional, Union, List, Dict, Any
-from typing_extensions import TypeAlias
-
-# Type aliases for clarity
-StepFunction: TypeAlias = Callable[[], None]
-GuardFunction: TypeAlias = Callable[[], bool]
-WeightFunction: TypeAlias = Callable[[], Union[int, float]]
-StateFunction: TypeAlias = Callable[[], str]
-
-# Protocol for models (structural typing)
-class OsmoModelProtocol(Protocol):
-    """Protocol defining the structure of an OSMO model."""
-
-    def before_test(self) -> None:
-        """Called before each test case starts."""
-        ...
-
-    def after_test(self) -> None:
-        """Called after each test case completes."""
-        ...
-
-# Osmo class with full type hints
-class Osmo:
-    def __init__(
-        self,
-        model: Union[object, List[object]],
-        *,
-        seed: Optional[int] = None,
-        algorithm: Optional[Algorithm] = None
-    ) -> None:
-        """Initialize OSMO test generator.
-
-        Args:
-            model: Test model instance or list of model instances
-            seed: Random seed for reproducible test generation
-            algorithm: Test generation algorithm (default: RandomAlgorithm)
-        """
-        ...
-
-    def run(self, max_iterations: int = 1000) -> OsmoHistory:
-        """Run test generation.
-
-        Args:
-            max_iterations: Maximum iterations to prevent infinite loops
-
-        Returns:
-            Test execution history
-
-        Raises:
-            ModelExecutionError: If model execution fails
-            EndConditionError: If end condition cannot be evaluated
-        """
-        ...
-```
-
-#### 1.2 Generic Types for Extensibility
-
-```python
-from typing import TypeVar, Generic
-
-T = TypeVar('T')
-
-class EndCondition(Generic[T], ABC):
-    """Base class for end conditions.
-
-    Type parameter T represents the type of state this condition tracks.
-    """
-
-    @abstractmethod
-    def should_end(self, history: OsmoHistory, context: T) -> bool:
-        """Check if testing should stop.
-
-        Args:
-            history: Current test execution history
-            context: Type-specific context for evaluation
-
-        Returns:
-            True if testing should stop, False otherwise
-        """
-        ...
-```
-
-#### 1.3 Strict Type Checking Configuration
-
-```python
-# pyproject.toml additions
-[tool.mypy]
-python_version = "3.11"
-strict = true
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_any_generics = true
-
-[[tool.mypy.overrides]]
-module = "pyosmo.tests.*"
-disallow_untyped_defs = false  # More lenient in tests
-```
-
-**Implementation Priority**: P1 (Phase 1, Week 2-3)
-
----
-
-## 2. Decorator-Based API
+## 1. Decorator-Based API
 
 ### Rationale
 While naming conventions (step_*, guard_*) work, decorators provide:
@@ -350,7 +232,7 @@ class OsmoModelCollector:
 
 ---
 
-## 3. Requirements System
+## 2. Requirements System
 
 ### Proposed API
 
@@ -471,7 +353,7 @@ class RequirementManager:
 
 ---
 
-## 4. Coverage Tracking
+## 3. Coverage Tracking
 
 ### 4.1 State Coverage
 
@@ -550,7 +432,7 @@ osmo.test_end_condition = StepPairCoverage(percentage=90)
 
 ---
 
-## 5. Reporting API
+## 4. Reporting API
 
 ### Proposed Unified Reporting Interface
 
@@ -694,7 +576,7 @@ class HTMLReporter(Reporter):
 
 ---
 
-## 6. Configuration API
+## 5. Configuration API
 
 ### Current Issues
 - Verbose configuration
@@ -778,7 +660,7 @@ osmo.run()
 
 ---
 
-## 7. History & Statistics API
+## 6. History & Statistics API
 
 ### Current Issues
 - Statistics returned as formatted strings
@@ -851,7 +733,7 @@ req_timeline = osmo.history.requirement_coverage_timeline()
 
 ---
 
-## 8. Model Validation API
+## 7. Model Validation API
 
 ### Proposed Static Analysis
 
@@ -928,7 +810,7 @@ pyosmo validate mymodel.py
 
 ---
 
-## 9. Error Handling Improvements
+## 8. Error Handling Improvements
 
 ### Current Issues
 - Bare `except:` clauses
@@ -1024,7 +906,7 @@ raise StepExecutionError(
 
 ---
 
-## 10. CLI Improvements
+## 9. CLI Improvements
 
 ### Current Issues
 - Limited commands
@@ -1102,7 +984,6 @@ def validate(model_file: str, strict: bool, fix: bool):
 
 | Improvement Area | Priority | Effort | Impact | Phase |
 |------------------|----------|--------|--------|-------|
-| Type Hints | P1 | 1 week | High | 1 |
 | Decorator API | P2 | 1 week | Medium | 2 |
 | Requirements System | P1 | 2 weeks | High | 2 |
 | Coverage Tracking | P1 | 2 weeks | High | 2 |
@@ -1113,7 +994,7 @@ def validate(model_file: str, strict: bool, fix: bool):
 | Error Handling | P2 | 3 days | Medium | 3 |
 | CLI Improvements | P2 | 3 days | Medium | 3 |
 
-**Total Estimated Effort**: 9-10 weeks
+**Total Estimated Effort**: 8-9 weeks
 
 ---
 
@@ -1123,14 +1004,13 @@ def validate(model_file: str, strict: bool, fix: bool):
 
 All improvements maintain backward compatibility:
 
-1. **Type Hints**: No breaking changes, purely additive
-2. **Decorators**: Optional, naming convention still works
-3. **Requirements**: New feature, doesn't affect existing code
-4. **Coverage**: Enhanced tracking, doesn't break existing code
-5. **Reporting**: New API, old methods still work
-6. **Configuration**: New fluent API alongside old property setting
-7. **History**: Enhanced API, old methods deprecated with warnings
-8. **CLI**: New commands, old usage still works
+1. **Decorators**: Optional, naming convention still works
+2. **Requirements**: New feature, doesn't affect existing code
+3. **Coverage**: Enhanced tracking, doesn't break existing code
+4. **Reporting**: New API, old methods still work
+5. **Configuration**: New fluent API alongside old property setting
+6. **History**: Enhanced API, old methods deprecated with warnings
+7. **CLI**: New commands, old usage still works
 
 ### Deprecation Timeline
 
