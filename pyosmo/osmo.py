@@ -124,3 +124,252 @@ class Osmo(OsmoConfig):
                 break
         self.model.execute_optional("after_suite")
         self.history.stop()
+
+    # Fluent Configuration API
+
+    def with_seed(self, seed: int) -> "Osmo":
+        """
+        Set random seed for test generation (fluent API).
+
+        Args:
+            seed: Random seed value
+
+        Returns:
+            Self for method chaining
+        """
+        self.seed = seed
+        return self
+
+    def with_algorithm(self, algorithm: "OsmoAlgorithm") -> "Osmo":
+        """
+        Set test generation algorithm (fluent API).
+
+        Args:
+            algorithm: Algorithm instance
+
+        Returns:
+            Self for method chaining
+        """
+        self.algorithm = algorithm
+        return self
+
+    def with_test_end_condition(self, condition: "OsmoEndCondition") -> "Osmo":
+        """
+        Set test end condition (fluent API).
+
+        Args:
+            condition: End condition instance
+
+        Returns:
+            Self for method chaining
+        """
+        self.test_end_condition = condition
+        return self
+
+    def with_suite_end_condition(self, condition: "OsmoEndCondition") -> "Osmo":
+        """
+        Set test suite end condition (fluent API).
+
+        Args:
+            condition: End condition instance
+
+        Returns:
+            Self for method chaining
+        """
+        self.test_suite_end_condition = condition
+        return self
+
+    def on_error(self, strategy: "OsmoErrorStrategy") -> "Osmo":
+        """
+        Set error handling strategy for both test and suite levels (fluent API).
+
+        Args:
+            strategy: Error strategy instance
+
+        Returns:
+            Self for method chaining
+        """
+        self.test_error_strategy = strategy
+        self.test_suite_error_strategy = strategy
+        return self
+
+    def on_test_error(self, strategy: "OsmoErrorStrategy") -> "Osmo":
+        """
+        Set error handling strategy for test level (fluent API).
+
+        Args:
+            strategy: Error strategy instance
+
+        Returns:
+            Self for method chaining
+        """
+        self.test_error_strategy = strategy
+        return self
+
+    def on_suite_error(self, strategy: "OsmoErrorStrategy") -> "Osmo":
+        """
+        Set error handling strategy for suite level (fluent API).
+
+        Args:
+            strategy: Error strategy instance
+
+        Returns:
+            Self for method chaining
+        """
+        self.test_suite_error_strategy = strategy
+        return self
+
+    def build(self) -> "Osmo":
+        """
+        Finalize configuration and return the Osmo instance (fluent API).
+
+        This method exists for API consistency and simply returns self.
+        It can be used as the final call in a fluent chain.
+
+        Returns:
+            Self
+        """
+        return self
+
+    # Convenience fluent methods (more fluent API)
+
+    def random_algorithm(self, seed: Optional[int] = None) -> "Osmo":
+        """
+        Use random algorithm with optional seed (convenience fluent API).
+
+        Args:
+            seed: Optional random seed. If provided, also sets the seed.
+
+        Returns:
+            Self for method chaining
+        """
+        from pyosmo.algorithm import RandomAlgorithm
+        self.algorithm = RandomAlgorithm()
+        if seed is not None:
+            self.seed = seed
+        return self
+
+    def balancing_algorithm(self, seed: Optional[int] = None) -> "Osmo":
+        """
+        Use balancing algorithm with optional seed (convenience fluent API).
+
+        Args:
+            seed: Optional random seed. If provided, also sets the seed.
+
+        Returns:
+            Self for method chaining
+        """
+        from pyosmo.algorithm import BalancingAlgorithm
+        self.algorithm = BalancingAlgorithm()
+        if seed is not None:
+            self.seed = seed
+        return self
+
+    def weighted_algorithm(self, seed: Optional[int] = None) -> "Osmo":
+        """
+        Use weighted algorithm with optional seed (convenience fluent API).
+
+        Args:
+            seed: Optional random seed. If provided, also sets the seed.
+
+        Returns:
+            Self for method chaining
+        """
+        from pyosmo.algorithm import WeightedAlgorithm
+        self.algorithm = WeightedAlgorithm()
+        if seed is not None:
+            self.seed = seed
+        return self
+
+    def stop_after_steps(self, steps: int) -> "Osmo":
+        """
+        Stop each test after N steps (convenience fluent API).
+
+        Args:
+            steps: Number of steps per test
+
+        Returns:
+            Self for method chaining
+        """
+        from pyosmo.end_conditions import Length
+        self.test_end_condition = Length(steps)
+        return self
+
+    def stop_after_time(self, seconds: int) -> "Osmo":
+        """
+        Stop each test after N seconds (convenience fluent API).
+
+        Args:
+            seconds: Maximum test duration in seconds
+
+        Returns:
+            Self for method chaining
+        """
+        from pyosmo.end_conditions import Time
+        self.test_end_condition = Time(timedelta(seconds=seconds))
+        return self
+
+    def run_tests(self, count: int) -> "Osmo":
+        """
+        Run N tests in the suite (convenience fluent API).
+
+        Args:
+            count: Number of tests to run
+
+        Returns:
+            Self for method chaining
+        """
+        from pyosmo.end_conditions import Length
+        self.test_suite_end_condition = Length(count)
+        return self
+
+    def run_endless(self) -> "Osmo":
+        """
+        Run tests endlessly (convenience fluent API).
+
+        Note: You'll need to manually interrupt execution (Ctrl+C).
+
+        Returns:
+            Self for method chaining
+        """
+        from pyosmo.end_conditions import Endless
+        self.test_suite_end_condition = Endless()
+        return self
+
+    def raise_on_error(self) -> "Osmo":
+        """
+        Raise exceptions immediately when errors occur (convenience fluent API).
+
+        Returns:
+            Self for method chaining
+        """
+        from pyosmo.error_strategy import AlwaysRaise
+        return self.on_error(AlwaysRaise())
+
+    def ignore_errors(self, max_count: Optional[int] = None) -> "Osmo":
+        """
+        Ignore errors during test execution (convenience fluent API).
+
+        Args:
+            max_count: Optional maximum number of errors to ignore.
+                      If None, all errors are ignored.
+
+        Returns:
+            Self for method chaining
+        """
+        if max_count is None:
+            from pyosmo.error_strategy import AlwaysIgnore
+            return self.on_error(AlwaysIgnore())
+        else:
+            from pyosmo.error_strategy import AllowCount
+            return self.on_error(AllowCount(max_count))
+
+    def ignore_asserts(self) -> "Osmo":
+        """
+        Ignore assertion errors but raise other exceptions (convenience fluent API).
+
+        Returns:
+            Self for method chaining
+        """
+        from pyosmo.error_strategy import IgnoreAsserts
+        return self.on_error(IgnoreAsserts())
