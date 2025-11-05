@@ -12,10 +12,9 @@ This document proposes concrete API improvements for pyosmo to enhance usability
 2. [Coverage Tracking](#2-coverage-tracking)
 3. [Reporting API](#3-reporting-api)
 4. [Configuration API](#4-configuration-api)
-5. [History & Statistics API](#5-history--statistics-api)
-6. [Model Validation API](#6-model-validation-api)
-7. [Error Handling Improvements](#7-error-handling-improvements)
-8. [CLI Improvements](#8-cli-improvements)
+5. [Model Validation API](#5-model-validation-api)
+6. [Error Handling Improvements](#6-error-handling-improvements)
+7. [CLI Improvements](#7-cli-improvements)
 
 ---
 
@@ -447,80 +446,7 @@ osmo.run()
 
 ---
 
-## 5. History & Statistics API
-
-### Current Issues
-- Statistics returned as formatted strings
-- Hard to use programmatically
-- Limited metrics
-
-### Proposed Improvements
-
-#### 7.1 Structured Statistics
-
-```python
-# Current
-print(osmo.history.step_stats())  # Returns formatted string
-
-# Proposed
-stats = osmo.history.statistics()
-print(stats.total_steps)  # 1543
-print(stats.unique_steps)  # 12
-print(stats.most_executed_step)  # 'browse'
-print(stats.least_executed_step)  # 'checkout'
-print(stats.average_steps_per_test)  # 308.6
-print(stats.step_execution_times)  # {'login': 0.5s, 'browse': 0.1s, ...}
-
-# Export for analysis
-import json
-with open('stats.json', 'w') as f:
-    json.dump(stats.to_dict(), f, indent=2)
-```
-
-#### 7.2 Test Case Access
-
-```python
-# Access individual test cases
-for test_case in osmo.history.test_cases:
-    print(f"Test {test_case.index}:")
-    print(f"  Steps: {len(test_case.steps)}")
-    print(f"  Duration: {test_case.duration}")
-    print(f"  Status: {test_case.status}")  # PASS, FAIL, ERROR
-    print(f"  Sequence: {test_case.step_names}")
-
-# Failed tests only
-failed_tests = osmo.history.failed_tests()
-for test in failed_tests:
-    print(f"Failed at step: {test.failed_step}")
-    print(f"Error: {test.error}")
-    print(f"Traceback: {test.traceback}")
-```
-
-#### 7.3 Advanced Metrics
-
-```python
-# Coverage progression over time
-coverage_timeline = osmo.history.coverage_timeline()
-# Returns: [(step_index, coverage_percentage), ...]
-
-# Step execution frequency
-frequency = osmo.history.step_frequency()
-# Returns: {'login': 45, 'browse': 120, 'checkout': 23, ...}
-
-# Step transition matrix
-transitions = osmo.history.transition_matrix()
-# Returns: DataFrame-like structure showing step A -> step B frequencies
-
-# Requirement coverage over time
-req_timeline = osmo.history.requirement_coverage_timeline()
-# Returns: [(step_index, {req_id: coverage_count}), ...]
-```
-
-**Implementation Priority**: P1 (Phase 2, Week 7)
-
----
-
-## 6. Model Validation API
+## 5. Model Validation API
 
 ### Proposed Static Analysis
 
@@ -597,7 +523,7 @@ pyosmo validate mymodel.py
 
 ---
 
-## 7. Error Handling Improvements
+## 6. Error Handling Improvements
 
 ### Current Issues
 - Bare `except:` clauses
@@ -693,7 +619,7 @@ raise StepExecutionError(
 
 ---
 
-## 8. CLI Improvements
+## 7. CLI Improvements
 
 ### Current Issues
 - Limited commands
@@ -775,12 +701,11 @@ def validate(model_file: str, strict: bool, fix: bool):
 | Coverage Tracking | P1 | 2 weeks | High | 2 |
 | Reporting API | P1 | 1 week | High | 2 |
 | Configuration API | P2 | 1 week | Medium | 2 |
-| History API | P1 | 3 days | Medium | 2 |
 | Model Validation | P1 | 1 week | High | 3 |
 | Error Handling | P2 | 3 days | Medium | 3 |
 | CLI Improvements | P2 | 3 days | Medium | 3 |
 
-**Total Estimated Effort**: 7-8 weeks
+**Total Estimated Effort**: 6-7 weeks
 
 ---
 
@@ -794,8 +719,7 @@ All improvements maintain backward compatibility:
 2. **Coverage**: Enhanced tracking, doesn't break existing code
 3. **Reporting**: New API, old methods still work
 4. **Configuration**: New fluent API alongside old property setting
-5. **History**: Enhanced API, old methods deprecated with warnings
-6. **CLI**: New commands, old usage still works
+5. **CLI**: New commands, old usage still works
 
 ### Deprecation Timeline
 
