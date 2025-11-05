@@ -7,6 +7,7 @@ from typing import Optional, Union, List
 from pyosmo.config import OsmoConfig
 from pyosmo.history.history import OsmoHistory
 from pyosmo.model import OsmoModelCollector, TestStep
+from pyosmo.reporting import Format, ReportConfig
 
 logger = logging.getLogger("osmo")
 
@@ -124,3 +125,88 @@ class Osmo(OsmoConfig):
                 break
         self.model.execute_optional("after_suite")
         self.history.stop()
+
+    def save_report(
+        self,
+        path: str,
+        format: Format = Format.HTML,
+        config: Optional[ReportConfig] = None
+    ) -> None:
+        """Save test execution report to a file.
+
+        Args:
+            path: File path where report should be saved
+            format: Report format (HTML, JSON, JUNIT, MARKDOWN, or CSV)
+            config: Optional configuration for report generation
+
+        Example:
+            >>> osmo = Osmo(model)
+            >>> osmo.run()
+            >>> osmo.save_report("report.html", format=Format.HTML)
+            >>> osmo.save_report("results.json", format=Format.JSON)
+        """
+        from pyosmo.reporting import (
+            HTMLReporter,
+            JSONReporter,
+            JUnitReporter,
+            MarkdownReporter,
+            CSVReporter,
+        )
+
+        # Select appropriate reporter based on format
+        reporter_map = {
+            Format.HTML: HTMLReporter,
+            Format.JSON: JSONReporter,
+            Format.JUNIT: JUnitReporter,
+            Format.MARKDOWN: MarkdownReporter,
+            Format.CSV: CSVReporter,
+        }
+
+        reporter_class = reporter_map.get(format)
+        if reporter_class is None:
+            raise ValueError(f"Unsupported format: {format}")
+
+        reporter = reporter_class(self.history, config)
+        reporter.save(path)
+        logger.info(f"Report saved to {path} in {format.value} format")
+
+    def save_reports(
+        self,
+        base_path: str,
+        formats: Optional[List[Format]] = None,
+        config: Optional[ReportConfig] = None
+    ) -> None:
+        """Save test execution reports in multiple formats.
+
+        Args:
+            base_path: Base file path (without extension) for reports
+            formats: List of formats to generate (defaults to all formats)
+            config: Optional configuration for report generation
+
+        Example:
+            >>> osmo = Osmo(model)
+            >>> osmo.run()
+            >>> osmo.save_reports(
+            ...     "reports/test_run",
+            ...     formats=[Format.HTML, Format.JSON, Format.JUNIT]
+            ... )
+            # Creates: test_run.html, test_run.json, test_run.xml
+        """
+        if formats is None:
+            formats = [Format.HTML, Format.JSON, Format.JUNIT, Format.MARKDOWN, Format.CSV]
+
+        # Extension mapping for different formats
+        extensions = {
+            Format.HTML: ".html",
+            Format.JSON: ".json",
+            Format.JUNIT: ".xml",
+            Format.MARKDOWN: ".md",
+            Format.CSV: ".csv",
+        }
+
+        for format_type in formats:
+            extension = extensions.get(format_type, f".{format_type.value}")
+            path = f"{base_path}{extension}"
+            self.save_report(path, format_type, config)
+
+        logger.info(f"Generated {len(formats)} reports at {base_path}.*")
