@@ -1,6 +1,7 @@
 import inspect
 import logging
-from typing import Any, Callable, Iterator, List, Optional
+from collections.abc import Callable, Iterator
+from typing import Any, Optional
 
 logger = logging.getLogger("osmo")
 
@@ -38,7 +39,7 @@ class TestStep(ModelFunction):
         self,
         function_name: str,
         object_instance: object,
-        step_name: Optional[str] = None,
+        step_name: str | None = None,
         is_decorator_based: bool = False
     ) -> None:
         if not is_decorator_based:
@@ -106,7 +107,7 @@ class OsmoModelCollector:
 
     def __init__(self) -> None:
         # Format: functions[function_name] = link_of_instance
-        self.sub_models: List[object] = []
+        self.sub_models: list[object] = []
         self.debug: bool = False
 
     def _discover_steps(self, sub_model: object) -> Iterator[TestStep]:
@@ -136,7 +137,7 @@ class OsmoModelCollector:
             for step in self._discover_steps(sub_model)
         )
 
-    def get_step_by_name(self, name: str) -> Optional[TestStep]:
+    def get_step_by_name(self, name: str) -> TestStep | None:
         """Get step by function name"""
         steps = (
             TestStep(f, sub_model)
@@ -172,6 +173,6 @@ class OsmoModelCollector:
             function.execute()
 
     @property
-    def available_steps(self) -> List[TestStep]:
+    def available_steps(self) -> list[TestStep]:
         """Return iterator for all available steps"""
         return list(filter(lambda x: x.is_available, self.all_steps))

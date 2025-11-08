@@ -1,4 +1,3 @@
-# pylint: disable=no-name-in-module,import-error,deprecated-module
 from distutils.core import setup
 from os import path
 

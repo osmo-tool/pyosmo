@@ -1,7 +1,7 @@
 """Structured statistics for OSMO test execution"""
 from dataclasses import dataclass
 from datetime import timedelta
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from pyosmo.history.history import OsmoHistory
@@ -29,19 +29,19 @@ class OsmoStatistics:
     error_count: int
     """Total number of errors encountered"""
 
-    most_executed_step: Optional[str]
+    most_executed_step: str | None
     """Name of the most frequently executed step"""
 
-    least_executed_step: Optional[str]
+    least_executed_step: str | None
     """Name of the least frequently executed step"""
 
     average_steps_per_test: float
     """Average number of steps per test case"""
 
-    step_frequency: Dict[str, int]
+    step_frequency: dict[str, int]
     """Execution frequency of each step"""
 
-    step_execution_times: Dict[str, float]
+    step_execution_times: dict[str, float]
     """Average execution time for each step (in seconds)"""
 
     @classmethod
@@ -57,8 +57,8 @@ class OsmoStatistics:
         from collections import defaultdict
 
         # Collect step frequency and execution times
-        step_frequency: Dict[str, int] = defaultdict(int)
-        step_times: Dict[str, List[float]] = defaultdict(list)
+        step_frequency: dict[str, int] = defaultdict(int)
+        step_times: dict[str, list[float]] = defaultdict(list)
 
         for test_case in history.test_cases:
             for step_log in test_case.steps_log:
@@ -88,7 +88,7 @@ class OsmoStatistics:
             step_execution_times=step_execution_times,
         )
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         """Convert statistics to dictionary for serialization.
 
         Returns:

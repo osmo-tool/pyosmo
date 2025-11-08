@@ -1,4 +1,3 @@
-# pylint: disable=bare-except,try-except-raise
 import contextlib
 
 from pyosmo import Osmo

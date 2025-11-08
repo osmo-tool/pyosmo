@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
 
 from pyosmo.history.test_case import OsmoTestCaseRecord
 from pyosmo.history.test_step_log import TestStepLog
@@ -8,8 +7,8 @@ from pyosmo.model import TestStep
 
 class OsmoHistory:
     def __init__(self) -> None:
-        self.test_cases: List[OsmoTestCaseRecord] = []
-        self.stop_time: Optional[datetime] = None
+        self.test_cases: list[OsmoTestCaseRecord] = []
+        self.stop_time: datetime | None = None
         self.start_time: datetime = datetime.now()
 
     def start_new_test(self) -> None:
@@ -26,7 +25,7 @@ class OsmoHistory:
             self.current_test_case.stop()
         self.stop_time = datetime.now()
 
-    def add_step(self, step: TestStep, duration: timedelta, error: Optional[Exception] = None) -> None:
+    def add_step(self, step: TestStep, duration: timedelta, error: Exception | None = None) -> None:
         """Add a step to the history"""
         if self.current_test_case is None:
             raise Exception("There is no active test case!!")
@@ -38,7 +37,7 @@ class OsmoHistory:
         return sum(x.error_count for x in self.test_cases)
 
     @property
-    def current_test_case(self) -> Optional[OsmoTestCaseRecord]:
+    def current_test_case(self) -> OsmoTestCaseRecord | None:
         """The test case which is running or generating at the moment"""
         return self.test_cases[-1] if self.test_cases else None
 
@@ -98,7 +97,7 @@ class OsmoHistory:
         from pyosmo.history.statistics import OsmoStatistics
         return OsmoStatistics.from_history(self)
 
-    def failed_tests(self) -> List[OsmoTestCaseRecord]:
+    def failed_tests(self) -> list[OsmoTestCaseRecord]:
         """Get list of test cases that had errors.
 
         Returns:
@@ -106,25 +105,25 @@ class OsmoHistory:
         """
         return [tc for tc in self.test_cases if tc.error_count > 0]
 
-    def step_frequency(self) -> Dict[str, int]:
+    def step_frequency(self) -> dict[str, int]:
         """Get execution frequency of each step.
 
         Returns:
             Dictionary mapping step name to execution count
         """
-        frequency: Dict[str, int] = {}
+        frequency: dict[str, int] = {}
         for test_case in self.test_cases:
             for step in test_case.steps_log:
                 frequency[step.name] = frequency.get(step.name, 0) + 1
         return frequency
 
-    def step_pairs(self) -> Dict[Tuple[str, str], int]:
+    def step_pairs(self) -> dict[tuple[str, str], int]:
         """Get execution frequency of step pairs (transitions).
 
         Returns:
             Dictionary mapping (step_a, step_b) tuples to execution count
         """
-        pairs: Dict[Tuple[str, str], int] = {}
+        pairs: dict[tuple[str, str], int] = {}
         for test_case in self.test_cases:
             steps = [s.name for s in test_case.steps_log]
             for i in range(len(steps) - 1):
@@ -132,7 +131,7 @@ class OsmoHistory:
                 pairs[pair] = pairs.get(pair, 0) + 1
         return pairs
 
-    def coverage_timeline(self) -> List[Tuple[int, int]]:
+    def coverage_timeline(self) -> list[tuple[int, int]]:
         """Get step coverage progression over time.
 
         Returns:

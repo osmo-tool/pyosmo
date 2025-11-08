@@ -1,4 +1,3 @@
-# pylint: disable=too-few-public-methods
 import logging
 from random import Random, randint
 

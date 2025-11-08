@@ -1,14 +1,13 @@
 from abc import ABC, abstractmethod
 from random import Random
-from typing import List, Optional
 
 from pyosmo.history.history import OsmoHistory
 from pyosmo.model import OsmoModelCollector, TestStep
 
 
 class OsmoAlgorithm(ABC):
-    random: Optional[Random]
-    model: Optional[OsmoModelCollector]
+    random: Random | None
+    model: OsmoModelCollector | None
 
     def __init__(self) -> None:
         self.random = None
@@ -24,5 +23,5 @@ class OsmoAlgorithm(ABC):
         self.model = model
 
     @abstractmethod
-    def choose(self, history: OsmoHistory, choices: List[TestStep]) -> TestStep:
+    def choose(self, history: OsmoHistory, choices: list[TestStep]) -> TestStep:
         raise Exception("This is just abstract class, not implementation")

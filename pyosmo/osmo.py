@@ -1,8 +1,6 @@
-# pylint: disable=bare-except,broad-except,too-many-instance-attributes
 import logging
 from datetime import datetime, timedelta
 from random import Random
-from typing import Optional, Union, List
 
 from pyosmo.config import OsmoConfig
 from pyosmo.history.history import OsmoHistory
@@ -20,7 +18,7 @@ class Osmo(OsmoConfig):
     and test history tracking.
     """
 
-    def __init__(self, model: Optional[Union[object, List[object]]] = None) -> None:
+    def __init__(self, model: object | list[object] | None = None) -> None:
         """
         Initialize Osmo with an optional model.
 
@@ -233,7 +231,7 @@ class Osmo(OsmoConfig):
 
     # Convenience fluent methods (more fluent API)
 
-    def random_algorithm(self, seed: Optional[int] = None) -> "Osmo":
+    def random_algorithm(self, seed: int | None = None) -> "Osmo":
         """
         Use random algorithm with optional seed (convenience fluent API).
 
@@ -249,7 +247,7 @@ class Osmo(OsmoConfig):
             self.seed = seed
         return self
 
-    def balancing_algorithm(self, seed: Optional[int] = None) -> "Osmo":
+    def balancing_algorithm(self, seed: int | None = None) -> "Osmo":
         """
         Use balancing algorithm with optional seed (convenience fluent API).
 
@@ -265,7 +263,7 @@ class Osmo(OsmoConfig):
             self.seed = seed
         return self
 
-    def weighted_algorithm(self, seed: Optional[int] = None) -> "Osmo":
+    def weighted_algorithm(self, seed: int | None = None) -> "Osmo":
         """
         Use weighted algorithm with optional seed (convenience fluent API).
 
@@ -346,7 +344,7 @@ class Osmo(OsmoConfig):
         from pyosmo.error_strategy import AlwaysRaise
         return self.on_error(AlwaysRaise())
 
-    def ignore_errors(self, max_count: Optional[int] = None) -> "Osmo":
+    def ignore_errors(self, max_count: int | None = None) -> "Osmo":
         """
         Ignore errors during test execution (convenience fluent API).
 
@@ -360,9 +358,8 @@ class Osmo(OsmoConfig):
         if max_count is None:
             from pyosmo.error_strategy import AlwaysIgnore
             return self.on_error(AlwaysIgnore())
-        else:
-            from pyosmo.error_strategy import AllowCount
-            return self.on_error(AllowCount(max_count))
+        from pyosmo.error_strategy import AllowCount
+        return self.on_error(AllowCount(max_count))
 
     def ignore_asserts(self) -> "Osmo":
         """

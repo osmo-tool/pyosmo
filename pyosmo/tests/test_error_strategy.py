@@ -1,4 +1,3 @@
-# pylint: disable=bare-except
 import builtins
 import contextlib
 

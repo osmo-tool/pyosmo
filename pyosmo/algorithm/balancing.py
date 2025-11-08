@@ -1,4 +1,3 @@
-from typing import List
 
 from pyosmo.algorithm.base import OsmoAlgorithm
 from pyosmo.history.history import OsmoHistory
@@ -9,7 +8,7 @@ class BalancingRandomAlgorithm(OsmoAlgorithm):
     """This is random algorithm but try to balance coverage.
     In practise rare steps gets more priority when those are available"""
 
-    def choose(self, history: OsmoHistory, choices: List[TestStep]) -> TestStep:
+    def choose(self, history: OsmoHistory, choices: list[TestStep]) -> TestStep:
         if len(choices) == 1:
             return choices[0]
         history_counts = [history.get_step_count(choice) for choice in choices]
@@ -21,6 +20,6 @@ class BalancingRandomAlgorithm(OsmoAlgorithm):
 class BalancingAlgorithm(OsmoAlgorithm):
     """Very simple and eager balancing algorithm"""
 
-    def choose(self, history: OsmoHistory, choices: List[TestStep]) -> TestStep:
+    def choose(self, history: OsmoHistory, choices: list[TestStep]) -> TestStep:
         history_counts = [history.get_step_count(choice) for choice in choices]
         return choices[history_counts.index(min(history_counts))]

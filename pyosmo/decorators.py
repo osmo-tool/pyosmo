@@ -1,11 +1,12 @@
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, List, Optional, TypeVar, Union
+from typing import Any, TypeVar
 
 F = TypeVar('F', bound=Callable[..., Any])
 
 
 # Legacy weight decorator (kept for backward compatibility)
-def weight(value: Union[int, float]) -> Callable[[F], F]:
+def weight(value: int | float) -> Callable[[F], F]:
     """Make able to put weight in classes or functions by decorator @weight"""
 
     def decorator(func: F) -> F:
@@ -22,9 +23,9 @@ class StepDecorator:
 
     def __init__(
         self,
-        name: Optional[str] = None,
+        name: str | None = None,
         *,
-        weight_value: Optional[Union[int, float]] = None,
+        weight_value: int | float | None = None,
         enabled: bool = True
     ) -> None:
         self.name = name
@@ -46,11 +47,11 @@ class StepDecorator:
 
 
 def step(
-    name_or_func: Optional[Union[str, Callable[..., Any]]] = None,
+    name_or_func: str | Callable[..., Any] | None = None,
     *,
-    weight_value: Optional[Union[int, float]] = None,
+    weight_value: int | float | None = None,
     enabled: bool = True
-) -> Union[Callable[..., Any], StepDecorator]:
+) -> Callable[..., Any] | StepDecorator:
     """Mark a method as a test step.
 
     Can be used with or without arguments:
@@ -75,13 +76,12 @@ def step(
     if callable(name_or_func):
         # Used without arguments: @step
         return StepDecorator()(name_or_func)
-    else:
-        # Used with arguments: @step("name")
-        return StepDecorator(name_or_func, weight_value=weight_value, enabled=enabled)
+    # Used with arguments: @step("name")
+    return StepDecorator(name_or_func, weight_value=weight_value, enabled=enabled)
 
 
 def guard(
-    step_name_or_func: Union[str, Callable[..., Any]],
+    step_name_or_func: str | Callable[..., Any],
     *,
     invert: bool = False
 ) -> Callable[..., Any]:
@@ -110,14 +110,13 @@ def guard(
         func._osmo_guard_inline = True  # type: ignore[attr-defined]
         func._osmo_guard_invert = invert  # type: ignore[attr-defined]
         return func
-    else:
-        # Named guard
-        def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-            func._osmo_guard = True  # type: ignore[attr-defined]
-            func._osmo_guard_for = step_name_or_func  # type: ignore[attr-defined]
-            func._osmo_guard_invert = invert  # type: ignore[attr-defined]
-            return func
-        return decorator
+    # Named guard
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        func._osmo_guard = True  # type: ignore[attr-defined]
+        func._osmo_guard_for = step_name_or_func  # type: ignore[attr-defined]
+        func._osmo_guard_invert = invert  # type: ignore[attr-defined]
+        return func
+    return decorator
 
 
 def pre(step_name: str) -> Callable[[F], F]:
@@ -227,7 +226,7 @@ def requires_any(*requirements: str) -> Callable[[F], F]:
     return decorator
 
 
-def variable(name: str, categories: Optional[List[str]] = None) -> Callable[[F], F]:
+def variable(name: str, categories: list[str] | None = None) -> Callable[[F], F]:
     """Mark a method as a variable provider for coverage tracking.
 
     Example:

@@ -1,5 +1,5 @@
 """Test decorator-based API"""
-from pyosmo import Osmo, guard, post, pre, requires, step, weight
+from pyosmo import Osmo, post, pre, requires, step, weight
 from pyosmo.end_conditions import Length
 
 

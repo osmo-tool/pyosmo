@@ -16,7 +16,9 @@ osmo.generate()
 ### Install tools needed for development
 
 ```bash
-pip install -r requirements.txt
+uv pip install -e ".[dev]"
+# or
+uv sync --all-extras
 ```
 
 ### Run osmo tests:
@@ -25,16 +27,34 @@ pip install -r requirements.txt
 pytest pyosmo/tests/
 ```
 
-### Run pylint
+### Run ruff linting
 
 ```bash
-pylint *
+ruff check pyosmo/
 ```
 
-### Run flake8
+### Auto-fix linting issues
 
 ```bash
-flake8 --max-line-length 120 --ignore=E722,F401,E402
+ruff check pyosmo/ --fix
+```
+
+### Run ruff formatting
+
+```bash
+ruff format pyosmo/
+```
+
+### Check formatting without changes
+
+```bash
+ruff format --check pyosmo/
+```
+
+### Run type checking
+
+```bash
+mypy pyosmo/
 ```
 
 ### Run mutation testing

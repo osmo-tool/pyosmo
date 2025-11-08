@@ -1,11 +1,10 @@
 """Tests for the fluent configuration API."""
 
-import pytest
 
 from pyosmo import Osmo
-from pyosmo.algorithm import RandomAlgorithm, BalancingAlgorithm, WeightedAlgorithm
-from pyosmo.end_conditions import Length, Time, Endless
-from pyosmo.error_strategy import AlwaysRaise, AlwaysIgnore, AllowCount, IgnoreAsserts
+from pyosmo.algorithm import BalancingAlgorithm, RandomAlgorithm, WeightedAlgorithm
+from pyosmo.end_conditions import Endless, Length, Time
+from pyosmo.error_strategy import AllowCount, AlwaysIgnore, AlwaysRaise, IgnoreAsserts
 
 
 class SimpleModel:

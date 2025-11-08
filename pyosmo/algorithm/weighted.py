@@ -1,4 +1,3 @@
-from typing import List
 
 from pyosmo.algorithm.base import OsmoAlgorithm
 from pyosmo.history.history import OsmoHistory
@@ -8,14 +7,14 @@ from pyosmo.model import TestStep
 class WeightedAlgorithm(OsmoAlgorithm):
     """Weighted random algorithm"""
 
-    def choose(self, history: OsmoHistory, choices: List[TestStep]) -> TestStep:
+    def choose(self, history: OsmoHistory, choices: list[TestStep]) -> TestStep:
         return self.random.choices(choices, weights=[c.weight for c in choices])[0]
 
 
 class WeightedBalancingAlgorithm(OsmoAlgorithm):
     """Weighted algorithm which balances based on history"""
 
-    def choose(self, history: OsmoHistory, choices: List[TestStep]) -> TestStep:
+    def choose(self, history: OsmoHistory, choices: list[TestStep]) -> TestStep:
         weights = [c.weight for c in choices]
         normalized_weights = [float(i) / max(weights) for i in weights]
 

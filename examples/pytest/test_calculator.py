@@ -1,4 +1,3 @@
-# pylint: disable=redefined-outer-name)
 """ This demonstrates how to use model fom pytest side """
 import pytest
 

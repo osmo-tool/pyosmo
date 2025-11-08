@@ -15,7 +15,6 @@ class CalculatorModel(pyosmo.OsmoModel):
         self.test_number = 0
 
     def before_suite(self):
-        self.file.write('# pylint: disable=too-many-lines\n')
         self.file.write('from examples.offline_mbt.sut_calculator import CalculatorSUT\n')
 
     def before_test(self):

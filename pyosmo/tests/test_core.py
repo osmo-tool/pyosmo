@@ -1,5 +1,3 @@
-# pylint: disable=bare-except
-
 from pyosmo import Osmo
 
 
