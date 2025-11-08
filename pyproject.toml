@@ -27,6 +27,7 @@ classifiers = [
 ]
 dependencies = [
     "click",
+    "mypy>=1.18.2",
 ]
 
 [project.optional-dependencies]
