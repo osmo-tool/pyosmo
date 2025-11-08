@@ -70,6 +70,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]  # Allow unused imports in __init__.py
 "tests/**/*.py" = ["B011"] # Allow assert False
+"model-creator/**/*.py" = ["N999"]  # Allow hyphenated directory name
 
 [tool.ruff.format]
 quote-style = "single"

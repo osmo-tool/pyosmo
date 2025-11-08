@@ -81,9 +81,8 @@ class ModelUpdater:
         for node in ast.walk(new_tree):
             if isinstance(node, ast.ClassDef):
                 for item in node.body:
-                    if isinstance(item, ast.FunctionDef):
-                        if item.name.startswith('step_'):
-                            new_methods.add(item.name[5:])
+                    if isinstance(item, ast.FunctionDef) and item.name.startswith('step_'):
+                        new_methods.add(item.name[5:])
 
         # Find truly new methods (not in existing model)
         added_methods = new_methods - self.existing_methods
@@ -93,9 +92,7 @@ class ModelUpdater:
             return self.existing_code
 
         # Extract new method code
-        updated_code = self._merge_models(new_code, added_methods)
-
-        return updated_code
+        return self._merge_models(new_code, added_methods)
 
     def _merge_models(self, new_code: str, added_methods: set[str]) -> str:
         """

@@ -51,7 +51,7 @@ class ModelGenerator:
     def analyze_forms(self):
         """Analyze forms and generate form submission actions."""
         for page_url, page in self.pages.items():
-            for form_idx, form in enumerate(page.forms):
+            for _form_idx, form in enumerate(page.forms):
                 # Determine action name based on form fields or page
                 form_name = self._get_form_name(form, page)
                 action_name = f'submit_{form_name}'

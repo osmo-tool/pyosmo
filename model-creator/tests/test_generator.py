@@ -179,7 +179,7 @@ class TestModelGenerator(unittest.TestCase):
 
         # Should be valid Python code
         try:
-            tree = ast.parse(code)
+            ast.parse(code)
         except SyntaxError as e:
             self.fail(f'Generated code is not valid Python: {e}')
 

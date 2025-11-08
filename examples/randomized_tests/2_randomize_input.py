@@ -17,7 +17,7 @@ def test():
     # Check that output is integer
     try:
         int(output)
-    except:
+    except (ValueError, TypeError):
         raise Exception('Data is not integer') from output
 
     # If we know logic of answer we can use that

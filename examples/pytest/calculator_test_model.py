@@ -45,8 +45,8 @@ class CalculatorTestModel(pyosmo.OsmoModel):
         # Zero is not possible
         if numb == 0:
             numb = 2
-        print(f'{self.expected_number} / {numb} = {self.expected_number / numb}')
-        self.expected_number /= numb
+        print(f'{self.expected_number} / {numb} = {self.expected_number // numb}')
+        self.expected_number //= numb
 
     @pyosmo.weight(0.1)
     def step_clear(self):

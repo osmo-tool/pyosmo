@@ -6,7 +6,6 @@ Base URL: https://example.com
 Generated: Example model for demonstration
 """
 
-
 try:
     import requests
 except ImportError:
