@@ -2,10 +2,11 @@
 Tests for the model generator.
 """
 
-import unittest
 import ast
+import unittest
+
+from model_creator.crawler import Form, FormField, Link, Page
 from model_creator.generator import ModelGenerator
-from model_creator.crawler import Page, Form, FormField, Link
 
 
 class TestModelGenerator(unittest.TestCase):

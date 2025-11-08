@@ -5,9 +5,7 @@ Web crawler for discovering website structure and interactions.
 import re
 import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Set, Optional, Tuple
-from urllib.parse import urljoin, urlparse, parse_qs, urlencode
-from collections import defaultdict
+from urllib.parse import urljoin, urlparse
 
 try:
     import requests
@@ -25,8 +23,8 @@ class FormField:
     name: str
     field_type: str
     required: bool = False
-    options: List[str] = field(default_factory=list)
-    default_value: Optional[str] = None
+    options: list[str] = field(default_factory=list)
+    default_value: str | None = None
 
 
 @dataclass
@@ -35,7 +33,7 @@ class Form:
 
     action: str
     method: str = 'GET'
-    fields: List[FormField] = field(default_factory=list)
+    fields: list[FormField] = field(default_factory=list)
     page_url: str = ''
 
 
@@ -54,14 +52,14 @@ class Page:
 
     url: str
     title: str
-    forms: List[Form] = field(default_factory=list)
-    links: List[Link] = field(default_factory=list)
+    forms: list[Form] = field(default_factory=list)
+    links: list[Link] = field(default_factory=list)
     has_login: bool = False
     has_logout: bool = False
     requires_auth: bool = False
     status_code: int = 200
-    error_messages: List[str] = field(default_factory=list)
-    success_messages: List[str] = field(default_factory=list)
+    error_messages: list[str] = field(default_factory=list)
+    success_messages: list[str] = field(default_factory=list)
 
 
 class WebsiteCrawler:
@@ -75,7 +73,7 @@ class WebsiteCrawler:
         max_pages: int = 50,
         delay: float = 0.5,
         follow_external: bool = False,
-        auth: Optional[Tuple[str, str]] = None,
+        auth: tuple[str, str] | None = None,
     ):
         """
         Initialize the crawler.
@@ -93,8 +91,8 @@ class WebsiteCrawler:
         self.follow_external = follow_external
         self.auth = auth
 
-        self.visited_urls: Set[str] = set()
-        self.pages: Dict[str, Page] = {}
+        self.visited_urls: set[str] = set()
+        self.pages: dict[str, Page] = {}
         self.session = requests.Session()
 
         if auth:
@@ -106,7 +104,7 @@ class WebsiteCrawler:
         self.error_patterns = [r'error', r'invalid', r'failed', r'incorrect', r'wrong', r'denied', r'forbidden']
         self.success_patterns = [r'success', r'successful', r'welcome', r'thank you', r'confirmed', r'completed']
 
-    def normalize_url(self, url: str, base: Optional[str] = None) -> str:
+    def normalize_url(self, url: str, base: str | None = None) -> str:
         """Normalize a URL by joining with base and removing fragments."""
         if base:
             url = urljoin(base, url)
@@ -120,7 +118,7 @@ class WebsiteCrawler:
         url_domain = urlparse(url).netloc
         return base_domain == url_domain
 
-    def extract_forms(self, soup: BeautifulSoup, page_url: str) -> List[Form]:
+    def extract_forms(self, soup: BeautifulSoup, page_url: str) -> list[Form]:
         """Extract all forms from a page."""
         forms = []
 
@@ -157,7 +155,7 @@ class WebsiteCrawler:
 
         return forms
 
-    def extract_links(self, soup: BeautifulSoup, page_url: str) -> List[Link]:
+    def extract_links(self, soup: BeautifulSoup, page_url: str) -> list[Link]:
         """Extract all links from a page."""
         links = []
 
@@ -179,7 +177,7 @@ class WebsiteCrawler:
 
         return links
 
-    def detect_patterns(self, text: str, patterns: List[str]) -> bool:
+    def detect_patterns(self, text: str, patterns: list[str]) -> bool:
         """Check if text matches any of the given patterns."""
         text_lower = text.lower()
         return any(re.search(pattern, text_lower) for pattern in patterns)
@@ -232,7 +230,7 @@ class WebsiteCrawler:
             success_messages=success_messages,
         )
 
-    def crawl_page(self, url: str) -> Optional[Page]:
+    def crawl_page(self, url: str) -> Page | None:
         """Crawl a single page."""
         if url in self.visited_urls:
             return None
@@ -264,7 +262,7 @@ class WebsiteCrawler:
             self.visited_urls.add(url)
             return None
 
-    def crawl(self, start_url: Optional[str] = None) -> Dict[str, Page]:
+    def crawl(self, start_url: str | None = None) -> dict[str, Page]:
         """
         Crawl the website starting from the given URL.
 
@@ -294,7 +292,7 @@ class WebsiteCrawler:
         print(f'\nCrawling complete. Discovered {len(self.pages)} pages.')
         return self.pages
 
-    def get_statistics(self) -> Dict:
+    def get_statistics(self) -> dict:
         """Get statistics about the crawled website."""
         total_forms = sum(len(page.forms) for page in self.pages.values())
         total_links = sum(len(page.links) for page in self.pages.values())

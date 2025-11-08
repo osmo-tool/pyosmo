@@ -6,7 +6,6 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Optional
 
 from .crawler import WebsiteCrawler
 from .generator import ModelGenerator
@@ -239,7 +238,7 @@ Examples:
     try:
         if args.command == 'create':
             return create_model(args)
-        elif args.command == 'update':
+        if args.command == 'update':
             return update_model(args)
     except KeyboardInterrupt:
         print('\n\nOperation cancelled by user.')

@@ -6,8 +6,6 @@ Base URL: https://example.com
 Generated: Example model for demonstration
 """
 
-import random
-from typing import Optional
 
 try:
     import requests
@@ -28,10 +26,10 @@ class ExampleWebsiteModel:
         self.base_url = 'https://example.com'
         self.session = requests.Session()
         self.logged_in = False
-        self.current_user: Optional[str] = None
+        self.current_user: str | None = None
         self.current_page = 'home'
         self.response = None
-        self.last_error: Optional[str] = None
+        self.last_error: str | None = None
 
     def before_test(self):
         """Called before each test run."""

@@ -2,12 +2,10 @@
 Model generator - Creates PyOsmo models from crawled website data.
 """
 
-import ast
 import re
-from typing import Dict, List, Set, Optional
 from pathlib import Path
 
-from .crawler import Page, Form, FormField
+from .crawler import Form, FormField, Page
 
 
 class ModelGenerator:
@@ -15,7 +13,7 @@ class ModelGenerator:
     Generates PyOsmo model code from crawled website data.
     """
 
-    def __init__(self, pages: Dict[str, Page], base_url: str):
+    def __init__(self, pages: dict[str, Page], base_url: str):
         """
         Initialize the model generator.
 
@@ -25,8 +23,8 @@ class ModelGenerator:
         """
         self.pages = pages
         self.base_url = base_url
-        self.actions: List[Dict] = []
-        self.state_variables: Set[str] = set()
+        self.actions: list[dict] = []
+        self.state_variables: set[str] = set()
 
     def sanitize_name(self, text: str) -> str:
         """Convert text to a valid Python identifier."""
@@ -130,7 +128,7 @@ class ModelGenerator:
     def analyze_links(self):
         """Analyze links and generate navigation actions."""
         # Group links by destination
-        link_destinations: Dict[str, List] = {}
+        link_destinations: dict[str, list] = {}
 
         for page in self.pages.values():
             for link in page.links:
@@ -272,7 +270,7 @@ class ModelGenerator:
 
         return '\n'.join(line for line in lines if line is not None)
 
-    def _generate_step_method(self, action: Dict) -> List[str]:
+    def _generate_step_method(self, action: dict) -> list[str]:
         """Generate a step method for an action."""
         lines = []
 
@@ -283,7 +281,7 @@ class ModelGenerator:
 
         return lines
 
-    def _generate_form_step(self, action: Dict) -> List[str]:
+    def _generate_form_step(self, action: dict) -> list[str]:
         """Generate a form submission step."""
         lines = []
         method_name = action['name']
@@ -349,7 +347,7 @@ class ModelGenerator:
 
         return lines
 
-    def _generate_navigation_step(self, action: Dict) -> List[str]:
+    def _generate_navigation_step(self, action: dict) -> list[str]:
         """Generate a navigation step."""
         lines = []
         method_name = action['name']
@@ -385,24 +383,21 @@ class ModelGenerator:
         # Type-specific defaults
         if field.field_type == 'email' or 'email' in field_name_lower:
             return '"test@example.com"'
-        elif field.field_type == 'password' or 'password' in field_name_lower:
+        if field.field_type == 'password' or 'password' in field_name_lower:
             return '"testpassword123"'
-        elif 'username' in field_name_lower or 'user' in field_name_lower:
+        if 'username' in field_name_lower or 'user' in field_name_lower:
             return '"testuser"'
-        elif 'name' in field_name_lower:
+        if 'name' in field_name_lower:
             return '"Test User"'
-        elif 'phone' in field_name_lower:
+        if 'phone' in field_name_lower:
             return '"555-1234"'
-        elif field.field_type == 'number':
+        if field.field_type == 'number':
             return '42'
-        elif field.field_type == 'checkbox':
+        if field.field_type == 'checkbox':
             return 'True'
-        elif field.field_type == 'radio' and field.options:
+        if field.field_type == 'radio' and field.options or field.field_type == 'select' and field.options:
             return f'"{field.options[0]}"'
-        elif field.field_type == 'select' and field.options:
-            return f'"{field.options[0]}"'
-        else:
-            return f'"test_{field.name}"'
+        return f'"test_{field.name}"'
 
     def save_model(self, output_path: Path, class_name: str = 'WebsiteModel'):
         """
@@ -422,7 +417,7 @@ class ModelGenerator:
 
         print(f'Model saved to: {output_path}')
 
-    def get_statistics(self) -> Dict:
+    def get_statistics(self) -> dict:
         """Get statistics about the generated model."""
         return {
             'total_actions': len(self.actions),

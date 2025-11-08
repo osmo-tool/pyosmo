@@ -2,9 +2,10 @@
 Complex model with two actors.
 """
 
-from pyosmo.osmo import Osmo
-from dataclasses import dataclass
 import random
+from dataclasses import dataclass
+
+from pyosmo.osmo import Osmo
 
 
 @dataclass

@@ -4,7 +4,6 @@ Model updater - Updates existing PyOsmo models with new discoveries.
 
 import ast
 import re
-from typing import Dict, List, Set, Optional
 from pathlib import Path
 
 from .crawler import Page
@@ -25,17 +24,17 @@ class ModelUpdater:
         """
         self.model_path = Path(model_path)
         self.existing_code = ''
-        self.tree: Optional[ast.Module] = None
-        self.existing_methods: Set[str] = set()
-        self.existing_guards: Set[str] = set()
-        self.class_name: Optional[str] = None
+        self.tree: ast.Module | None = None
+        self.existing_methods: set[str] = set()
+        self.existing_guards: set[str] = set()
+        self.class_name: str | None = None
 
         if self.model_path.exists():
             self._parse_existing_model()
 
     def _parse_existing_model(self):
         """Parse the existing model file."""
-        with open(self.model_path, 'r') as f:
+        with open(self.model_path) as f:
             self.existing_code = f.read()
 
         try:
@@ -56,7 +55,7 @@ class ModelUpdater:
                         elif method_name.startswith('guard_'):
                             self.existing_guards.add(method_name[6:])  # Remove 'guard_' prefix
 
-    def update_model(self, pages: Dict[str, Page], base_url: str, preserve_existing: bool = True) -> str:
+    def update_model(self, pages: dict[str, Page], base_url: str, preserve_existing: bool = True) -> str:
         """
         Update the model with new discoveries.
 
@@ -77,7 +76,7 @@ class ModelUpdater:
 
         # Parse new model to find new methods
         new_tree = ast.parse(new_code)
-        new_methods: Set[str] = set()
+        new_methods: set[str] = set()
 
         for node in ast.walk(new_tree):
             if isinstance(node, ast.ClassDef):
@@ -98,7 +97,7 @@ class ModelUpdater:
 
         return updated_code
 
-    def _merge_models(self, new_code: str, added_methods: Set[str]) -> str:
+    def _merge_models(self, new_code: str, added_methods: set[str]) -> str:
         """
         Merge new methods into existing model.
 
@@ -111,7 +110,7 @@ class ModelUpdater:
         """
         # Parse new code to extract method definitions
         new_tree = ast.parse(new_code)
-        methods_to_add: List[str] = []
+        methods_to_add: list[str] = []
 
         for node in ast.walk(new_tree):
             if isinstance(node, ast.ClassDef):
@@ -160,7 +159,7 @@ class ModelUpdater:
 
         return '\n'.join(new_lines)
 
-    def save_updated_model(self, pages: Dict[str, Page], base_url: str, backup: bool = True):
+    def save_updated_model(self, pages: dict[str, Page], base_url: str, backup: bool = True):
         """
         Update and save the model.
 
@@ -181,7 +180,7 @@ class ModelUpdater:
 
         print(f'Model updated: {self.model_path}')
 
-    def get_update_summary(self, pages: Dict[str, Page], base_url: str) -> Dict:
+    def get_update_summary(self, pages: dict[str, Page], base_url: str) -> dict:
         """
         Get a summary of what would be updated.
 

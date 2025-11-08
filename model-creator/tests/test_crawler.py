@@ -3,8 +3,9 @@ Tests for the website crawler.
 """
 
 import unittest
-from unittest.mock import Mock, patch, MagicMock
-from model_creator.crawler import WebsiteCrawler, Page, Form, FormField, Link
+from unittest.mock import MagicMock, Mock, patch
+
+from model_creator.crawler import Form, FormField, Link, Page, WebsiteCrawler
 
 
 class TestWebsiteCrawler(unittest.TestCase):
