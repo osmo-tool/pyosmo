@@ -1,4 +1,5 @@
 """Structured statistics for OSMO test execution"""
+
 from dataclasses import dataclass
 from datetime import timedelta
 from typing import TYPE_CHECKING
@@ -66,10 +67,7 @@ class OsmoStatistics:
                 step_times[step_log.name].append(step_log.duration.total_seconds())
 
         # Calculate average execution times
-        step_execution_times = {
-            step_name: sum(times) / len(times)
-            for step_name, times in step_times.items()
-        }
+        step_execution_times = {step_name: sum(times) / len(times) for step_name, times in step_times.items()}
 
         # Find most and least executed steps
         most_executed = max(step_frequency.items(), key=lambda x: x[1])[0] if step_frequency else None
@@ -83,7 +81,9 @@ class OsmoStatistics:
             error_count=history.error_count,
             most_executed_step=most_executed,
             least_executed_step=least_executed,
-            average_steps_per_test=history.total_amount_of_steps / history.test_case_count if history.test_case_count > 0 else 0.0,
+            average_steps_per_test=history.total_amount_of_steps / history.test_case_count
+            if history.test_case_count > 0
+            else 0.0,
             step_frequency=dict(step_frequency),
             step_execution_times=step_execution_times,
         )
@@ -120,9 +120,13 @@ class OsmoStatistics:
         ]
 
         if self.most_executed_step:
-            lines.append(f"  Most Executed: {self.most_executed_step} ({self.step_frequency[self.most_executed_step]} times)")
+            lines.append(
+                f"  Most Executed: {self.most_executed_step} ({self.step_frequency[self.most_executed_step]} times)"
+            )
 
         if self.least_executed_step:
-            lines.append(f"  Least Executed: {self.least_executed_step} ({self.step_frequency[self.least_executed_step]} times)")
+            lines.append(
+                f"  Least Executed: {self.least_executed_step} ({self.step_frequency[self.least_executed_step]} times)"
+            )
 
         return "\n".join(lines)

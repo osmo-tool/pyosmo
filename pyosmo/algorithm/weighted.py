@@ -1,4 +1,3 @@
-
 from pyosmo.algorithm.base import OsmoAlgorithm
 from pyosmo.history.history import OsmoHistory
 from pyosmo.model import TestStep
@@ -24,7 +23,9 @@ class WeightedBalancingAlgorithm(OsmoAlgorithm):
 
         history_normalized_weights = [float(i) / max(history_counts) for i in history_counts]
 
-        total_weights = [a - b if a - b != 0 else 0.1 for (a, b) in zip(normalized_weights, history_normalized_weights)]
+        total_weights = [
+            a - b if a - b != 0 else 0.1 for (a, b) in zip(normalized_weights, history_normalized_weights, strict=True)
+        ]
 
         # Make sure that total weight is more than zero
         if sum(total_weights) < 0:

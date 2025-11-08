@@ -1,8 +1,12 @@
 from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
 
 from pyosmo.history.test_case import OsmoTestCaseRecord
 from pyosmo.history.test_step_log import TestStepLog
 from pyosmo.model import TestStep
+
+if TYPE_CHECKING:
+    from pyosmo.history.statistics import OsmoStatistics
 
 
 class OsmoHistory:
@@ -95,6 +99,7 @@ class OsmoHistory:
             Structured statistics object with programmatic access
         """
         from pyosmo.history.statistics import OsmoStatistics
+
         return OsmoStatistics.from_history(self)
 
     def failed_tests(self) -> list[OsmoTestCaseRecord]:

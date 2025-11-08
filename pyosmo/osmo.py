@@ -1,10 +1,16 @@
 import logging
 from datetime import datetime, timedelta
 from random import Random
+from typing import TYPE_CHECKING
 
 from pyosmo.config import OsmoConfig
 from pyosmo.history.history import OsmoHistory
 from pyosmo.model import OsmoModelCollector, TestStep
+
+if TYPE_CHECKING:
+    from pyosmo.algorithm.base import OsmoAlgorithm
+    from pyosmo.end_conditions.base import OsmoEndCondition
+    from pyosmo.error_strategy.base import OsmoErrorStrategy
 
 logger = logging.getLogger("osmo")
 
@@ -242,6 +248,7 @@ class Osmo(OsmoConfig):
             Self for method chaining
         """
         from pyosmo.algorithm import RandomAlgorithm
+
         self.algorithm = RandomAlgorithm()
         if seed is not None:
             self.seed = seed
@@ -258,6 +265,7 @@ class Osmo(OsmoConfig):
             Self for method chaining
         """
         from pyosmo.algorithm import BalancingAlgorithm
+
         self.algorithm = BalancingAlgorithm()
         if seed is not None:
             self.seed = seed
@@ -274,6 +282,7 @@ class Osmo(OsmoConfig):
             Self for method chaining
         """
         from pyosmo.algorithm import WeightedAlgorithm
+
         self.algorithm = WeightedAlgorithm()
         if seed is not None:
             self.seed = seed
@@ -290,6 +299,7 @@ class Osmo(OsmoConfig):
             Self for method chaining
         """
         from pyosmo.end_conditions import Length
+
         self.test_end_condition = Length(steps)
         return self
 
@@ -304,6 +314,7 @@ class Osmo(OsmoConfig):
             Self for method chaining
         """
         from pyosmo.end_conditions import Time
+
         self.test_end_condition = Time(timedelta(seconds=seconds))
         return self
 
@@ -318,6 +329,7 @@ class Osmo(OsmoConfig):
             Self for method chaining
         """
         from pyosmo.end_conditions import Length
+
         self.test_suite_end_condition = Length(count)
         return self
 
@@ -331,6 +343,7 @@ class Osmo(OsmoConfig):
             Self for method chaining
         """
         from pyosmo.end_conditions import Endless
+
         self.test_suite_end_condition = Endless()
         return self
 
@@ -342,6 +355,7 @@ class Osmo(OsmoConfig):
             Self for method chaining
         """
         from pyosmo.error_strategy import AlwaysRaise
+
         return self.on_error(AlwaysRaise())
 
     def ignore_errors(self, max_count: int | None = None) -> "Osmo":
@@ -357,8 +371,10 @@ class Osmo(OsmoConfig):
         """
         if max_count is None:
             from pyosmo.error_strategy import AlwaysIgnore
+
             return self.on_error(AlwaysIgnore())
         from pyosmo.error_strategy import AllowCount
+
         return self.on_error(AllowCount(max_count))
 
     def ignore_asserts(self) -> "Osmo":
@@ -369,4 +385,5 @@ class Osmo(OsmoConfig):
             Self for method chaining
         """
         from pyosmo.error_strategy import IgnoreAsserts
+
         return self.on_error(IgnoreAsserts())

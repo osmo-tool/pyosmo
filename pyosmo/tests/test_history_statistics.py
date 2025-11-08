@@ -1,4 +1,5 @@
 """Test history and statistics API"""
+
 from pyosmo import Osmo
 from pyosmo.end_conditions import Length
 
@@ -39,7 +40,7 @@ def test_statistics():
 
     # Verify step frequency is a dictionary
     assert isinstance(stats.step_frequency, dict)
-    assert all(isinstance(k, str) for k in stats.step_frequency.keys())
+    assert all(isinstance(k, str) for k in stats.step_frequency)
     assert all(isinstance(v, int) for v in stats.step_frequency.values())
 
     # Verify most/least executed steps are set
@@ -101,7 +102,7 @@ def test_step_pairs():
 
     # Verify it's a dictionary with tuple keys
     assert isinstance(pairs, dict)
-    assert all(isinstance(k, tuple) and len(k) == 2 for k in pairs.keys())
+    assert all(isinstance(k, tuple) and len(k) == 2 for k in pairs)
 
     # Verify total pairs is one less than total steps
     # (n steps create n-1 pairs)
@@ -150,6 +151,7 @@ def test_failed_tests():
 
     # Import error strategy to ignore errors
     from pyosmo.error_strategy import AlwaysIgnore
+
     osmo.test_error_strategy = AlwaysIgnore()
 
     osmo.run()

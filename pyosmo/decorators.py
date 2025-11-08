@@ -2,7 +2,7 @@ from collections.abc import Callable
 from functools import wraps
 from typing import Any, TypeVar
 
-F = TypeVar('F', bound=Callable[..., Any])
+F = TypeVar("F", bound=Callable[..., Any])
 
 
 # Legacy weight decorator (kept for backward compatibility)
@@ -18,15 +18,12 @@ def weight(value: int | float) -> Callable[[F], F]:
 
 # New decorator-based API
 
+
 class StepDecorator:
     """Decorator for marking test steps."""
 
     def __init__(
-        self,
-        name: str | None = None,
-        *,
-        weight_value: int | float | None = None,
-        enabled: bool = True
+        self, name: str | None = None, *, weight_value: int | float | None = None, enabled: bool = True
     ) -> None:
         self.name = name
         self.weight_value = weight_value
@@ -50,7 +47,7 @@ def step(
     name_or_func: str | Callable[..., Any] | None = None,
     *,
     weight_value: int | float | None = None,
-    enabled: bool = True
+    enabled: bool = True,
 ) -> Callable[..., Any] | StepDecorator:
     """Mark a method as a test step.
 
@@ -80,11 +77,7 @@ def step(
     return StepDecorator(name_or_func, weight_value=weight_value, enabled=enabled)
 
 
-def guard(
-    step_name_or_func: str | Callable[..., Any],
-    *,
-    invert: bool = False
-) -> Callable[..., Any]:
+def guard(step_name_or_func: str | Callable[..., Any], *, invert: bool = False) -> Callable[..., Any]:
     """Mark a method as a guard for a step.
 
     Can be used as inline lambda or separate method:
@@ -110,12 +103,14 @@ def guard(
         func._osmo_guard_inline = True  # type: ignore[attr-defined]
         func._osmo_guard_invert = invert  # type: ignore[attr-defined]
         return func
+
     # Named guard
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         func._osmo_guard = True  # type: ignore[attr-defined]
         func._osmo_guard_for = step_name_or_func  # type: ignore[attr-defined]
         func._osmo_guard_invert = invert  # type: ignore[attr-defined]
         return func
+
     return decorator
 
 
@@ -133,10 +128,12 @@ def pre(step_name: str) -> Callable[[F], F]:
     Returns:
         Decorated function
     """
+
     def decorator(func: F) -> F:
         func._osmo_pre = True  # type: ignore[attr-defined]
         func._osmo_pre_for = step_name  # type: ignore[attr-defined]
         return func
+
     return decorator
 
 
@@ -154,10 +151,12 @@ def post(step_name: str) -> Callable[[F], F]:
     Returns:
         Decorated function
     """
+
     def decorator(func: F) -> F:
         func._osmo_post = True  # type: ignore[attr-defined]
         func._osmo_post_for = step_name  # type: ignore[attr-defined]
         return func
+
     return decorator
 
 
@@ -176,9 +175,11 @@ def requires(*requirements: str) -> Callable[[F], F]:
     Returns:
         Decorated function
     """
+
     def decorator(func: F) -> F:
         func._osmo_requires = list(requirements)  # type: ignore[attr-defined]
         return func
+
     return decorator
 
 
@@ -197,10 +198,12 @@ def requires_all(*requirements: str) -> Callable[[F], F]:
     Returns:
         Decorated function
     """
+
     def decorator(func: F) -> F:
         func._osmo_requires = list(requirements)  # type: ignore[attr-defined]
         func._osmo_requires_all = True  # type: ignore[attr-defined]
         return func
+
     return decorator
 
 
@@ -219,10 +222,12 @@ def requires_any(*requirements: str) -> Callable[[F], F]:
     Returns:
         Decorated function
     """
+
     def decorator(func: F) -> F:
         func._osmo_requires = list(requirements)  # type: ignore[attr-defined]
         func._osmo_requires_any = True  # type: ignore[attr-defined]
         return func
+
     return decorator
 
 
@@ -243,11 +248,13 @@ def variable(name: str, categories: list[str] | None = None) -> Callable[[F], F]
     Returns:
         Decorated function
     """
+
     def decorator(func: F) -> F:
         func._osmo_variable = True  # type: ignore[attr-defined]
         func._osmo_variable_name = name  # type: ignore[attr-defined]
         func._osmo_variable_categories = categories  # type: ignore[attr-defined]
         return func
+
     return decorator
 
 

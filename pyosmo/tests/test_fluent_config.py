@@ -1,6 +1,5 @@
 """Tests for the fluent configuration API."""
 
-
 from pyosmo import Osmo
 from pyosmo.algorithm import BalancingAlgorithm, RandomAlgorithm, WeightedAlgorithm
 from pyosmo.end_conditions import Endless, Length, Time
@@ -208,14 +207,7 @@ class TestConvenienceFluentAPI:
     def test_convenience_fluent_chain(self):
         """Test the full convenience fluent chain (even more fluent API)."""
         model = SimpleModel()
-        osmo = (
-            Osmo(model)
-            .random_algorithm(seed=12345)
-            .stop_after_steps(100)
-            .run_tests(5)
-            .raise_on_error()
-            .build()
-        )
+        osmo = Osmo(model).random_algorithm(seed=12345).stop_after_steps(100).run_tests(5).raise_on_error().build()
 
         assert osmo.seed == 12345
         assert isinstance(osmo.algorithm, RandomAlgorithm)
@@ -272,12 +264,7 @@ class TestFluentAPIIntegration:
 
         model = ErrorModel()
         osmo = (
-            Osmo(model)
-            .random_algorithm(seed=42)
-            .stop_after_steps(10)
-            .run_tests(1)
-            .ignore_errors(max_count=1)
-            .build()
+            Osmo(model).random_algorithm(seed=42).stop_after_steps(10).run_tests(1).ignore_errors(max_count=1).build()
         )
 
         # Should handle the error and continue

@@ -1,4 +1,3 @@
-
 from pyosmo.algorithm.base import OsmoAlgorithm
 from pyosmo.history.history import OsmoHistory
 from pyosmo.model import TestStep

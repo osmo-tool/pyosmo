@@ -40,7 +40,7 @@ class TestStep(ModelFunction):
         function_name: str,
         object_instance: object,
         step_name: str | None = None,
-        is_decorator_based: bool = False
+        is_decorator_based: bool = False,
     ) -> None:
         if not is_decorator_based:
             assert function_name.startswith("step_"), "Wrong name function"
@@ -62,7 +62,7 @@ class TestStep(ModelFunction):
     @property
     def weight(self) -> float:
         # Check decorator-based weight first
-        if hasattr(self.func, '_osmo_weight') and self.func._osmo_weight is not None:  # type: ignore[attr-defined]
+        if hasattr(self.func, "_osmo_weight") and self.func._osmo_weight is not None:  # type: ignore[attr-defined]
             return float(self.func._osmo_weight)  # type: ignore[attr-defined]
 
         # Check weight function (naming convention)
@@ -80,11 +80,11 @@ class TestStep(ModelFunction):
     def is_available(self) -> bool:
         """Check if step is available right now"""
         # Check if step is disabled by decorator
-        if hasattr(self.func, '_osmo_enabled') and not self.func._osmo_enabled:  # type: ignore[attr-defined]
+        if hasattr(self.func, "_osmo_enabled") and not self.func._osmo_enabled:  # type: ignore[attr-defined]
             return False
 
         # Check for inline guard (decorator-based)
-        if hasattr(self.func, '_osmo_guard_inline'):  # type: ignore[attr-defined]
+        if hasattr(self.func, "_osmo_guard_inline"):  # type: ignore[attr-defined]
             return bool(self.func(self.object_instance))  # type: ignore[attr-defined]
 
         # Check for named guard function
@@ -117,7 +117,7 @@ class OsmoModelCollector:
         # First, discover decorator-based steps
         for attr_name in dir(sub_model):
             method = getattr(sub_model, attr_name)
-            if callable(method) and hasattr(method, '_osmo_step'):
+            if callable(method) and hasattr(method, "_osmo_step"):
                 step_name = method._osmo_step_name  # type: ignore[attr-defined]
                 discovered_step_names.add(attr_name)
                 yield TestStep(attr_name, sub_model, step_name, is_decorator_based=True)
@@ -131,11 +131,7 @@ class OsmoModelCollector:
 
     @property
     def all_steps(self) -> Iterator[TestStep]:
-        return (
-            step
-            for sub_model in self.sub_models
-            for step in self._discover_steps(sub_model)
-        )
+        return (step for sub_model in self.sub_models for step in self._discover_steps(sub_model))
 
     def get_step_by_name(self, name: str) -> TestStep | None:
         """Get step by function name"""
