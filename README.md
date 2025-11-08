@@ -25,17 +25,26 @@ python. All python libraries are helping the modelling work.
 
 ## Install
 
-using pip
+using uv (recommended)
+
+```bash
+uv pip install pyosmo
+```
+
+or using pip
 
 ```bash
 pip install pyosmo
 ```
 
-or using git clone
+### Development Installation
+
+Clone and install for development:
 
 ```bash
 git clone git@github.com:OPpuolitaival/pyosmo.git
-python -m pip install -e .
+cd pyosmo
+uv sync --all-extras
 ```
 
 ## Example model
