@@ -1,0 +1,8 @@
+# PyOsmo Model Creator Dependencies
+
+# Web crawling
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+
+# For running generated models (user should have this already)
+# requests is listed above
