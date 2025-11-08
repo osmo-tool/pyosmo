@@ -98,11 +98,15 @@ def guard(step_name_or_func: str | Callable[..., Any], *, invert: bool = False) 
         Decorated function
     """
     if callable(step_name_or_func):
-        # Inline guard
-        func = step_name_or_func
-        func._osmo_guard_inline = True  # type: ignore[attr-defined]
-        func._osmo_guard_invert = invert  # type: ignore[attr-defined]
-        return func
+        # Inline guard - return a decorator that attaches the guard to the step
+        guard_func = step_name_or_func
+
+        def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+            func._osmo_guard_inline = guard_func  # type: ignore[attr-defined]
+            func._osmo_guard_invert = invert  # type: ignore[attr-defined]
+            return func
+
+        return decorator
 
     # Named guard
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
