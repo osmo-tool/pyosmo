@@ -29,41 +29,46 @@ import sys
 from pathlib import Path
 
 # Make the plugin available
-# (In real project, this would be: pytest_plugins = ["pytest_pyosmo.plugin"])
-pytest_plugins = ["pytest_pyosmo_plugin"]  # We copied pytest_pyosmo_plugin.py to this dir
+# Add the pytest_pyosmo directory to sys.path so we can import the plugin
+sys.path.insert(0, str(Path(__file__).parent))
+
+# Import the plugin module directly
+pytest_plugins = ['pytest_pyosmo_plugin']  # We copied pytest_pyosmo_plugin.py to this dir
 
 
 # ============================================================================
 # Optional: Pytest Configuration
 # ============================================================================
 
+
 def pytest_configure(config):
     """
     Optional pytest configuration for model-based testing.
-    
+
     You can set defaults here that apply to all models.
     """
-    print("\n" + "="*70)
-    print("Pytest-Pyosmo Integration Example")
-    print("="*70)
-    print("\nHow to run:")
-    print("  pytest -v                    # All tests")
-    print("  pytest -m quick              # Quick smoke tests only")
-    print("  pytest -m comprehensive      # Full coverage tests")
-    print("  pytest --collect-only -q     # Show what will run")
-    print("  pytest -k CounterModel       # Run specific model")
-    print("  pytest -v -s                 # Verbose with print statements")
-    print("="*70 + "\n")
+    print('\n' + '=' * 70)
+    print('Pytest-Pyosmo Integration Example')
+    print('=' * 70)
+    print('\nHow to run:')
+    print('  pytest -v                    # All tests')
+    print('  pytest -m quick              # Quick smoke tests only')
+    print('  pytest -m comprehensive      # Full coverage tests')
+    print('  pytest --collect-only -q     # Show what will run')
+    print('  pytest -k CounterModel       # Run specific model')
+    print('  pytest -v -s                 # Verbose with print statements')
+    print('=' * 70 + '\n')
 
 
 # ============================================================================
 # Optional: Pytest Hooks for Model Testing
 # ============================================================================
 
+
 def pytest_collection_modifyitems(items):
     """
     Optional: Modify collected items.
-    
+
     This is called after pytest discovers all tests (including generated ones).
     You can use this to:
     - Add markers dynamically
@@ -71,7 +76,7 @@ def pytest_collection_modifyitems(items):
     - Modify test configuration
     """
     for item in items:
-        if "ModelTestItem" in item.__class__.__name__:
+        if 'ModelTestItem' in item.__class__.__name__:
             # This is a generated model test
             # You could add markers, modify timeouts, etc.
             pass
