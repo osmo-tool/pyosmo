@@ -24,4 +24,4 @@ class OsmoAlgorithm(ABC):
 
     @abstractmethod
     def choose(self, history: OsmoHistory, choices: list[TestStep]) -> TestStep:
-        raise Exception("This is just abstract class, not implementation")
+        raise Exception('This is just abstract class, not implementation')

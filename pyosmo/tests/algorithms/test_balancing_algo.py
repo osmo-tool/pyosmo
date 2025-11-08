@@ -4,17 +4,17 @@ from pyosmo.end_conditions import Length
 
 
 class WeightTestModel:
-    steps = []
+    steps: list[str] = []
 
     def step_first(self):
-        self.steps.append("step_first")
+        self.steps.append('step_first')
 
     # Available every second time, balancing algoritm need to handle this
     def guard_second(self):
         return len(self.steps) % 2 == 0
 
     def step_second(self):
-        self.steps.append("step_second")
+        self.steps.append('step_second')
 
 
 def test_balancing_random_algorithm():
@@ -26,8 +26,13 @@ def test_balancing_random_algorithm():
     osmo.algorithm = BalancingRandomAlgorithm()
     osmo.generate()
 
-    step_first_count = osmo.history.get_step_count(osmo.model.get_step_by_name("step_first"))
-    step_second_count = osmo.history.get_step_count(osmo.model.get_step_by_name("step_second"))
+    step_first = osmo.model.get_step_by_name('step_first')
+    step_second = osmo.model.get_step_by_name('step_second')
+    assert step_first is not None
+    assert step_second is not None
+
+    step_first_count = osmo.history.get_step_count(step_first)
+    step_second_count = osmo.history.get_step_count(step_second)
     difference = step_first_count - step_second_count
 
     # Difference is less than 20%
@@ -45,8 +50,13 @@ def test_balancing_algorithm():
     osmo.algorithm = BalancingAlgorithm()
     osmo.generate()
 
-    step_first_count = osmo.history.get_step_count(osmo.model.get_step_by_name("step_first"))
-    step_second_count = osmo.history.get_step_count(osmo.model.get_step_by_name("step_second"))
+    step_first = osmo.model.get_step_by_name('step_first')
+    step_second = osmo.model.get_step_by_name('step_second')
+    assert step_first is not None
+    assert step_second is not None
+
+    step_first_count = osmo.history.get_step_count(step_first)
+    step_second_count = osmo.history.get_step_count(step_second)
     difference = step_first_count - step_second_count
 
     # Difference need to be very small

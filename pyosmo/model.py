@@ -3,7 +3,7 @@ import logging
 from collections.abc import Callable, Iterator
 from typing import Any, Optional
 
-logger = logging.getLogger("osmo")
+logger = logging.getLogger('osmo')
 
 
 class ModelFunction:
@@ -28,10 +28,10 @@ class ModelFunction:
         try:
             return self.func()
         except AttributeError as e:
-            raise Exception(f"Osmo cannot find function {self.object_instance}.{self.function_name} from model") from e
+            raise Exception(f'Osmo cannot find function {self.object_instance}.{self.function_name} from model') from e
 
     def __str__(self) -> str:
-        return f"{type(self.object_instance).__name__}.{self.function_name}()"
+        return f'{type(self.object_instance).__name__}.{self.function_name}()'
 
 
 class TestStep(ModelFunction):
@@ -43,7 +43,7 @@ class TestStep(ModelFunction):
         is_decorator_based: bool = False,
     ) -> None:
         if not is_decorator_based:
-            assert function_name.startswith("step_"), "Wrong name function"
+            assert function_name.startswith('step_'), 'Wrong name function'
         super().__init__(function_name, object_instance)
         self._step_name = step_name
         self._is_decorator_based = is_decorator_based
@@ -57,21 +57,21 @@ class TestStep(ModelFunction):
 
     @property
     def guard_name(self) -> str:
-        return f"guard_{self.name}"
+        return f'guard_{self.name}'
 
     @property
     def weight(self) -> float:
         # Check decorator-based weight first
-        if hasattr(self.func, "_osmo_weight") and self.func._osmo_weight is not None:  # type: ignore[attr-defined]
-            return float(self.func._osmo_weight)  # type: ignore[attr-defined]
+        if hasattr(self.func, '_osmo_weight') and self.func._osmo_weight is not None:
+            return float(self.func._osmo_weight)
 
         # Check weight function (naming convention)
-        weight_function = self.return_function_if_exists(f"weight_{self.name}")
+        weight_function = self.return_function_if_exists(f'weight_{self.name}')
         if weight_function is not None:
             return float(weight_function.execute())
 
         # Check weight attribute (legacy decorator)
-        if "weight" in dir(self.func):
+        if 'weight' in dir(self.func):
             return float(self.func.weight)  # type: ignore[attr-defined]
 
         return self.default_weight  # Default value
@@ -80,22 +80,22 @@ class TestStep(ModelFunction):
     def is_available(self) -> bool:
         """Check if step is available right now"""
         # Check if step is disabled by decorator
-        if hasattr(self.func, "_osmo_enabled") and not self.func._osmo_enabled:  # type: ignore[attr-defined]
+        if hasattr(self.func, '_osmo_enabled') and not self.func._osmo_enabled:
             return False
 
         # Check for inline guard (decorator-based)
-        if hasattr(self.func, "_osmo_guard_inline"):  # type: ignore[attr-defined]
-            return bool(self.func(self.object_instance))  # type: ignore[attr-defined]
+        if hasattr(self.func, '_osmo_guard_inline'):
+            return bool(self.func._osmo_guard_inline(self.object_instance))
 
         # Check for named guard function
         return True if self.guard_function is None else bool(self.guard_function.execute())
 
     @property
-    def guard_function(self) -> Optional["ModelFunction"]:
+    def guard_function(self) -> Optional['ModelFunction']:
         """Return guard function if it exists, otherwise None."""
         return self.return_function_if_exists(self.guard_name)
 
-    def return_function_if_exists(self, name: str) -> Optional["ModelFunction"]:
+    def return_function_if_exists(self, name: str) -> Optional['ModelFunction']:
         """Return ModelFunction if method exists in the model instance, otherwise None."""
         if name in dir(self.object_instance):
             return ModelFunction(name, self.object_instance)
@@ -117,8 +117,8 @@ class OsmoModelCollector:
         # First, discover decorator-based steps
         for attr_name in dir(sub_model):
             method = getattr(sub_model, attr_name)
-            if callable(method) and hasattr(method, "_osmo_step"):
-                step_name = method._osmo_step_name  # type: ignore[attr-defined]
+            if callable(method) and hasattr(method, '_osmo_step'):
+                step_name = method._osmo_step_name
                 discovered_step_names.add(attr_name)
                 yield TestStep(attr_name, sub_model, step_name, is_decorator_based=True)
 
@@ -126,7 +126,7 @@ class OsmoModelCollector:
         for attr_name in dir(sub_model):
             if attr_name in discovered_step_names:
                 continue
-            if callable(getattr(sub_model, attr_name)) and attr_name.startswith("step_"):
+            if callable(getattr(sub_model, attr_name)) and attr_name.startswith('step_'):
                 yield TestStep(attr_name, sub_model)
 
     @property
@@ -160,12 +160,12 @@ class OsmoModelCollector:
             model = model()
 
         self.sub_models.append(model)
-        logger.debug(f"Loaded model: {model.__class__}")
+        logger.debug(f'Loaded model: {model.__class__}')
 
     def execute_optional(self, function_name: str) -> None:
         """Execute all this name functions if available"""
         for function in self.functions_by_name(function_name):
-            logger.debug(f"Execute: {function}")
+            logger.debug(f'Execute: {function}')
             function.execute()
 
     @property

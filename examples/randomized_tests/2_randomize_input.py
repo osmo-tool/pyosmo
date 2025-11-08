@@ -5,7 +5,7 @@ import time
 def system_under_testing(data):
     if data < 900:
         # Flaky bug here
-        return "error"
+        return 'error'
     return data * 2
 
 
@@ -18,7 +18,7 @@ def test():
     try:
         int(output)
     except:
-        raise Exception("Data is not integer") from output
+        raise Exception('Data is not integer') from output
 
     # If we know logic of answer we can use that
     # now output should be 2 times input
@@ -30,6 +30,6 @@ if __name__ == '__main__':
     index = 0
     while True:
         index += 1
-        print(f"Test {index}")
+        print(f'Test {index}')
         time.sleep(0.1)
         test()

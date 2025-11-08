@@ -7,6 +7,8 @@ class WeightedAlgorithm(OsmoAlgorithm):
     """Weighted random algorithm"""
 
     def choose(self, history: OsmoHistory, choices: list[TestStep]) -> TestStep:
+        if self.random is None:
+            raise RuntimeError('Algorithm not initialized. Call initialize() first.')
         return self.random.choices(choices, weights=[c.weight for c in choices])[0]
 
 
@@ -14,6 +16,8 @@ class WeightedBalancingAlgorithm(OsmoAlgorithm):
     """Weighted algorithm which balances based on history"""
 
     def choose(self, history: OsmoHistory, choices: list[TestStep]) -> TestStep:
+        if self.random is None:
+            raise RuntimeError('Algorithm not initialized. Call initialize() first.')
         weights = [c.weight for c in choices]
         normalized_weights = [float(i) / max(weights) for i in weights]
 

@@ -8,7 +8,7 @@ from pyosmo.end_conditions.length import Length
 from pyosmo.error_strategy.always_raise import AlwaysRaise
 from pyosmo.error_strategy.base import OsmoErrorStrategy
 
-logger = logging.getLogger("osmo")
+logger = logging.getLogger('osmo')
 
 # Default random seed range
 DEFAULT_SEED_MAX = 10000
@@ -38,7 +38,7 @@ class OsmoConfig:
     def algorithm(self, value: OsmoAlgorithm):
         """Set test generation algorithm"""
         if not isinstance(value, OsmoAlgorithm):
-            raise AttributeError("algorithm needs to be OsmoAlgorithm")
+            raise AttributeError('algorithm needs to be OsmoAlgorithm')
         self._algorithm = value
 
     @property
@@ -49,7 +49,7 @@ class OsmoConfig:
     def test_end_condition(self, value: OsmoEndCondition):
         """Set test generation test_end_condition"""
         if not isinstance(value, OsmoEndCondition):
-            raise AttributeError("test_end_condition needs to be OsmoEndCondition")
+            raise AttributeError('test_end_condition needs to be OsmoEndCondition')
         self._test_end_condition = value
 
     @property
@@ -60,7 +60,7 @@ class OsmoConfig:
     def test_suite_end_condition(self, value: OsmoEndCondition):
         """Set test generation test_suite_end_condition"""
         if not isinstance(value, OsmoEndCondition):
-            raise AttributeError("test_suite_end_condition needs to be OsmoEndCondition")
+            raise AttributeError('test_suite_end_condition needs to be OsmoEndCondition')
         self._test_suite_end_condition = value
 
     @property
@@ -71,7 +71,7 @@ class OsmoConfig:
     def test_error_strategy(self, value: OsmoErrorStrategy):
         """Set test generation test_suite_end_condition"""
         if not isinstance(value, OsmoErrorStrategy):
-            raise AttributeError("test_error_strategy needs to be OsmoErrorStrategy")
+            raise AttributeError('test_error_strategy needs to be OsmoErrorStrategy')
         self._test_error_strategy = value
 
     @property
@@ -82,5 +82,5 @@ class OsmoConfig:
     def test_suite_error_strategy(self, value: OsmoErrorStrategy):
         """Set test generation test_suite_end_condition"""
         if not isinstance(value, OsmoErrorStrategy):
-            raise AttributeError("test_suite_error_strategy needs to be OsmoErrorStrategy")
+            raise AttributeError('test_suite_error_strategy needs to be OsmoErrorStrategy')
         self._test_suite_error_strategy = value

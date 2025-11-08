@@ -17,16 +17,16 @@ from pyosmo.models.osmo_model import OsmoModel
 from pyosmo.osmo import Osmo
 
 __all__ = [
-    "Osmo",
-    "OsmoModel",
-    "weight",
-    "step",
-    "guard",
-    "pre",
-    "post",
-    "requires",
-    "requires_all",
-    "requires_any",
-    "variable",
-    "state",
+    'Osmo',
+    'OsmoModel',
+    'weight',
+    'step',
+    'guard',
+    'pre',
+    'post',
+    'requires',
+    'requires_all',
+    'requires_any',
+    'variable',
+    'state',
 ]

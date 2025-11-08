@@ -2,7 +2,7 @@ from collections.abc import Callable
 from functools import wraps
 from typing import Any, TypeVar
 
-F = TypeVar("F", bound=Callable[..., Any])
+F = TypeVar('F', bound=Callable[..., Any])
 
 
 # Legacy weight decorator (kept for backward compatibility)

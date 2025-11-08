@@ -11,14 +11,14 @@ class PositiveCalculator:
 
     @staticmethod
     def step_something():
-        print("1. inside step")
+        print('1. inside step')
 
         # Random wait can be added inside test step
         wait_ms = random.randint(200, 1000)
-        print(f"{wait_ms} sleep inside step")
+        print(f'{wait_ms} sleep inside step')
         time.sleep(wait_ms / 1000)
 
-        print("2. inside step")
+        print('2. inside step')
 
     @staticmethod
     def after():

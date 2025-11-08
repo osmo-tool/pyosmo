@@ -6,7 +6,6 @@ import pyosmo
 
 
 class CalculatorModel(pyosmo.OsmoModel):
-
     def __init__(self, f):
         self.expected_result = 0
         self.file = f

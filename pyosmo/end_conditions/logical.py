@@ -6,7 +6,7 @@ from pyosmo.model import OsmoModelCollector
 class LogicalEndCondition:
     def __init__(self, *args):
         if len(args) < 2:
-            raise Exception("And operator needs at least two OsmoEndConditions!")
+            raise Exception('And operator needs at least two OsmoEndConditions!')
         self.endConditions = args
 
 

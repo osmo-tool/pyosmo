@@ -14,14 +14,14 @@ try:
     from bs4 import BeautifulSoup
 except ImportError:
     raise ImportError(
-        "Website crawler requires additional dependencies. Install with:\n"
-        "pip install requests beautifulsoup4"
+        'Website crawler requires additional dependencies. Install with:\npip install requests beautifulsoup4'
     )
 
 
 @dataclass
 class FormField:
     """Represents a form field."""
+
     name: str
     field_type: str
     required: bool = False
@@ -32,15 +32,17 @@ class FormField:
 @dataclass
 class Form:
     """Represents a form on a webpage."""
+
     action: str
-    method: str = "GET"
+    method: str = 'GET'
     fields: List[FormField] = field(default_factory=list)
-    page_url: str = ""
+    page_url: str = ''
 
 
 @dataclass
 class Link:
     """Represents a link on a webpage."""
+
     url: str
     text: str
     source_page: str
@@ -49,6 +51,7 @@ class Link:
 @dataclass
 class Page:
     """Represents a discovered webpage."""
+
     url: str
     title: str
     forms: List[Form] = field(default_factory=list)
@@ -84,7 +87,7 @@ class WebsiteCrawler:
             follow_external: Whether to follow external links
             auth: Optional tuple of (username, password) for basic auth
         """
-        self.base_url = base_url.rstrip("/")
+        self.base_url = base_url.rstrip('/')
         self.max_pages = max_pages
         self.delay = delay
         self.follow_external = follow_external
@@ -98,21 +101,10 @@ class WebsiteCrawler:
             self.session.auth = auth
 
         # Patterns for detecting special elements
-        self.login_patterns = [
-            r"login", r"signin", r"log.in", r"sign.in",
-            r"authenticate", r"auth"
-        ]
-        self.logout_patterns = [
-            r"logout", r"signout", r"log.out", r"sign.out"
-        ]
-        self.error_patterns = [
-            r"error", r"invalid", r"failed", r"incorrect",
-            r"wrong", r"denied", r"forbidden"
-        ]
-        self.success_patterns = [
-            r"success", r"successful", r"welcome", r"thank you",
-            r"confirmed", r"completed"
-        ]
+        self.login_patterns = [r'login', r'signin', r'log.in', r'sign.in', r'authenticate', r'auth']
+        self.logout_patterns = [r'logout', r'signout', r'log.out', r'sign.out']
+        self.error_patterns = [r'error', r'invalid', r'failed', r'incorrect', r'wrong', r'denied', r'forbidden']
+        self.success_patterns = [r'success', r'successful', r'welcome', r'thank you', r'confirmed', r'completed']
 
     def normalize_url(self, url: str, base: Optional[str] = None) -> str:
         """Normalize a URL by joining with base and removing fragments."""
@@ -120,7 +112,7 @@ class WebsiteCrawler:
             url = urljoin(base, url)
         # Remove fragment
         parsed = urlparse(url)
-        return f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
+        return f'{parsed.scheme}://{parsed.netloc}{parsed.path}'
 
     def is_same_domain(self, url: str) -> bool:
         """Check if URL belongs to the same domain as base_url."""
@@ -132,40 +124,36 @@ class WebsiteCrawler:
         """Extract all forms from a page."""
         forms = []
 
-        for form_elem in soup.find_all("form"):
-            action = form_elem.get("action", "")
+        for form_elem in soup.find_all('form'):
+            action = form_elem.get('action', '')
             action = self.normalize_url(action, page_url)
-            method = form_elem.get("method", "GET").upper()
+            method = form_elem.get('method', 'GET').upper()
 
             fields = []
-            for input_elem in form_elem.find_all(["input", "select", "textarea"]):
-                name = input_elem.get("name")
+            for input_elem in form_elem.find_all(['input', 'select', 'textarea']):
+                name = input_elem.get('name')
                 if not name:
                     continue
 
-                field_type = input_elem.get("type", "text").lower()
-                required = input_elem.get("required") is not None
-                default_value = input_elem.get("value")
+                field_type = input_elem.get('type', 'text').lower()
+                required = input_elem.get('required') is not None
+                default_value = input_elem.get('value')
 
                 options = []
-                if input_elem.name == "select":
-                    options = [opt.get("value", opt.text)
-                              for opt in input_elem.find_all("option")]
+                if input_elem.name == 'select':
+                    options = [opt.get('value', opt.text) for opt in input_elem.find_all('option')]
 
-                fields.append(FormField(
-                    name=name,
-                    field_type=field_type,
-                    required=required,
-                    options=options,
-                    default_value=default_value
-                ))
+                fields.append(
+                    FormField(
+                        name=name,
+                        field_type=field_type,
+                        required=required,
+                        options=options,
+                        default_value=default_value,
+                    )
+                )
 
-            forms.append(Form(
-                action=action,
-                method=method,
-                fields=fields,
-                page_url=page_url
-            ))
+            forms.append(Form(action=action, method=method, fields=fields, page_url=page_url))
 
         return forms
 
@@ -173,12 +161,12 @@ class WebsiteCrawler:
         """Extract all links from a page."""
         links = []
 
-        for a_elem in soup.find_all("a", href=True):
-            href = a_elem["href"]
+        for a_elem in soup.find_all('a', href=True):
+            href = a_elem['href']
             text = a_elem.get_text(strip=True)
 
             # Skip javascript links, anchors, etc.
-            if href.startswith(("javascript:", "mailto:", "tel:", "#")):
+            if href.startswith(('javascript:', 'mailto:', 'tel:', '#')):
                 continue
 
             url = self.normalize_url(href, page_url)
@@ -198,7 +186,7 @@ class WebsiteCrawler:
 
     def analyze_page(self, url: str, html: str) -> Page:
         """Analyze a page's HTML and extract information."""
-        soup = BeautifulSoup(html, "html.parser")
+        soup = BeautifulSoup(html, 'html.parser')
 
         # Extract title
         title = soup.title.string if soup.title else url
@@ -216,8 +204,7 @@ class WebsiteCrawler:
         if not has_login:
             for form in forms:
                 form_fields = {f.name.lower() for f in form.fields}
-                if any(field in form_fields for field in
-                       ["username", "password", "email", "login"]):
+                if any(field in form_fields for field in ['username', 'password', 'email', 'login']):
                     has_login = True
                     break
 
@@ -225,13 +212,13 @@ class WebsiteCrawler:
         error_messages = []
         success_messages = []
 
-        for elem in soup.find_all(["div", "p", "span"], class_=True):
-            classes = " ".join(elem.get("class", []))
+        for elem in soup.find_all(['div', 'p', 'span'], class_=True):
+            classes = ' '.join(elem.get('class', []))
             text = elem.get_text(strip=True)
 
-            if self.detect_patterns(classes + " " + text, self.error_patterns):
+            if self.detect_patterns(classes + ' ' + text, self.error_patterns):
                 error_messages.append(text)
-            elif self.detect_patterns(classes + " " + text, self.success_patterns):
+            elif self.detect_patterns(classes + ' ' + text, self.success_patterns):
                 success_messages.append(text)
 
         return Page(
@@ -242,7 +229,7 @@ class WebsiteCrawler:
             has_login=has_login,
             has_logout=has_logout,
             error_messages=error_messages,
-            success_messages=success_messages
+            success_messages=success_messages,
         )
 
     def crawl_page(self, url: str) -> Optional[Page]:
@@ -254,7 +241,7 @@ class WebsiteCrawler:
             return None
 
         try:
-            print(f"Crawling: {url}")
+            print(f'Crawling: {url}')
             response = self.session.get(url, timeout=10)
             self.visited_urls.add(url)
 
@@ -273,7 +260,7 @@ class WebsiteCrawler:
             return page
 
         except Exception as e:
-            print(f"Error crawling {url}: {e}")
+            print(f'Error crawling {url}: {e}')
             self.visited_urls.add(url)
             return None
 
@@ -304,7 +291,7 @@ class WebsiteCrawler:
                 if link.url not in self.visited_urls and link.url not in to_visit:
                     to_visit.append(link.url)
 
-        print(f"\nCrawling complete. Discovered {len(self.pages)} pages.")
+        print(f'\nCrawling complete. Discovered {len(self.pages)} pages.')
         return self.pages
 
     def get_statistics(self) -> Dict:
@@ -316,10 +303,10 @@ class WebsiteCrawler:
         pages_with_logout = sum(1 for page in self.pages.values() if page.has_logout)
 
         return {
-            "total_pages": len(self.pages),
-            "total_forms": total_forms,
-            "total_links": total_links,
-            "pages_with_forms": pages_with_forms,
-            "pages_with_login": pages_with_login,
-            "pages_with_logout": pages_with_logout,
+            'total_pages': len(self.pages),
+            'total_forms': total_forms,
+            'total_links': total_links,
+            'pages_with_forms': pages_with_forms,
+            'pages_with_login': pages_with_login,
+            'pages_with_logout': pages_with_logout,
         }

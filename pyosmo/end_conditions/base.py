@@ -11,8 +11,8 @@ class OsmoEndCondition(ABC):
 
     @abstractmethod
     def end_test(self, history: OsmoHistory, model: OsmoModelCollector) -> bool:
-        raise Exception("This is not implemented!")
+        raise Exception('This is not implemented!')
 
     @abstractmethod
     def end_suite(self, history: OsmoHistory, model: OsmoModelCollector) -> bool:
-        raise Exception("This is not implemented!")
+        raise Exception('This is not implemented!')

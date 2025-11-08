@@ -5,10 +5,10 @@ This package provides tools to automatically generate PyOsmo models from website
 by crawling and analyzing their structure and behavior.
 """
 
-__version__ = "0.1.0"
+__version__ = '0.1.0'
 
 from .crawler import WebsiteCrawler
 from .generator import ModelGenerator
 from .updater import ModelUpdater
 
-__all__ = ["WebsiteCrawler", "ModelGenerator", "ModelUpdater"]
+__all__ = ['WebsiteCrawler', 'ModelGenerator', 'ModelUpdater']

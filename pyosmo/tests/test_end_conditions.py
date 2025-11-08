@@ -78,5 +78,11 @@ def test_step_coverage():
     osmo.test_end_condition = StepCoverage(100)
     osmo.test_suite_end_condition = Length(1)
     osmo.generate()
-    assert osmo.history.get_step_count(osmo.model.get_step_by_name("step_first")) > 0
-    assert osmo.history.get_step_count(osmo.model.get_step_by_name("step_second")) > 0
+
+    step_first = osmo.model.get_step_by_name('step_first')
+    step_second = osmo.model.get_step_by_name('step_second')
+    assert step_first is not None
+    assert step_second is not None
+
+    assert osmo.history.get_step_count(step_first) > 0
+    assert osmo.history.get_step_count(step_second) > 0

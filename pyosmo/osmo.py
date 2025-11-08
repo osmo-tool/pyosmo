@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from pyosmo.end_conditions.base import OsmoEndCondition
     from pyosmo.error_strategy.base import OsmoErrorStrategy
 
-logger = logging.getLogger("osmo")
+logger = logging.getLogger('osmo')
 
 
 class Osmo(OsmoConfig):
@@ -48,9 +48,9 @@ class Osmo(OsmoConfig):
     @seed.setter
     def seed(self, value: int) -> None:
         """Set random seed for test generation"""
-        logger.debug(f"Set seed: {value}")
+        logger.debug(f'Set seed: {value}')
         if not isinstance(value, int):
-            raise AttributeError("Seed value must be an integer.")
+            raise AttributeError('Seed value must be an integer.')
         self._seed = value
         self._random = Random(self._seed)
         # update osmo_random in all models
@@ -60,12 +60,12 @@ class Osmo(OsmoConfig):
     @staticmethod
     def _check_model(model: object) -> None:
         """Check that model is valid"""
-        if not hasattr(model, "__class__"):
-            raise Exception("Osmo model need to be instance of model, not just class")
+        if not hasattr(model, '__class__'):
+            raise Exception('Osmo model need to be instance of model, not just class')
 
     def add_model(self, model: object) -> None:
         """Add model for osmo"""
-        logger.debug(f"Add model:{model}")
+        logger.debug(f'Add model:{model}')
         self._check_model(model)
         # Set osmo_random
         model.osmo_random = self._random  # type: ignore[attr-defined]
@@ -77,7 +77,7 @@ class Osmo(OsmoConfig):
         :param step: Test step
         :return:
         """
-        logger.debug(f"Run step: {step}")
+        logger.debug(f'Run step: {step}')
         start_time = datetime.now()
         try:
             step.execute()
@@ -93,45 +93,45 @@ class Osmo(OsmoConfig):
     def generate(self) -> None:
         """Generate / run tests"""
         self.history = OsmoHistory()  # Restart the history
-        logger.debug("Start generation..")
-        logger.info(f"Using seed: {self.seed}")
+        logger.debug('Start generation..')
+        logger.info(f'Using seed: {self.seed}')
         # Initialize algorithm
         self.algorithm.initialize(self.random, self.model)
 
-        self.model.execute_optional("before_suite")
+        self.model.execute_optional('before_suite')
         if not self.model.all_steps:
-            raise Exception("Empty model!")
+            raise Exception('Empty model!')
 
         while True:
             try:
                 self.history.start_new_test()
-                self.model.execute_optional("before_test")
+                self.model.execute_optional('before_test')
                 while True:
                     # Use algorithm to select the step
-                    self.model.execute_optional("before")
+                    self.model.execute_optional('before')
                     step = self.algorithm.choose(self.history, self.model.available_steps)
-                    self.model.execute_optional(f"pre_{step}")
+                    self.model.execute_optional(f'pre_{step}')
                     try:
                         self._run_step(step)
                     except BaseException as error:
                         self.test_error_strategy.failure_in_test(self.history, self.model, error)
-                    self.model.execute_optional(f"post_{step.name}")
+                    self.model.execute_optional(f'post_{step.name}')
                     # General after step which is run after each step
-                    self.model.execute_optional("after")
+                    self.model.execute_optional('after')
 
                     if self.test_end_condition.end_test(self.history, self.model):
                         break
-                self.model.execute_optional("after_test")
+                self.model.execute_optional('after_test')
             except BaseException as error:
                 self.test_suite_error_strategy.failure_in_suite(self.history, self.model, error)
             if self.test_suite_end_condition.end_suite(self.history, self.model):
                 break
-        self.model.execute_optional("after_suite")
+        self.model.execute_optional('after_suite')
         self.history.stop()
 
     # Fluent Configuration API
 
-    def with_seed(self, seed: int) -> "Osmo":
+    def with_seed(self, seed: int) -> 'Osmo':
         """
         Set random seed for test generation (fluent API).
 
@@ -144,7 +144,7 @@ class Osmo(OsmoConfig):
         self.seed = seed
         return self
 
-    def with_algorithm(self, algorithm: "OsmoAlgorithm") -> "Osmo":
+    def with_algorithm(self, algorithm: 'OsmoAlgorithm') -> 'Osmo':
         """
         Set test generation algorithm (fluent API).
 
@@ -157,7 +157,7 @@ class Osmo(OsmoConfig):
         self.algorithm = algorithm
         return self
 
-    def with_test_end_condition(self, condition: "OsmoEndCondition") -> "Osmo":
+    def with_test_end_condition(self, condition: 'OsmoEndCondition') -> 'Osmo':
         """
         Set test end condition (fluent API).
 
@@ -170,7 +170,7 @@ class Osmo(OsmoConfig):
         self.test_end_condition = condition
         return self
 
-    def with_suite_end_condition(self, condition: "OsmoEndCondition") -> "Osmo":
+    def with_suite_end_condition(self, condition: 'OsmoEndCondition') -> 'Osmo':
         """
         Set test suite end condition (fluent API).
 
@@ -183,7 +183,7 @@ class Osmo(OsmoConfig):
         self.test_suite_end_condition = condition
         return self
 
-    def on_error(self, strategy: "OsmoErrorStrategy") -> "Osmo":
+    def on_error(self, strategy: 'OsmoErrorStrategy') -> 'Osmo':
         """
         Set error handling strategy for both test and suite levels (fluent API).
 
@@ -197,7 +197,7 @@ class Osmo(OsmoConfig):
         self.test_suite_error_strategy = strategy
         return self
 
-    def on_test_error(self, strategy: "OsmoErrorStrategy") -> "Osmo":
+    def on_test_error(self, strategy: 'OsmoErrorStrategy') -> 'Osmo':
         """
         Set error handling strategy for test level (fluent API).
 
@@ -210,7 +210,7 @@ class Osmo(OsmoConfig):
         self.test_error_strategy = strategy
         return self
 
-    def on_suite_error(self, strategy: "OsmoErrorStrategy") -> "Osmo":
+    def on_suite_error(self, strategy: 'OsmoErrorStrategy') -> 'Osmo':
         """
         Set error handling strategy for suite level (fluent API).
 
@@ -223,7 +223,7 @@ class Osmo(OsmoConfig):
         self.test_suite_error_strategy = strategy
         return self
 
-    def build(self) -> "Osmo":
+    def build(self) -> 'Osmo':
         """
         Finalize configuration and return the Osmo instance (fluent API).
 
@@ -237,7 +237,7 @@ class Osmo(OsmoConfig):
 
     # Convenience fluent methods (more fluent API)
 
-    def random_algorithm(self, seed: int | None = None) -> "Osmo":
+    def random_algorithm(self, seed: int | None = None) -> 'Osmo':
         """
         Use random algorithm with optional seed (convenience fluent API).
 
@@ -254,7 +254,7 @@ class Osmo(OsmoConfig):
             self.seed = seed
         return self
 
-    def balancing_algorithm(self, seed: int | None = None) -> "Osmo":
+    def balancing_algorithm(self, seed: int | None = None) -> 'Osmo':
         """
         Use balancing algorithm with optional seed (convenience fluent API).
 
@@ -271,7 +271,7 @@ class Osmo(OsmoConfig):
             self.seed = seed
         return self
 
-    def weighted_algorithm(self, seed: int | None = None) -> "Osmo":
+    def weighted_algorithm(self, seed: int | None = None) -> 'Osmo':
         """
         Use weighted algorithm with optional seed (convenience fluent API).
 
@@ -288,7 +288,7 @@ class Osmo(OsmoConfig):
             self.seed = seed
         return self
 
-    def stop_after_steps(self, steps: int) -> "Osmo":
+    def stop_after_steps(self, steps: int) -> 'Osmo':
         """
         Stop each test after N steps (convenience fluent API).
 
@@ -303,7 +303,7 @@ class Osmo(OsmoConfig):
         self.test_end_condition = Length(steps)
         return self
 
-    def stop_after_time(self, seconds: int) -> "Osmo":
+    def stop_after_time(self, seconds: int) -> 'Osmo':
         """
         Stop each test after N seconds (convenience fluent API).
 
@@ -318,7 +318,7 @@ class Osmo(OsmoConfig):
         self.test_end_condition = Time(timedelta(seconds=seconds))
         return self
 
-    def run_tests(self, count: int) -> "Osmo":
+    def run_tests(self, count: int) -> 'Osmo':
         """
         Run N tests in the suite (convenience fluent API).
 
@@ -333,7 +333,7 @@ class Osmo(OsmoConfig):
         self.test_suite_end_condition = Length(count)
         return self
 
-    def run_endless(self) -> "Osmo":
+    def run_endless(self) -> 'Osmo':
         """
         Run tests endlessly (convenience fluent API).
 
@@ -347,7 +347,7 @@ class Osmo(OsmoConfig):
         self.test_suite_end_condition = Endless()
         return self
 
-    def raise_on_error(self) -> "Osmo":
+    def raise_on_error(self) -> 'Osmo':
         """
         Raise exceptions immediately when errors occur (convenience fluent API).
 
@@ -358,7 +358,7 @@ class Osmo(OsmoConfig):
 
         return self.on_error(AlwaysRaise())
 
-    def ignore_errors(self, max_count: int | None = None) -> "Osmo":
+    def ignore_errors(self, max_count: int | None = None) -> 'Osmo':
         """
         Ignore errors during test execution (convenience fluent API).
 
@@ -377,7 +377,7 @@ class Osmo(OsmoConfig):
 
         return self.on_error(AllowCount(max_count))
 
-    def ignore_asserts(self) -> "Osmo":
+    def ignore_asserts(self) -> 'Osmo':
         """
         Ignore assertion errors but raise other exceptions (convenience fluent API).
 

@@ -1,6 +1,7 @@
 """
 Complex model with two actors.
 """
+
 from pyosmo.osmo import Osmo
 from dataclasses import dataclass
 import random
@@ -23,11 +24,10 @@ class Person:
 
 def give(giver, receiver):
     amount = giver.give_money(random.randint(1, 5), receiver)
-    print(f"- {giver} gave {amount} to {receiver}")
+    print(f'- {giver} gave {amount} to {receiver}')
 
 
 class ExampleModel:
-
     def __init__(self):
         print('Starting')
 
@@ -46,7 +46,6 @@ class ExampleModel:
 
     def step_person2_gives_to_person1(self):
         give(self.person2, self.person1)
-
 
     def after_test(self):
         print(f'Situation in the end:\n  {self.person1}\n  {self.person2}')

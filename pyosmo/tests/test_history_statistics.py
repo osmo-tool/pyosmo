@@ -60,16 +60,16 @@ def test_statistics_to_dict():
     data = stats.to_dict()
 
     # Verify dictionary structure
-    assert "total_steps" in data
-    assert "total_tests" in data
-    assert "duration_seconds" in data
-    assert "step_frequency" in data
-    assert "step_execution_times" in data
+    assert 'total_steps' in data
+    assert 'total_tests' in data
+    assert 'duration_seconds' in data
+    assert 'step_frequency' in data
+    assert 'step_execution_times' in data
 
     # Verify types
-    assert isinstance(data["total_steps"], int)
-    assert isinstance(data["duration_seconds"], float)
-    assert isinstance(data["step_frequency"], dict)
+    assert isinstance(data['total_steps'], int)
+    assert isinstance(data['duration_seconds'], float)
+    assert isinstance(data['step_frequency'], dict)
 
 
 def test_step_frequency():
@@ -143,7 +143,7 @@ def test_failed_tests():
         def step_action(self):
             self.counter += 1
             if self.counter == 3:
-                raise Exception("Intentional failure")
+                raise Exception('Intentional failure')
 
     model = FailingModel()
     osmo = Osmo(model)
@@ -176,6 +176,6 @@ def test_statistics_str_representation():
     str_repr = str(stats)
 
     # Verify it contains expected information
-    assert "Total Tests:" in str_repr
-    assert "Total Steps:" in str_repr
-    assert "Duration:" in str_repr
+    assert 'Total Tests:' in str_repr
+    assert 'Total Steps:' in str_repr
+    assert 'Duration:' in str_repr

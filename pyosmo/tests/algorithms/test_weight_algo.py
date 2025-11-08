@@ -4,15 +4,15 @@ from pyosmo.end_conditions import Length
 
 
 class WeightTestModel1:
-    steps = []
+    steps: list[str] = []
 
     @weight(1)
     def step_first(self):
-        self.steps.append("step_first")
+        self.steps.append('step_first')
 
     @weight(2)
     def step_second(self):
-        self.steps.append("step_second")
+        self.steps.append('step_second')
 
     @staticmethod
     def weight_third():
@@ -20,7 +20,7 @@ class WeightTestModel1:
         return 3
 
     def step_third(self):
-        self.steps.append("step_third")
+        self.steps.append('step_third')
 
 
 def test_weighted_algorithm():
@@ -31,27 +31,34 @@ def test_weighted_algorithm():
     osmo.algorithm = WeightedAlgorithm()
     osmo.generate()
 
-    step_first_count = osmo.history.get_step_count(osmo.model.get_step_by_name("step_first"))
-    step_second_count = osmo.history.get_step_count(osmo.model.get_step_by_name("step_second"))
-    step_third_count = osmo.history.get_step_count(osmo.model.get_step_by_name("step_third"))
+    step_first = osmo.model.get_step_by_name('step_first')
+    step_second = osmo.model.get_step_by_name('step_second')
+    step_third = osmo.model.get_step_by_name('step_third')
+    assert step_first is not None
+    assert step_second is not None
+    assert step_third is not None
+
+    step_first_count = osmo.history.get_step_count(step_first)
+    step_second_count = osmo.history.get_step_count(step_second)
+    step_third_count = osmo.history.get_step_count(step_third)
 
     assert step_first_count < step_second_count < step_third_count
 
 
 @weight(10)  # Set default weight for class functions
 class WeightTestModel2:
-    steps = []
+    steps: list[str] = []
 
     @weight(5)
     def step_first(self):
-        self.steps.append("step_first")
+        self.steps.append('step_first')
 
     # Weight is 10 because of class basic weight
     def step_second(self):
-        self.steps.append("step_second")
+        self.steps.append('step_second')
 
     def step_third(self):
-        self.steps.append("step_third")
+        self.steps.append('step_third')
 
 
 def test_weighted_algorithm2():
@@ -63,8 +70,13 @@ def test_weighted_algorithm2():
     osmo.algorithm = WeightedAlgorithm()
     osmo.generate()
 
-    step_first_count = osmo.history.get_step_count(osmo.model.get_step_by_name("step_first"))
-    step_second_count = osmo.history.get_step_count(osmo.model.get_step_by_name("step_second"))
+    step_first = osmo.model.get_step_by_name('step_first')
+    step_second = osmo.model.get_step_by_name('step_second')
+    assert step_first is not None
+    assert step_second is not None
+
+    step_first_count = osmo.history.get_step_count(step_first)
+    step_second_count = osmo.history.get_step_count(step_second)
 
     assert step_first_count < step_second_count
 
@@ -77,7 +89,12 @@ def test_weighted_balancing_algorithm():
     osmo.algorithm = WeightedBalancingAlgorithm()
     osmo.generate()
 
-    step_first_count = osmo.history.get_step_count(osmo.model.get_step_by_name("step_first"))
-    step_second_count = osmo.history.get_step_count(osmo.model.get_step_by_name("step_second"))
+    step_first = osmo.model.get_step_by_name('step_first')
+    step_second = osmo.model.get_step_by_name('step_second')
+    assert step_first is not None
+    assert step_second is not None
+
+    step_first_count = osmo.history.get_step_count(step_first)
+    step_second_count = osmo.history.get_step_count(step_second)
 
     assert step_first_count < step_second_count

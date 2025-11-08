@@ -46,7 +46,7 @@ class OsmoStatistics:
     """Average execution time for each step (in seconds)"""
 
     @classmethod
-    def from_history(cls, history: "OsmoHistory") -> "OsmoStatistics":
+    def from_history(cls, history: 'OsmoHistory') -> 'OsmoStatistics':
         """Create statistics from history.
 
         Args:
@@ -95,38 +95,38 @@ class OsmoStatistics:
             Dictionary representation of statistics
         """
         return {
-            "total_steps": self.total_steps,
-            "unique_steps": self.unique_steps,
-            "total_tests": self.total_tests,
-            "duration_seconds": self.duration.total_seconds(),
-            "error_count": self.error_count,
-            "most_executed_step": self.most_executed_step,
-            "least_executed_step": self.least_executed_step,
-            "average_steps_per_test": self.average_steps_per_test,
-            "step_frequency": self.step_frequency,
-            "step_execution_times": self.step_execution_times,
+            'total_steps': self.total_steps,
+            'unique_steps': self.unique_steps,
+            'total_tests': self.total_tests,
+            'duration_seconds': self.duration.total_seconds(),
+            'error_count': self.error_count,
+            'most_executed_step': self.most_executed_step,
+            'least_executed_step': self.least_executed_step,
+            'average_steps_per_test': self.average_steps_per_test,
+            'step_frequency': self.step_frequency,
+            'step_execution_times': self.step_execution_times,
         }
 
     def __str__(self) -> str:
         """Formatted string representation of statistics."""
         lines = [
-            "Test Execution Statistics:",
-            f"  Total Tests: {self.total_tests}",
-            f"  Total Steps: {self.total_steps}",
-            f"  Unique Steps: {self.unique_steps}",
-            f"  Duration: {self.duration}",
-            f"  Errors: {self.error_count}",
-            f"  Avg Steps/Test: {self.average_steps_per_test:.2f}",
+            'Test Execution Statistics:',
+            f'  Total Tests: {self.total_tests}',
+            f'  Total Steps: {self.total_steps}',
+            f'  Unique Steps: {self.unique_steps}',
+            f'  Duration: {self.duration}',
+            f'  Errors: {self.error_count}',
+            f'  Avg Steps/Test: {self.average_steps_per_test:.2f}',
         ]
 
         if self.most_executed_step:
             lines.append(
-                f"  Most Executed: {self.most_executed_step} ({self.step_frequency[self.most_executed_step]} times)"
+                f'  Most Executed: {self.most_executed_step} ({self.step_frequency[self.most_executed_step]} times)'
             )
 
         if self.least_executed_step:
             lines.append(
-                f"  Least Executed: {self.least_executed_step} ({self.step_frequency[self.least_executed_step]} times)"
+                f'  Least Executed: {self.least_executed_step} ({self.step_frequency[self.least_executed_step]} times)'
             )
 
-        return "\n".join(lines)
+        return '\n'.join(lines)

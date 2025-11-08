@@ -17,7 +17,7 @@ class OsmoHistory:
 
     def start_new_test(self) -> None:
         # Stop test case timer
-        if self.current_test_case and self.current_test_case.is_running:
+        if self.current_test_case and self.current_test_case.is_running():
             self.current_test_case.stop()
         # Start a new test case
         self.test_cases.append(OsmoTestCaseRecord())
@@ -32,7 +32,7 @@ class OsmoHistory:
     def add_step(self, step: TestStep, duration: timedelta, error: Exception | None = None) -> None:
         """Add a step to the history"""
         if self.current_test_case is None:
-            raise Exception("There is no active test case!!")
+            raise Exception('There is no active test case!!')
         self.current_test_case.add_step(TestStepLog(step, duration, error))
 
     @property
@@ -70,8 +70,8 @@ class OsmoHistory:
 
     @property
     def step_stats(self) -> str:
-        stats = {}
-        ret = ""
+        stats: dict[str, int] = {}
+        ret = ''
         for test_case in self.test_cases:
             for step in test_case.steps_log:
                 if step.name in stats:
@@ -79,20 +79,20 @@ class OsmoHistory:
                 else:
                     stats[step.name] = 1
         for key, value in stats.items():
-            ret += f"{key}:{value}\n"
+            ret += f'{key}:{value}\n'
         return ret
 
     def print_summary(self) -> None:
         if self.stop_time is None:
-            raise Exception("Cannot get summary of ongoing test")
-        ret = "\n"
-        ret += "Osmo run summary:\n"
-        ret += f"Test cases: {self.test_case_count}\n"
-        ret += f"Test steps: {self.total_amount_of_steps}\n"
-        ret += f"Duration: {self.duration}\n"
+            raise Exception('Cannot get summary of ongoing test')
+        ret = '\n'
+        ret += 'Osmo run summary:\n'
+        ret += f'Test cases: {self.test_case_count}\n'
+        ret += f'Test steps: {self.total_amount_of_steps}\n'
+        ret += f'Duration: {self.duration}\n'
         print(ret)
 
-    def statistics(self) -> "OsmoStatistics":
+    def statistics(self) -> 'OsmoStatistics':
         """Get structured statistics from test execution.
 
         Returns:
@@ -155,10 +155,10 @@ class OsmoHistory:
         return timeline
 
     def __str__(self) -> str:
-        ret = ""
+        ret = ''
         for tc_index, test_case in enumerate(self.test_cases, start=1):
-            ret += f"{tc_index}. test case {test_case.duration:.2f}s\n"
+            ret += f'{tc_index}. test case {test_case.duration:.2f}s\n'
             for step in test_case.steps_log:
-                ret += f"{step.timestamp} {step.duration:.2f}s {step.name}\n"
-            ret += "\n"
+                ret += f'{step.timestamp} {step.duration:.2f}s {step.name}\n'
+            ret += '\n'
         return ret

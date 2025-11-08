@@ -14,6 +14,8 @@ class Time(OsmoEndCondition):
         self.duration = duration
 
     def end_test(self, history: OsmoHistory, model: OsmoModelCollector) -> bool:
+        if history.current_test_case is None:
+            return False
         return history.current_test_case.duration >= self.duration
 
     def end_suite(self, history: OsmoHistory, model: OsmoModelCollector) -> bool:

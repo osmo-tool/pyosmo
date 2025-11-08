@@ -17,5 +17,5 @@ class RandomDelayModel:
 
     def after(self):
         delay = random.uniform(self.min, self.max)
-        print(f"Sleeping {delay}")
+        print(f'Sleeping {delay}')
         time.sleep(delay)

@@ -8,8 +8,8 @@ class AlwaysRaise(OsmoErrorStrategy):
     Just raise the exception always, which stops osmo execution
     """
 
-    def failure_in_test(self, history: OsmoHistory, model: OsmoModelCollector, error: Exception):
+    def failure_in_test(self, history: OsmoHistory, model: OsmoModelCollector, error: BaseException) -> None:
         raise error
 
-    def failure_in_suite(self, history: OsmoHistory, model: OsmoModelCollector, error: Exception):
+    def failure_in_suite(self, history: OsmoHistory, model: OsmoModelCollector, error: BaseException) -> None:
         raise error

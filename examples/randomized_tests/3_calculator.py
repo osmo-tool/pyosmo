@@ -30,6 +30,7 @@ class PositiveCalculator:
     """
     This test model test only positive numbers
     """
+
     # Reference number which will be compared to the system under testing
     expected_count = 0
     # Connection to the system under testing, just instance in this case
@@ -40,11 +41,11 @@ class PositiveCalculator:
 
     @staticmethod
     def before_suite():
-        """ This is executed at the begin of the test suite """
+        """This is executed at the begin of the test suite"""
         print('START')
 
     def before_test(self):
-        """ This is executed before each test case """
+        """This is executed before each test case"""
         print('Test starts')
         # Initializing variables
         self.expected_count = 0
@@ -52,12 +53,12 @@ class PositiveCalculator:
 
     @staticmethod
     def guard_add():
-        """ It is always able to add when testing positive numbers
-        This guard can be deleted because this is default guard when guard is missing """
+        """It is always able to add when testing positive numbers
+        This guard can be deleted because this is default guard when guard is missing"""
         return True
 
     def step_add(self):
-        """ Add a number """
+        """Add a number"""
         add_num = random.randint(1, 1000)
         print(f'{self.expected_count} + {add_num} = {self.expected_count + add_num}')
         # Add number to the system under testing
@@ -66,11 +67,11 @@ class PositiveCalculator:
         self.expected_count += add_num
 
     def guard_minus(self):
-        """ This is allowed only when count is positive """
+        """This is allowed only when count is positive"""
         return self.expected_count > 0
 
     def step_minus(self):
-        """ Minus random number """
+        """Minus random number"""
         minus_num = random.randint(1, self.expected_count)
         print(f'{self.expected_count} - {minus_num} = {self.expected_count - minus_num}')
         # Minus number from system under testing
@@ -79,12 +80,12 @@ class PositiveCalculator:
         self.expected_count -= minus_num
 
     def after(self):
-        """ This happend after each test step """
+        """This happend after each test step"""
         print(f'assert {self.calculator.result()} == {self.expected_count}')
         assert self.calculator.result() == self.expected_count
 
     def after_test(self):
-        """ This is executed after each test """
+        """This is executed after each test"""
         print(f'Test ends, final number: {self.expected_count}\n')
 
     @staticmethod

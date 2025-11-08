@@ -260,7 +260,7 @@ class TestFluentAPIIntegration:
                 """Step that sometimes raises an error."""
                 self.step_count += 1
                 if self.step_count == 5:
-                    raise ValueError("Test error")
+                    raise ValueError('Test error')
 
         model = ErrorModel()
         osmo = (

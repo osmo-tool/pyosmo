@@ -1,10 +1,9 @@
-""" This is simples possible example how to split model in two parts """
+"""This is simples possible example how to split model in two parts"""
 
 import pyosmo
 
 
 class TestModel(pyosmo.OsmoModel):
-
     def __init__(self):
         pass
 
@@ -14,7 +13,7 @@ class TestModel(pyosmo.OsmoModel):
 
     @staticmethod
     def step_first():
-        print("1. step")
+        print('1. step')
 
     @staticmethod
     def before_suite():
@@ -34,7 +33,6 @@ class TestModel(pyosmo.OsmoModel):
 
 
 class TestModel2(pyosmo.OsmoModel):
-
     def __init__(self):
         pass
 
@@ -44,15 +42,15 @@ class TestModel2(pyosmo.OsmoModel):
 
     @staticmethod
     def pre_second():
-        print("-->")
+        print('-->')
 
     @staticmethod
     def step_second():
-        print("2. step")
+        print('2. step')
 
     @staticmethod
     def post_second():
-        print("<--")
+        print('<--')
 
 
 if __name__ == '__main__':

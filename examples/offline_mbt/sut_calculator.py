@@ -1,5 +1,4 @@
 class CalculatorSUT:
-
     def __init__(self):
         self.display = 0
 

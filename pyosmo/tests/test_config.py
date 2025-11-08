@@ -16,7 +16,7 @@ class OneStepModel:
     def step_one(self):
         self.index += 1
         if self.index == 5:
-            raise TempError("Should happen!")
+            raise TempError('Should happen!')
 
 
 def test_exception_raise_effects():
@@ -32,14 +32,14 @@ def test_exception_raise_effects():
 def test_wrong_config_objects():
     osmo = Osmo(OneStepModel())
     try:
-        osmo.test_end_condition = RandomAlgorithm()
+        osmo.test_end_condition = RandomAlgorithm()  # type: ignore[assignment]
     except AttributeError:
         pass
     except:
         raise
 
     try:
-        osmo.algorithm = Length(1)
+        osmo.algorithm = Length(1)  # type: ignore[assignment]
     except AttributeError:
         pass
     except:

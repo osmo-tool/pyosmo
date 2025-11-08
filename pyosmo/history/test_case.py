@@ -6,10 +6,9 @@ from pyosmo.model import TestStep
 
 class OsmoTestCaseRecord:
     def __init__(self):
-        self.steps_log = []
-        self._start_time = None
-        self._stop_time = None
-        self._start_time = datetime.now()
+        self.steps_log: list[TestStepLog] = []
+        self._start_time: datetime = datetime.now()
+        self._stop_time: datetime | None = None
 
     def stop(self) -> None:
         self._stop_time = datetime.now()
@@ -22,7 +21,7 @@ class OsmoTestCaseRecord:
 
     def add_step(self, step_log: TestStepLog) -> None:
         if self.is_running():
-            raise Exception("Test case is not running, cannot add more test steps!")
+            raise Exception('Test case is not running, cannot add more test steps!')
         self.steps_log.append(step_log)
 
     @property
@@ -43,11 +42,11 @@ class OsmoTestCaseRecord:
         return len(list(filter(lambda x: x.step.name == step.name, self.steps_log)))
 
     @property
-    def start_time(self):
+    def start_time(self) -> datetime:
         return self._start_time
 
     @property
-    def stop_time(self) -> datetime:
+    def stop_time(self) -> datetime | None:
         return self._stop_time
 
     @property

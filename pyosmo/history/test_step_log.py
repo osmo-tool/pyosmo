@@ -4,7 +4,7 @@ from pyosmo.model import TestStep
 
 
 class TestStepLog:
-    def __init__(self, step: TestStep, duration: timedelta, error: Exception = None):
+    def __init__(self, step: TestStep, duration: timedelta, error: Exception | None = None):
         self._step = step
         self._timestamp = datetime.now()
         self._duration = duration
@@ -15,7 +15,7 @@ class TestStepLog:
         return self._step
 
     @property
-    def error(self) -> Exception:
+    def error(self) -> Exception | None:
         return self._error
 
     @property

@@ -14,7 +14,7 @@ def test_empty_model():
         exception = True
 
     if not exception:
-        raise Exception("Osmo did not except empty model")
+        raise Exception('Osmo did not except empty model')
 
 
 def test_step_without_guard():
@@ -59,7 +59,7 @@ def test_guard():
     osmo.generate()
     for tc in osmo.history.test_cases:
         for step in tc.steps_log:
-            assert "not" not in step.name
+            assert 'not' not in step.name
 
 
 def test_split_model_with_same_name_functions():
@@ -82,5 +82,5 @@ def test_split_model_with_same_name_functions():
     osmo = Osmo(tm1)
     osmo.add_model(tm2)
     osmo.generate()
-    assert tm1.step_execute, "Osmo did not execute step in first model"
-    assert tm2.step_execute, "Osmo did not execute step in second model"
+    assert tm1.step_execute, 'Osmo did not execute step in first model'
+    assert tm2.step_execute, 'Osmo did not execute step in second model'

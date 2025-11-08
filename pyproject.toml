@@ -72,7 +72,7 @@ ignore = [
 "tests/**/*.py" = ["B011"] # Allow assert False
 
 [tool.ruff.format]
-quote-style = "double"
+quote-style = "single"
 indent-style = "space"
 line-ending = "auto"
 

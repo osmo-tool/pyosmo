@@ -19,7 +19,7 @@ class DecoratorModel:
         self.logged_in = True
         self.counter += 1
 
-    @step("custom_logout")
+    @step('custom_logout')
     def logout_method(self):
         """Logout step with custom name"""
         self.logged_in = False
@@ -30,12 +30,12 @@ class DecoratorModel:
         """Step with decorator-based weight"""
         self.counter += 1
 
-    @pre("login")
+    @pre('login')
     def before_login(self):
         """Pre-hook for login"""
         self.pre_called = True
 
-    @post("custom_logout")
+    @post('custom_logout')
     def after_logout(self):
         """Post-hook for logout"""
         self.post_called = True
@@ -78,8 +78,8 @@ def test_decorator_step_with_custom_name():
     steps = list(osmo.model.all_steps)
     step_names = [s.name for s in steps]
 
-    assert "custom_logout" in step_names
-    assert "logout_method" not in step_names  # Function name should not be used
+    assert 'custom_logout' in step_names
+    assert 'logout_method' not in step_names  # Function name should not be used
 
 
 def test_decorator_weight():
@@ -88,7 +88,7 @@ def test_decorator_weight():
     osmo = Osmo(model)
 
     steps = list(osmo.model.all_steps)
-    weighted_step = next(s for s in steps if s.name == "weighted_action")
+    weighted_step = next(s for s in steps if s.name == 'weighted_action')
 
     assert weighted_step.weight == 10
 
@@ -108,8 +108,8 @@ def test_mixed_naming_conventions():
     steps = list(osmo.model.all_steps)
     step_names = [s.name for s in steps]
 
-    assert "old_style" in step_names
-    assert "new_style" in step_names
+    assert 'old_style' in step_names
+    assert 'new_style' in step_names
 
 
 def test_requires_decorator():
@@ -117,15 +117,15 @@ def test_requires_decorator():
 
     class RequirementsModel:
         @step
-        @requires("REQ-001", "REQ-002")
+        @requires('REQ-001', 'REQ-002')
         def checkout(self):
             pass
 
     model = RequirementsModel()
     method = model.checkout
 
-    assert hasattr(method, "_osmo_requires")
-    assert method._osmo_requires == ["REQ-001", "REQ-002"]
+    assert hasattr(method, '_osmo_requires')
+    assert method._osmo_requires == ['REQ-001', 'REQ-002']
 
 
 def test_legacy_weight_decorator():
@@ -143,7 +143,7 @@ def test_legacy_weight_decorator():
     osmo = Osmo(model)
 
     steps = list(osmo.model.all_steps)
-    action_step = next(s for s in steps if s.name == "action")
+    action_step = next(s for s in steps if s.name == 'action')
 
     # Weight function should be called
     assert action_step.weight == 20

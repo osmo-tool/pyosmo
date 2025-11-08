@@ -24,7 +24,7 @@ class ModelUpdater:
             model_path: Path to the existing model file
         """
         self.model_path = Path(model_path)
-        self.existing_code = ""
+        self.existing_code = ''
         self.tree: Optional[ast.Module] = None
         self.existing_methods: Set[str] = set()
         self.existing_guards: Set[str] = set()
@@ -35,13 +35,13 @@ class ModelUpdater:
 
     def _parse_existing_model(self):
         """Parse the existing model file."""
-        with open(self.model_path, "r") as f:
+        with open(self.model_path, 'r') as f:
             self.existing_code = f.read()
 
         try:
             self.tree = ast.parse(self.existing_code)
         except SyntaxError as e:
-            raise ValueError(f"Failed to parse model file: {e}")
+            raise ValueError(f'Failed to parse model file: {e}')
 
         # Find the model class and extract method names
         for node in ast.walk(self.tree):
@@ -51,17 +51,12 @@ class ModelUpdater:
                 for item in node.body:
                     if isinstance(item, ast.FunctionDef):
                         method_name = item.name
-                        if method_name.startswith("step_"):
+                        if method_name.startswith('step_'):
                             self.existing_methods.add(method_name[5:])  # Remove 'step_' prefix
-                        elif method_name.startswith("guard_"):
+                        elif method_name.startswith('guard_'):
                             self.existing_guards.add(method_name[6:])  # Remove 'guard_' prefix
 
-    def update_model(
-        self,
-        pages: Dict[str, Page],
-        base_url: str,
-        preserve_existing: bool = True
-    ) -> str:
+    def update_model(self, pages: Dict[str, Page], base_url: str, preserve_existing: bool = True) -> str:
         """
         Update the model with new discoveries.
 
@@ -75,7 +70,7 @@ class ModelUpdater:
         """
         # Generate new model
         generator = ModelGenerator(pages, base_url)
-        new_code = generator.generate_model_class(self.class_name or "WebsiteModel")
+        new_code = generator.generate_model_class(self.class_name or 'WebsiteModel')
 
         if not preserve_existing or not self.existing_code:
             return new_code
@@ -88,14 +83,14 @@ class ModelUpdater:
             if isinstance(node, ast.ClassDef):
                 for item in node.body:
                     if isinstance(item, ast.FunctionDef):
-                        if item.name.startswith("step_"):
+                        if item.name.startswith('step_'):
                             new_methods.add(item.name[5:])
 
         # Find truly new methods (not in existing model)
         added_methods = new_methods - self.existing_methods
 
         if not added_methods:
-            print("No new methods to add.")
+            print('No new methods to add.')
             return self.existing_code
 
         # Extract new method code
@@ -123,7 +118,7 @@ class ModelUpdater:
                 for item in node.body:
                     if isinstance(item, ast.FunctionDef):
                         method_name = item.name
-                        action_name = method_name.replace("step_", "").replace("guard_", "")
+                        action_name = method_name.replace('step_', '').replace('guard_', '')
 
                         if action_name in added_methods:
                             # Extract method source code
@@ -135,42 +130,37 @@ class ModelUpdater:
             return self.existing_code
 
         # Find insertion point (before last method or at end of class)
-        lines = self.existing_code.split("\n")
+        lines = self.existing_code.split('\n')
         insertion_line = len(lines)
 
         # Find the last method in the class
         for i in range(len(lines) - 1, -1, -1):
-            if re.match(r"^\s+def ", lines[i]):
+            if re.match(r'^\s+def ', lines[i]):
                 # Find the end of this method
                 indent = len(lines[i]) - len(lines[i].lstrip())
                 for j in range(i + 1, len(lines)):
-                    if lines[j].strip() and not lines[j].startswith(" " * (indent + 1)):
+                    if lines[j].strip() and not lines[j].startswith(' ' * (indent + 1)):
                         insertion_line = j
                         break
                 break
 
         # Insert new methods
         new_lines = lines[:insertion_line]
-        new_lines.append("")
-        new_lines.append("    # --- Auto-generated methods below ---")
-        new_lines.append("")
+        new_lines.append('')
+        new_lines.append('    # --- Auto-generated methods below ---')
+        new_lines.append('')
 
         for method_code in methods_to_add:
             # Add proper indentation
-            method_lines = method_code.split("\n")
+            method_lines = method_code.split('\n')
             new_lines.extend(method_lines)
-            new_lines.append("")
+            new_lines.append('')
 
         new_lines.extend(lines[insertion_line:])
 
-        return "\n".join(new_lines)
+        return '\n'.join(new_lines)
 
-    def save_updated_model(
-        self,
-        pages: Dict[str, Page],
-        base_url: str,
-        backup: bool = True
-    ):
+    def save_updated_model(self, pages: Dict[str, Page], base_url: str, backup: bool = True):
         """
         Update and save the model.
 
@@ -180,16 +170,16 @@ class ModelUpdater:
             backup: Whether to create a backup of the existing model
         """
         if backup and self.model_path.exists():
-            backup_path = self.model_path.with_suffix(".py.bak")
+            backup_path = self.model_path.with_suffix('.py.bak')
             backup_path.write_text(self.existing_code)
-            print(f"Backup saved to: {backup_path}")
+            print(f'Backup saved to: {backup_path}')
 
         updated_code = self.update_model(pages, base_url)
 
-        with open(self.model_path, "w") as f:
+        with open(self.model_path, 'w') as f:
             f.write(updated_code)
 
-        print(f"Model updated: {self.model_path}")
+        print(f'Model updated: {self.model_path}')
 
     def get_update_summary(self, pages: Dict[str, Page], base_url: str) -> Dict:
         """
@@ -206,15 +196,15 @@ class ModelUpdater:
         generator.analyze_forms()
         generator.analyze_links()
 
-        new_actions = {action["name"] for action in generator.actions}
+        new_actions = {action['name'] for action in generator.actions}
         added_actions = new_actions - self.existing_methods
         removed_actions = self.existing_methods - new_actions
 
         return {
-            "existing_methods": len(self.existing_methods),
-            "new_methods": len(new_actions),
-            "added_methods": len(added_actions),
-            "removed_methods": len(removed_actions),
-            "added_method_names": list(added_actions),
-            "removed_method_names": list(removed_actions),
+            'existing_methods': len(self.existing_methods),
+            'new_methods': len(new_actions),
+            'added_methods': len(added_actions),
+            'removed_methods': len(removed_actions),
+            'added_method_names': list(added_actions),
+            'removed_method_names': list(removed_actions),
         }
