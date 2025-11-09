@@ -108,10 +108,13 @@ class TestStep(ModelFunction):
         """Find a guard method decorated with @guard("step_name") for this step."""
         for attr_name in dir(self.object_instance):
             method = getattr(self.object_instance, attr_name)
-            if callable(method) and hasattr(method, '_osmo_guard') and hasattr(method, '_osmo_guard_for'):
-                # Check if this guard is for our step
-                if method._osmo_guard_for == self.name:
-                    return ModelFunction(attr_name, self.object_instance)
+            if (
+                callable(method)
+                and hasattr(method, '_osmo_guard')
+                and hasattr(method, '_osmo_guard_for')
+                and method._osmo_guard_for == self.name
+            ):
+                return ModelFunction(attr_name, self.object_instance)
         return None
 
     @property
