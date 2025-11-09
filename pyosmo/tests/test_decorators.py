@@ -162,7 +162,7 @@ def test_guard_decorator_with_step_name():
         def process(self):
             self.process_called = True
 
-        @guard("process")
+        @guard('process')
         def can_process(self) -> bool:
             return self.ready
 
@@ -207,7 +207,8 @@ def test_guard_decorator_inline():
 
     model = InlineGuardModel()
     osmo = Osmo(model)
-    osmo.test_end_condition = Length(10)
+    osmo.seed = 42
+    osmo.test_end_condition = Length(20)
 
     osmo.run()
 
@@ -227,7 +228,7 @@ def test_guard_decorator_with_invert():
         def action(self):
             self.action_called = True
 
-        @guard("action", invert=True)
+        @guard('action', invert=True)
         def is_blocked(self) -> bool:
             return self.blocked
 
@@ -262,11 +263,11 @@ def test_guard_decorator_multiple_steps():
         def checkout(self):
             pass
 
-        @guard("login")
+        @guard('login')
         def can_login(self) -> bool:
             return not self.logged_in
 
-        @guard("checkout")
+        @guard('checkout')
         def can_checkout(self) -> bool:
             return self.logged_in and self.has_items
 
@@ -305,7 +306,7 @@ def test_guard_mixing_decorator_and_naming_convention():
         def action_a(self):
             pass
 
-        @guard("action_a")
+        @guard('action_a')
         def guard_for_a(self) -> bool:
             return self.flag_a
 
