@@ -6,6 +6,7 @@ A simple model-based testing (MBT) tool for python
 
 Original OSMO tester can be found from: https://github.com/mukatee/osmo
 
+
 ## Motivation
 
 Pyosmo is very useful tool when need to test system under testing logic very carefully or long time with automation.
