@@ -85,10 +85,34 @@ class TestStep(ModelFunction):
 
         # Check for inline guard (decorator-based)
         if hasattr(self.func, '_osmo_guard_inline'):
-            return bool(self.func._osmo_guard_inline(self.object_instance))
+            result = bool(self.func._osmo_guard_inline(self.object_instance))
+            # Apply invert if specified
+            if hasattr(self.func, '_osmo_guard_invert') and self.func._osmo_guard_invert:
+                result = not result
+            return result
 
-        # Check for named guard function
+        # Check for decorator-based guard (@guard("step_name"))
+        decorator_guard = self._find_decorator_guard()
+        if decorator_guard is not None:
+            result = bool(decorator_guard.execute())
+            # Check if guard should be inverted
+            guard_func = decorator_guard.func
+            if hasattr(guard_func, '_osmo_guard_invert') and guard_func._osmo_guard_invert:
+                result = not result
+            return result
+
+        # Check for named guard function (naming convention)
         return True if self.guard_function is None else bool(self.guard_function.execute())
+
+    def _find_decorator_guard(self) -> Optional['ModelFunction']:
+        """Find a guard method decorated with @guard("step_name") for this step."""
+        for attr_name in dir(self.object_instance):
+            method = getattr(self.object_instance, attr_name)
+            if callable(method) and hasattr(method, '_osmo_guard') and hasattr(method, '_osmo_guard_for'):
+                # Check if this guard is for our step
+                if method._osmo_guard_for == self.name:
+                    return ModelFunction(attr_name, self.object_instance)
+        return None
 
     @property
     def guard_function(self) -> Optional['ModelFunction']:
