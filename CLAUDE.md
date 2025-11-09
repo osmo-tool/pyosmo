@@ -64,6 +64,24 @@ python -m build
 pyosmo examples/calculator_example.py --algorithm weighted --test-len 100
 ```
 
+### Publishing (NEW)
+```bash
+# Automated publishing workflow
+make publish-patch     # Bump patch version (0.2.2 -> 0.2.3) and publish
+make publish-minor     # Bump minor version (0.2.2 -> 0.3.0) and publish
+make publish-major     # Bump major version (0.2.2 -> 1.0.0) and publish
+
+# Just bump version (no publish)
+make version-patch
+make version-minor
+make version-major
+
+# Check if version exists on PyPI
+make check-pypi
+```
+
+See [PUBLISHING.md](PUBLISHING.md) for detailed publishing instructions and troubleshooting.
+
 ## Architecture
 
 ### Core Components
