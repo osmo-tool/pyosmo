@@ -71,8 +71,8 @@ class TestStep(ModelFunction):
             return float(weight_function.execute())
 
         # Check weight attribute (legacy decorator)
-        if 'weight' in dir(self.func):
-            return float(self.func.weight)  # type: ignore[attr-defined]
+        if hasattr(self.func, 'weight'):
+            return float(self.func.weight)
 
         return self.default_weight  # Default value
 
@@ -105,12 +105,18 @@ class TestStep(ModelFunction):
         return True if self.guard_function is None else bool(self.guard_function.execute())
 
     def _find_decorator_guard(self) -> Optional['ModelFunction']:
-        """Find a guard method decorated with @guard("step_name") for this step."""
-        for attr_name in dir(self.object_instance):
-            method = getattr(self.object_instance, attr_name)
+        """Find a guard method decorated with @guard("step_name") for this step.
+
+        Uses inspect.getmembers() for robust introspection.
+        Supports both instance methods and static methods.
+        """
+        for attr_name, method in inspect.getmembers(self.object_instance, predicate=callable):
+            # Skip private/protected methods
+            if attr_name.startswith('_'):
+                continue
+
             if (
-                callable(method)
-                and hasattr(method, '_osmo_guard')
+                hasattr(method, '_osmo_guard')
                 and hasattr(method, '_osmo_guard_for')
                 and method._osmo_guard_for == self.name
             ):
@@ -123,9 +129,14 @@ class TestStep(ModelFunction):
         return self.return_function_if_exists(self.guard_name)
 
     def return_function_if_exists(self, name: str) -> Optional['ModelFunction']:
-        """Return ModelFunction if method exists in the model instance, otherwise None."""
-        if name in dir(self.object_instance):
-            return ModelFunction(name, self.object_instance)
+        """Return ModelFunction if method exists in the model instance, otherwise None.
+
+        Uses hasattr() instead of dir() for robust attribute checking.
+        """
+        if hasattr(self.object_instance, name):
+            attr = getattr(self.object_instance, name)
+            if callable(attr):
+                return ModelFunction(name, self.object_instance)
         return None
 
 
@@ -138,22 +149,32 @@ class OsmoModelCollector:
         self.debug: bool = False
 
     def _discover_steps(self, sub_model: object) -> Iterator[TestStep]:
-        """Discover steps using both naming convention and decorators."""
+        """Discover steps using both naming convention and decorators.
+
+        Uses inspect.getmembers() for robust introspection, avoiding
+        fragile dir() patterns and properly handling inherited methods.
+        Supports both instance methods and static methods.
+        """
         discovered_step_names = set()
 
         # First, discover decorator-based steps
-        for attr_name in dir(sub_model):
-            method = getattr(sub_model, attr_name)
-            if callable(method) and hasattr(method, '_osmo_step'):
-                step_name = method._osmo_step_name
+        for attr_name, method in inspect.getmembers(sub_model, predicate=callable):
+            # Skip private/protected methods
+            if attr_name.startswith('_'):
+                continue
+
+            if hasattr(method, '_osmo_step'):
+                step_name = method._osmo_step_name  # type: ignore[attr-defined]
                 discovered_step_names.add(attr_name)
                 yield TestStep(attr_name, sub_model, step_name, is_decorator_based=True)
 
         # Then, discover naming convention steps (skip if already found via decorator)
-        for attr_name in dir(sub_model):
-            if attr_name in discovered_step_names:
+        for attr_name, _method in inspect.getmembers(sub_model, predicate=callable):
+            # Skip if already discovered or is private/protected
+            if attr_name in discovered_step_names or attr_name.startswith('_'):
                 continue
-            if callable(getattr(sub_model, attr_name)) and attr_name.startswith('step_'):
+
+            if attr_name.startswith('step_'):
                 yield TestStep(attr_name, sub_model)
 
     @property
@@ -161,24 +182,27 @@ class OsmoModelCollector:
         return (step for sub_model in self.sub_models for step in self._discover_steps(sub_model))
 
     def get_step_by_name(self, name: str) -> TestStep | None:
-        """Get step by function name"""
-        steps = (
-            TestStep(f, sub_model)
-            for sub_model in self.sub_models
-            for f in dir(sub_model)
-            if callable(getattr(sub_model, f)) and f == name
-        )
-        for step in steps:
-            return step
-        return None  # noqa
+        """Get step by function name.
+
+        Uses inspect.getmembers() for robust introspection.
+        Supports both instance methods and static methods.
+        """
+        for sub_model in self.sub_models:
+            for attr_name, _method in inspect.getmembers(sub_model, predicate=callable):
+                if attr_name == name:
+                    return TestStep(attr_name, sub_model)
+        return None
 
     def functions_by_name(self, name: str) -> Iterator[ModelFunction]:
-        return (
-            ModelFunction(f, sub_model)
-            for sub_model in self.sub_models
-            for f in dir(sub_model)
-            if callable(getattr(sub_model, f)) and f == name
-        )
+        """Get all functions with a specific name from all sub-models.
+
+        Uses inspect.getmembers() for robust introspection.
+        Supports both instance methods and static methods.
+        """
+        for sub_model in self.sub_models:
+            for attr_name, _method in inspect.getmembers(sub_model, predicate=callable):
+                if attr_name == name:
+                    yield ModelFunction(attr_name, sub_model)
 
     def add_model(self, model: object) -> None:
         """Add model for osmo"""
