@@ -207,7 +207,8 @@ def test_guard_decorator_inline():
 
     model = InlineGuardModel()
     osmo = Osmo(model)
-    osmo.test_end_condition = Length(10)
+    osmo.seed = 42
+    osmo.test_end_condition = Length(20)
 
     osmo.run()
 

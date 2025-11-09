@@ -761,14 +761,6 @@ class LazyModelCollector:
         if self._steps is None:
             self._steps = self._discover_steps()
         return self._steps
-
-    @lru_cache(maxsize=128)
-    def evaluate_guard(self, step_name: str) -> bool:
-        """Evaluate guard with caching."""
-        guard = self._guards.get(f"guard_{step_name}")
-        if guard is None:
-            return True
-        return guard(self.model)
 ```
 
 ### 6.2 Algorithm Optimizations
