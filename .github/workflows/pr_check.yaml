@@ -25,10 +25,10 @@ jobs:
         with:
           enable-cache: true
       - name: Install dependencies
-        run: uv pip install --system -e ".[dev]"
+        run: uv sync --all-extras
       - name: Run ruff linter
-        run: uv run ruff check pyosmo/
+        run: uv run ruff check
       - name: Run ruff formatter check
-        run: uv run ruff format --check pyosmo/
+        run: uv run ruff format --check
       - name: Test with pytest
         run: uv run pytest pyosmo/tests/
