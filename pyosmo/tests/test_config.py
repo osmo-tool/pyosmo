@@ -35,12 +35,12 @@ def test_wrong_config_objects():
         osmo.test_end_condition = RandomAlgorithm()  # type: ignore[assignment]
     except AttributeError:
         pass
-    except:
-        raise
+    except Exception as e:
+        raise AssertionError(f'Expected AttributeError, got {type(e).__name__}: {e}') from e
 
     try:
         osmo.algorithm = Length(1)  # type: ignore[assignment]
     except AttributeError:
         pass
-    except:
-        raise
+    except Exception as e:
+        raise AssertionError(f'Expected AttributeError, got {type(e).__name__}: {e}') from e
