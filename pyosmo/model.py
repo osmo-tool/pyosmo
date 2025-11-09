@@ -147,6 +147,9 @@ class OsmoModelCollector:
         # Format: functions[function_name] = link_of_instance
         self.sub_models: list[object] = []
         self.debug: bool = False
+        # Performance optimization: cache discovered steps
+        self._steps_cache: list[TestStep] | None = None
+        self._cache_valid: bool = False
 
     def _discover_steps(self, sub_model: object) -> Iterator[TestStep]:
         """Discover steps using both naming convention and decorators.
@@ -179,7 +182,17 @@ class OsmoModelCollector:
 
     @property
     def all_steps(self) -> Iterator[TestStep]:
-        return (step for sub_model in self.sub_models for step in self._discover_steps(sub_model))
+        """Get all discovered steps (with caching for performance).
+
+        Steps are discovered once and cached until models are added/modified.
+        This improves performance when repeatedly accessing all_steps.
+        """
+        if not self._cache_valid or self._steps_cache is None:
+            # Rebuild cache
+            self._steps_cache = [step for sub_model in self.sub_models for step in self._discover_steps(sub_model)]
+            self._cache_valid = True
+
+        return iter(self._steps_cache)
 
     def get_step_by_name(self, name: str) -> TestStep | None:
         """Get step by function name.
@@ -205,12 +218,17 @@ class OsmoModelCollector:
                     yield ModelFunction(attr_name, sub_model)
 
     def add_model(self, model: object) -> None:
-        """Add model for osmo"""
+        """Add model for osmo.
+
+        Invalidates step cache since new model may add steps.
+        """
         # Check if model is a class (not an instance) and instantiate it
         if inspect.isclass(model):
             model = model()
 
         self.sub_models.append(model)
+        # Invalidate cache since we added a model
+        self._cache_valid = False
         logger.debug(f'Loaded model: {model.__class__}')
 
     def execute_optional(self, function_name: str) -> None:
