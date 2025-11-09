@@ -47,10 +47,18 @@ class Osmo(OsmoConfig):
 
     @seed.setter
     def seed(self, value: int) -> None:
-        """Set random seed for test generation"""
+        """Set random seed for test generation with validation.
+
+        Args:
+            value: Random seed value (must be non-negative int that fits in 32 bits)
+
+        Raises:
+            ConfigurationError: If seed value is invalid
+        """
+        from pyosmo.config import ConfigValidator
+
+        ConfigValidator.validate_seed(value)
         logger.debug(f'Set seed: {value}')
-        if not isinstance(value, int):
-            raise AttributeError('Seed value must be an integer.')
         self._seed = value
         self._random = Random(self._seed)
         # update osmo_random in all models
@@ -73,18 +81,52 @@ class Osmo(OsmoConfig):
 
     def _run_step(self, step: TestStep) -> None:
         """
-        Run step and save it to the history
-        :param step: Test step
-        :return:
+        Run step and save it to the history.
+
+        Args:
+            step: Test step to execute
+
+        Raises:
+            KeyboardInterrupt: User interrupted execution (preserved)
+            Exception: Any error during step execution (with proper error chaining)
         """
         logger.debug(f'Run step: {step}')
         start_time = datetime.now()
         try:
             step.execute()
             self.history.add_step(step, datetime.now() - start_time)
+        except KeyboardInterrupt:
+            # Preserve keyboard interrupt for user cancellation
+            # Note: KeyboardInterrupt is BaseException, not Exception, so we can't log it
+            duration = datetime.now() - start_time
+            self.history.add_step(step, duration, None)
+            raise
+        except AssertionError as error:
+            # Test assertion failed
+            duration = datetime.now() - start_time
+            self.history.add_step(step, duration, error)
+            logger.debug(f'Step {step} assertion failed: {error}')
+            raise
+        except AttributeError as error:
+            # Missing attribute/method in model or step
+            duration = datetime.now() - start_time
+            self.history.add_step(step, duration, error)
+            raise RuntimeError(
+                f"Step '{step}' tried to access missing attribute. Check your model implementation."
+            ) from error
+        except TypeError as error:
+            # Method signature or type issue
+            duration = datetime.now() - start_time
+            self.history.add_step(step, duration, error)
+            raise RuntimeError(
+                f"Step '{step}' has invalid signature or type mismatch. Check your step method implementation."
+            ) from error
         except Exception as error:
-            self.history.add_step(step, datetime.now() - start_time, error)
-            raise error
+            # Other runtime errors
+            duration = datetime.now() - start_time
+            self.history.add_step(step, duration, error)
+            logger.debug(f'Step {step} failed with {type(error).__name__}: {error}')
+            raise
 
     def run(self) -> None:
         """Same as generate but in online usage this sounds more natural"""
@@ -113,7 +155,11 @@ class Osmo(OsmoConfig):
                     self.model.execute_optional(f'pre_{step}')
                     try:
                         self._run_step(step)
+                    except KeyboardInterrupt:
+                        # User interrupted - re-raise immediately
+                        raise
                     except BaseException as error:
+                        # Let error strategy decide how to handle
                         self.test_error_strategy.failure_in_test(self.history, self.model, error)
                     self.model.execute_optional(f'post_{step.name}')
                     # General after step which is run after each step
@@ -122,7 +168,11 @@ class Osmo(OsmoConfig):
                     if self.test_end_condition.end_test(self.history, self.model):
                         break
                 self.model.execute_optional('after_test')
+            except KeyboardInterrupt:
+                # User interrupted - re-raise immediately without error strategy processing
+                raise
             except BaseException as error:
+                # Let suite error strategy decide how to handle
                 self.test_suite_error_strategy.failure_in_suite(self.history, self.model, error)
             if self.test_suite_end_condition.end_suite(self.history, self.model):
                 break
