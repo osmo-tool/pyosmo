@@ -1,5 +1,6 @@
 import logging
 from random import Random, randint
+from typing import Any
 
 from pyosmo.algorithm import RandomAlgorithm
 from pyosmo.algorithm.base import OsmoAlgorithm
@@ -12,6 +13,99 @@ logger = logging.getLogger('osmo')
 
 # Default random seed range
 DEFAULT_SEED_MAX = 10000
+
+
+class ConfigurationError(ValueError):
+    """Raised when configuration validation fails."""
+
+    pass
+
+
+class ConfigValidator:
+    """Validates configuration values with comprehensive error messages."""
+
+    @staticmethod
+    def validate_algorithm(algorithm: Any) -> None:
+        """Validate algorithm configuration.
+
+        Args:
+            algorithm: Algorithm to validate
+
+        Raises:
+            ConfigurationError: If algorithm is invalid
+        """
+        if algorithm is None:
+            raise ConfigurationError('Algorithm cannot be None. Please provide a valid OsmoAlgorithm instance.')
+
+        if not isinstance(algorithm, OsmoAlgorithm):
+            raise ConfigurationError(
+                f'Algorithm must be an instance of OsmoAlgorithm, '
+                f'got {type(algorithm).__name__}. '
+                f'Available algorithms: RandomAlgorithm, WeightedAlgorithm, BalancingAlgorithm.'
+            )
+
+    @staticmethod
+    def validate_end_condition(condition: Any, name: str = 'End condition') -> None:
+        """Validate end condition configuration.
+
+        Args:
+            condition: End condition to validate
+            name: Name of the condition for error messages
+
+        Raises:
+            ConfigurationError: If end condition is invalid
+        """
+        if condition is None:
+            raise ConfigurationError(f'{name} cannot be None. Please provide a valid OsmoEndCondition instance.')
+
+        if not isinstance(condition, OsmoEndCondition):
+            raise ConfigurationError(
+                f'{name} must be an instance of OsmoEndCondition, '
+                f'got {type(condition).__name__}. '
+                f'Available conditions: Length, Time, StepCoverage, Endless, And, Or.'
+            )
+
+    @staticmethod
+    def validate_error_strategy(strategy: Any, name: str = 'Error strategy') -> None:
+        """Validate error strategy configuration.
+
+        Args:
+            strategy: Error strategy to validate
+            name: Name of the strategy for error messages
+
+        Raises:
+            ConfigurationError: If error strategy is invalid
+        """
+        if strategy is None:
+            raise ConfigurationError(f'{name} cannot be None. Please provide a valid OsmoErrorStrategy instance.')
+
+        if not isinstance(strategy, OsmoErrorStrategy):
+            raise ConfigurationError(
+                f'{name} must be an instance of OsmoErrorStrategy, '
+                f'got {type(strategy).__name__}. '
+                f'Available strategies: AlwaysRaise, AlwaysIgnore, IgnoreAsserts, AllowCount.'
+            )
+
+    @staticmethod
+    def validate_seed(seed: Any) -> None:
+        """Validate random seed value.
+
+        Args:
+            seed: Seed value to validate
+
+        Raises:
+            ConfigurationError: If seed is invalid
+        """
+        if not isinstance(seed, int):
+            raise ConfigurationError(f'Seed must be an integer, got {type(seed).__name__}.')
+
+        if seed < 0:
+            raise ConfigurationError(f'Seed must be non-negative, got {seed}.')
+
+        if seed > 2**32 - 1:
+            raise ConfigurationError(
+                f'Seed must fit in 32 bits (max {2**32 - 1}), got {seed}. Use a smaller seed value for reproducibility.'
+            )
 
 
 class OsmoConfig:
@@ -35,10 +129,16 @@ class OsmoConfig:
         return self._algorithm
 
     @algorithm.setter
-    def algorithm(self, value: OsmoAlgorithm):
-        """Set test generation algorithm"""
-        if not isinstance(value, OsmoAlgorithm):
-            raise AttributeError('algorithm needs to be OsmoAlgorithm')
+    def algorithm(self, value: OsmoAlgorithm) -> None:
+        """Set test generation algorithm with validation.
+
+        Args:
+            value: Algorithm instance
+
+        Raises:
+            ConfigurationError: If algorithm is invalid
+        """
+        ConfigValidator.validate_algorithm(value)
         self._algorithm = value
 
     @property
@@ -46,10 +146,16 @@ class OsmoConfig:
         return self._test_end_condition
 
     @test_end_condition.setter
-    def test_end_condition(self, value: OsmoEndCondition):
-        """Set test generation test_end_condition"""
-        if not isinstance(value, OsmoEndCondition):
-            raise AttributeError('test_end_condition needs to be OsmoEndCondition')
+    def test_end_condition(self, value: OsmoEndCondition) -> None:
+        """Set test end condition with validation.
+
+        Args:
+            value: End condition instance
+
+        Raises:
+            ConfigurationError: If end condition is invalid
+        """
+        ConfigValidator.validate_end_condition(value, 'Test end condition')
         self._test_end_condition = value
 
     @property
@@ -57,10 +163,16 @@ class OsmoConfig:
         return self._test_suite_end_condition
 
     @test_suite_end_condition.setter
-    def test_suite_end_condition(self, value: OsmoEndCondition):
-        """Set test generation test_suite_end_condition"""
-        if not isinstance(value, OsmoEndCondition):
-            raise AttributeError('test_suite_end_condition needs to be OsmoEndCondition')
+    def test_suite_end_condition(self, value: OsmoEndCondition) -> None:
+        """Set test suite end condition with validation.
+
+        Args:
+            value: End condition instance
+
+        Raises:
+            ConfigurationError: If end condition is invalid
+        """
+        ConfigValidator.validate_end_condition(value, 'Test suite end condition')
         self._test_suite_end_condition = value
 
     @property
@@ -68,10 +180,16 @@ class OsmoConfig:
         return self._test_error_strategy
 
     @test_error_strategy.setter
-    def test_error_strategy(self, value: OsmoErrorStrategy):
-        """Set test generation test_suite_end_condition"""
-        if not isinstance(value, OsmoErrorStrategy):
-            raise AttributeError('test_error_strategy needs to be OsmoErrorStrategy')
+    def test_error_strategy(self, value: OsmoErrorStrategy) -> None:
+        """Set test error strategy with validation.
+
+        Args:
+            value: Error strategy instance
+
+        Raises:
+            ConfigurationError: If error strategy is invalid
+        """
+        ConfigValidator.validate_error_strategy(value, 'Test error strategy')
         self._test_error_strategy = value
 
     @property
@@ -79,8 +197,14 @@ class OsmoConfig:
         return self._test_suite_error_strategy
 
     @test_suite_error_strategy.setter
-    def test_suite_error_strategy(self, value: OsmoErrorStrategy):
-        """Set test generation test_suite_end_condition"""
-        if not isinstance(value, OsmoErrorStrategy):
-            raise AttributeError('test_suite_error_strategy needs to be OsmoErrorStrategy')
+    def test_suite_error_strategy(self, value: OsmoErrorStrategy) -> None:
+        """Set test suite error strategy with validation.
+
+        Args:
+            value: Error strategy instance
+
+        Raises:
+            ConfigurationError: If error strategy is invalid
+        """
+        ConfigValidator.validate_error_strategy(value, 'Test suite error strategy')
         self._test_suite_error_strategy = value

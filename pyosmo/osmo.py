@@ -47,10 +47,18 @@ class Osmo(OsmoConfig):
 
     @seed.setter
     def seed(self, value: int) -> None:
-        """Set random seed for test generation"""
+        """Set random seed for test generation with validation.
+
+        Args:
+            value: Random seed value (must be non-negative int that fits in 32 bits)
+
+        Raises:
+            ConfigurationError: If seed value is invalid
+        """
+        from pyosmo.config import ConfigValidator
+
+        ConfigValidator.validate_seed(value)
         logger.debug(f'Set seed: {value}')
-        if not isinstance(value, int):
-            raise AttributeError('Seed value must be an integer.')
         self._seed = value
         self._random = Random(self._seed)
         # update osmo_random in all models
