@@ -2,6 +2,7 @@ import contextlib
 
 from pyosmo import Osmo
 from pyosmo.algorithm import RandomAlgorithm
+from pyosmo.config import ConfigurationError
 from pyosmo.end_conditions import Length
 
 
@@ -33,14 +34,14 @@ def test_wrong_config_objects():
     osmo = Osmo(OneStepModel())
     try:
         osmo.test_end_condition = RandomAlgorithm()  # type: ignore[assignment]
-    except AttributeError:
+    except ConfigurationError:
         pass
-    except:
-        raise
+    except Exception as e:
+        raise AssertionError(f'Expected ConfigurationError, got {type(e).__name__}: {e}') from e
 
     try:
         osmo.algorithm = Length(1)  # type: ignore[assignment]
-    except AttributeError:
+    except ConfigurationError:
         pass
-    except:
-        raise
+    except Exception as e:
+        raise AssertionError(f'Expected ConfigurationError, got {type(e).__name__}: {e}') from e
