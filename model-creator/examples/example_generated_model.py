@@ -11,6 +11,9 @@ try:
 except ImportError:
     raise ImportError('Model requires requests library. Install with: pip install requests')
 
+from pyosmo import Osmo
+from pyosmo.decorators import guard, step
+
 
 class ExampleWebsiteModel:
     """
@@ -50,14 +53,15 @@ class ExampleWebsiteModel:
             # Verify response is valid
             assert self.response.status_code < 500, f'Server error: {self.response.status_code}'
 
-            # Check for error messages if we expect success
+            # Could add more sophisticated error checking here
             if self.response.status_code == 200:
-                # Could add more sophisticated error checking here
                 pass
 
     # --- Form Submission Actions ---
 
-    def step_submit_login(self):
+    @step
+    @guard(lambda self: not self.logged_in)
+    def submit_login(self):
         """Submit the login form."""
         data = {
             'username': 'testuser',
@@ -77,12 +81,9 @@ class ExampleWebsiteModel:
         self.current_page = 'login'
         print('Executed: submit_login')
 
-    def guard_submit_login(self):
-        """Guard for submit_login."""
-        # Can only login when not logged in
-        return not self.logged_in
-
-    def step_submit_register(self):
+    @step
+    @guard(lambda self: not self.logged_in)
+    def submit_register(self):
         """Submit the registration form."""
         data = {
             'username': 'testuser',
@@ -99,12 +100,9 @@ class ExampleWebsiteModel:
         self.current_page = 'register'
         print('Executed: submit_register')
 
-    def guard_submit_register(self):
-        """Guard for submit_register."""
-        # Can only register when not logged in
-        return not self.logged_in
-
-    def step_submit_logout(self):
+    @step
+    @guard(lambda self: self.logged_in)
+    def submit_logout(self):
         """Submit the logout form."""
         data = {}
 
@@ -119,12 +117,8 @@ class ExampleWebsiteModel:
         self.current_page = 'logout'
         print('Executed: submit_logout')
 
-    def guard_submit_logout(self):
-        """Guard for submit_logout."""
-        # Can only logout when logged in
-        return self.logged_in
-
-    def step_submit_contact(self):
+    @step
+    def submit_contact(self):
         """Submit the contact form."""
         data = {
             'name': 'Test User',
@@ -140,11 +134,8 @@ class ExampleWebsiteModel:
         self.current_page = 'contact'
         print('Executed: submit_contact')
 
-    def guard_submit_contact(self):
-        """Guard for submit_contact."""
-        return True
-
-    def step_submit_search(self):
+    @step
+    def submit_search(self):
         """Submit the search form."""
         data = {
             'q': 'test_q',
@@ -158,70 +149,62 @@ class ExampleWebsiteModel:
         self.current_page = 'search'
         print('Executed: submit_search')
 
-    def guard_submit_search(self):
-        """Guard for submit_search."""
-        return True
-
     # --- Navigation Actions ---
 
-    def step_navigate_to_home(self):
+    @step
+    def navigate_to_home(self):
         """Navigate to home."""
         self.response = self.session.get('https://example.com')
         self.current_page = 'home'
         print('Navigated to: home')
 
-    def guard_navigate_to_home(self):
-        """Guard for navigate_to_home."""
-        return True
-
-    def step_navigate_to_about(self):
+    @step
+    def navigate_to_about(self):
         """Navigate to about."""
         self.response = self.session.get('https://example.com/about')
         self.current_page = 'about'
         print('Navigated to: about')
 
-    def guard_navigate_to_about(self):
-        """Guard for navigate_to_about."""
-        return True
-
-    def step_navigate_to_contact(self):
+    @step
+    def navigate_to_contact(self):
         """Navigate to contact."""
         self.response = self.session.get('https://example.com/contact')
         self.current_page = 'contact'
         print('Navigated to: contact')
 
-    def guard_navigate_to_contact(self):
-        """Guard for navigate_to_contact."""
-        return True
-
-    def step_navigate_to_login(self):
+    @step
+    @guard(lambda self: not self.logged_in)
+    def navigate_to_login(self):
         """Navigate to login."""
         self.response = self.session.get('https://example.com/login')
         self.current_page = 'login'
         print('Navigated to: login')
 
-    def guard_navigate_to_login(self):
-        """Guard for navigate_to_login."""
-        # Only show login page when not logged in
-        return not self.logged_in
-
-    def step_navigate_to_dashboard(self):
+    @step
+    @guard(lambda self: self.logged_in)
+    def navigate_to_dashboard(self):
         """Navigate to dashboard."""
         self.response = self.session.get('https://example.com/dashboard')
         self.current_page = 'dashboard'
         print('Navigated to: dashboard')
 
-    def guard_navigate_to_dashboard(self):
-        """Guard for navigate_to_dashboard."""
-        # Dashboard requires authentication
-        return self.logged_in
 
-    # --- Optional: Custom Methods ---
+def main():
+    """Run the model with PyOsmo."""
+    model = ExampleWebsiteModel()
 
-    def weight_submit_login(self):
-        """Make login more likely when not logged in."""
-        return 10 if not self.logged_in else 1
+    osmo = Osmo(model).weighted_algorithm().stop_after_steps(100).run_tests(1)
 
-    def weight_navigate_to_dashboard(self):
-        """Dashboard is important - visit it more often when logged in."""
-        return 15 if self.logged_in else 0
+    print(f'Starting test generation for {model.base_url}')
+    osmo.generate()
+
+    # Print summary
+    stats = osmo.history.statistics()
+    print('\n' + '=' * 50)
+    print('Test generation complete!')
+    print(f'Steps executed: {stats.total_steps}')
+    print(f'Unique steps: {len(stats.step_coverage)}')
+
+
+if __name__ == '__main__':
+    main()

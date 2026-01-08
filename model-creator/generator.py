@@ -203,6 +203,9 @@ class ModelGenerator:
                 '        "Model requires requests library. Install with: pip install requests"',
                 '    )',
                 '',
+                'from pyosmo import Osmo',
+                'from pyosmo.decorators import step, guard',
+                '',
                 '',
             ]
         )
@@ -268,6 +271,9 @@ class ModelGenerator:
             lines.extend(self._generate_step_method(action))
             lines.append('')
 
+        # Generate main function
+        lines.extend(self._generate_main_function(class_name))
+
         return '\n'.join(line for line in lines if line is not None)
 
     def _generate_step_method(self, action: dict) -> list[str]:
@@ -282,13 +288,27 @@ class ModelGenerator:
         return lines
 
     def _generate_form_step(self, action: dict) -> list[str]:
-        """Generate a form submission step."""
+        """Generate a form submission step with decorators."""
         lines = []
         method_name = action['name']
         form = action['form']
 
-        # Method signature
-        lines.append(f'    def step_{method_name}(self):')
+        # Determine guard condition
+        if action['is_login']:
+            guard_condition = 'not self.logged_in'
+        elif action['is_logout']:
+            guard_condition = 'self.logged_in'
+        else:
+            page = self.pages.get(action['page_url'])
+            guard_condition = 'self.logged_in' if page and page.requires_auth else None
+
+        # Add decorators
+        lines.append('    @step')
+        if guard_condition:
+            lines.append(f'    @guard(lambda self: {guard_condition})')
+
+        # Method signature (no step_ prefix)
+        lines.append(f'    def {method_name}(self):')
         lines.append(f'        """Submit the {method_name.replace("_", " ")} form."""')
 
         # Prepare form data
@@ -326,33 +346,23 @@ class ModelGenerator:
 
         lines.append(f'        print(f"Executed: {method_name}")')
 
-        # Guard method
-        lines.append('')
-        lines.append(f'    def guard_{method_name}(self):')
-        lines.append(f'        """Guard for {method_name}."""')
-
-        if action['is_login']:
-            lines.append('        # Can only login when not logged in')
-            lines.append('        return not self.logged_in')
-        elif action['is_logout']:
-            lines.append('        # Can only logout when logged in')
-            lines.append('        return self.logged_in')
-        else:
-            # Check if requires login
-            page = self.pages.get(action['page_url'])
-            if page and page.requires_auth:
-                lines.append('        return self.logged_in')
-            else:
-                lines.append('        return True')
-
         return lines
 
     def _generate_navigation_step(self, action: dict) -> list[str]:
-        """Generate a navigation step."""
+        """Generate a navigation step with decorators."""
         lines = []
         method_name = action['name']
 
-        lines.append(f'    def step_{method_name}(self):')
+        # Determine guard condition
+        guard_condition = 'self.logged_in' if action['requires_auth'] else None
+
+        # Add decorators
+        lines.append('    @step')
+        if guard_condition:
+            lines.append(f'    @guard(lambda self: {guard_condition})')
+
+        # Method signature (no step_ prefix)
+        lines.append(f'    def {method_name}(self):')
         lines.append(f'        """Navigate to {action["target_page"]}."""')
         lines.append(f'        self.response = self.session.get("{action["target_url"]}")')
 
@@ -360,16 +370,6 @@ class ModelGenerator:
             lines.append(f'        self.current_page = "{action["target_page"]}"')
 
         lines.append(f'        print(f"Navigated to: {action["target_page"]}")')
-
-        # Guard
-        lines.append('')
-        lines.append(f'    def guard_{method_name}(self):')
-        lines.append(f'        """Guard for {method_name}."""')
-
-        if action['requires_auth']:
-            lines.append('        return self.logged_in')
-        else:
-            lines.append('        return True')
 
         return lines
 
@@ -398,6 +398,36 @@ class ModelGenerator:
         if field.field_type == 'radio' and field.options or field.field_type == 'select' and field.options:
             return f'"{field.options[0]}"'
         return f'"test_{field.name}"'
+
+    def _generate_main_function(self, class_name: str) -> list[str]:
+        """Generate main function for running the model with PyOsmo."""
+        return [
+            '',
+            '',
+            'def main():',
+            '    """Run the model with PyOsmo."""',
+            f'    model = {class_name}()',
+            '',
+            '    osmo = (',
+            '        Osmo(model)',
+            '        .weighted_algorithm()',
+            '        .stop_after_steps(100)',
+            '        .run_tests(1)',
+            '    )',
+            '',
+            '    print(f"Starting test generation for {model.base_url}")',
+            '    osmo.generate()',
+            '',
+            '    # Print summary',
+            '    stats = osmo.history.statistics()',
+            '    print("\\n" + "=" * 50)',
+            '    print("Test generation complete!")',
+            '    print(stats)',
+            '',
+            '',
+            'if __name__ == "__main__":',
+            '    main()',
+        ]
 
     def save_model(self, output_path: Path, class_name: str = 'WebsiteModel'):
         """

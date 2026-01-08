@@ -197,9 +197,16 @@ class TestModelGenerator(unittest.TestCase):
         # Check for imports
         self.assertIn('import requests', code)
         self.assertIn('import random', code)
+        self.assertIn('from pyosmo import Osmo', code)
+        self.assertIn('from pyosmo.decorators import step, guard', code)
+
+        # Check for main function
+        self.assertIn('def main():', code)
+        self.assertIn('if __name__ == "__main__":', code)
+        self.assertIn('Osmo(model)', code)
 
     def test_generate_form_step(self):
-        """Test form step generation."""
+        """Test form step generation with decorators."""
         action = {
             'type': 'form_submit',
             'name': 'submit_login',
@@ -222,9 +229,12 @@ class TestModelGenerator(unittest.TestCase):
         lines = self.generator._generate_form_step(action)
         code = '\n'.join(lines)
 
-        # Check method definition
-        self.assertIn('def step_submit_login(self):', code)
-        self.assertIn('def guard_submit_login(self):', code)
+        # Check decorators
+        self.assertIn('@step', code)
+        self.assertIn('@guard(lambda self: not self.logged_in)', code)
+
+        # Check method definition (no step_ prefix)
+        self.assertIn('def submit_login(self):', code)
 
         # Check form data preparation
         self.assertIn('data = {', code)
@@ -237,11 +247,8 @@ class TestModelGenerator(unittest.TestCase):
         # Check login state update
         self.assertIn('self.logged_in = True', code)
 
-        # Check guard for login
-        self.assertIn('return not self.logged_in', code)
-
     def test_generate_navigation_step(self):
-        """Test navigation step generation."""
+        """Test navigation step generation with decorators."""
         action = {
             'type': 'navigation',
             'name': 'navigate_to_about',
@@ -254,16 +261,37 @@ class TestModelGenerator(unittest.TestCase):
         lines = self.generator._generate_navigation_step(action)
         code = '\n'.join(lines)
 
-        # Check method definition
-        self.assertIn('def step_navigate_to_about(self):', code)
-        self.assertIn('def guard_navigate_to_about(self):', code)
+        # Check decorator (no guard since requires_auth is False)
+        self.assertIn('@step', code)
+        self.assertNotIn('@guard', code)
+
+        # Check method definition (no step_ prefix)
+        self.assertIn('def navigate_to_about(self):', code)
 
         # Check navigation
         self.assertIn('self.response = self.session.get(', code)
         self.assertIn('https://example.com/about', code)
 
-        # Check guard
-        self.assertIn('return True', code)
+    def test_generate_navigation_step_with_auth(self):
+        """Test navigation step generation with auth requirement."""
+        action = {
+            'type': 'navigation',
+            'name': 'navigate_to_dashboard',
+            'target_url': 'https://example.com/dashboard',
+            'target_page': 'dashboard',
+            'link_text': 'Dashboard',
+            'requires_auth': True,
+        }
+
+        lines = self.generator._generate_navigation_step(action)
+        code = '\n'.join(lines)
+
+        # Check decorators
+        self.assertIn('@step', code)
+        self.assertIn('@guard(lambda self: self.logged_in)', code)
+
+        # Check method definition (no step_ prefix)
+        self.assertIn('def navigate_to_dashboard(self):', code)
 
     def test_get_statistics(self):
         """Test statistics generation."""
