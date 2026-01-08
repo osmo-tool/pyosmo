@@ -18,7 +18,7 @@ class ModelFunction:
         try:
             return float(self.object_instance.weight)  # type: ignore[attr-defined]
         except AttributeError:
-            return 0.0
+            return 1.0  # Default weight of 1.0 for all steps
 
     @property
     def func(self) -> Callable[[], Any]:

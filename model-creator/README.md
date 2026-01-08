@@ -116,9 +116,13 @@ def after(self):
 
 ### Step Methods (Actions)
 
+The generated models use PyOsmo's decorator syntax for steps and guards:
+
 Form submission:
 ```python
-def step_submit_login(self):
+@step
+@guard(lambda self: not self.logged_in)
+def submit_login(self):
     """Submit the login form."""
     data = {
         "username": "testuser",
@@ -136,31 +140,73 @@ def step_submit_login(self):
 
 Navigation:
 ```python
-def step_navigate_to_about(self):
+@step
+def navigate_to_about(self):
     """Navigate to about page."""
     self.response = self.session.get("https://example.com/about")
     self.current_page = "about"
     print("Navigated to: about")
 ```
 
-### Guard Methods (Preconditions)
-
+Steps with authentication requirements:
 ```python
-def guard_submit_login(self):
-    """Guard for login - can only login when not logged in."""
-    return not self.logged_in
+@step
+@guard(lambda self: self.logged_in)
+def navigate_to_dashboard(self):
+    """Navigate to dashboard (requires login)."""
+    self.response = self.session.get("https://example.com/dashboard")
+    self.current_page = "dashboard"
+    print("Navigated to: dashboard")
+```
 
-def guard_submit_logout(self):
-    """Guard for logout - can only logout when logged in."""
-    return self.logged_in
+### Main Function
+
+Generated models include a `main()` function for easy execution:
+```python
+def main():
+    """Run the model with PyOsmo."""
+    model = WebsiteModel()
+
+    osmo = (
+        Osmo(model)
+        .weighted_algorithm()
+        .stop_after_steps(100)
+        .run_tests(1)
+    )
+
+    print(f"Starting test generation for {model.base_url}")
+    osmo.generate()
+
+    # Print summary
+    stats = osmo.history.statistics()
+    print("\n" + "=" * 50)
+    print("Test generation complete!")
+    print(f"Steps executed: {stats.total_steps}")
+    print(f"Unique steps: {len(stats.step_coverage)}")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+You can run the generated model directly:
+```bash
+python models/example_model.py
 ```
 
 ## Running Generated Models
 
-Once you have a generated model, you can run it with PyOsmo:
+Generated models include a `main()` function that can be run directly:
 
 ```bash
-# Run model exploration
+# Run the model directly (uses built-in defaults)
+python models/example_model.py
+```
+
+Or use PyOsmo's CLI for more control:
+
+```bash
+# Run model exploration with custom settings
 python -m osmo.explorer -m models/example_model.py:WebsiteModel
 
 # Run with specific seed for reproducibility
@@ -268,10 +314,12 @@ Generated models can be customized after creation:
 
 1. **Add custom verification logic** in the `after()` method
 2. **Customize default values** in form submission steps
-3. **Add weights** to control action frequency:
+3. **Add weights** to control action frequency using the `weight_value` parameter:
    ```python
-   def weight_submit_login(self):
-       return 5  # Higher weight = more frequent
+   @step(weight_value=5)  # Higher weight = more frequent
+   @guard(lambda self: not self.logged_in)
+   def submit_login(self):
+       ...
    ```
 4. **Add invariants** for state checking
 5. **Customize guards** for complex preconditions
