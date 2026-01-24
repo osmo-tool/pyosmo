@@ -17,10 +17,10 @@ class OsmoTestCaseRecord:
         return self._start_time is not None
 
     def is_running(self) -> bool:
-        return self._stop_time is not None
+        return self._stop_time is None
 
     def add_step(self, step_log: TestStepLog) -> None:
-        if self.is_running():
+        if not self.is_running():
             raise Exception('Test case is not running, cannot add more test steps!')
         self.steps_log.append(step_log)
 

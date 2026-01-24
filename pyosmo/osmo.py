@@ -109,7 +109,10 @@ class Osmo(OsmoConfig):
                 while True:
                     # Use algorithm to select the step
                     self.model.execute_optional('before')
-                    step = self.algorithm.choose(self.history, self.model.available_steps)
+                    available = self.model.available_steps
+                    if not available:
+                        raise Exception('No steps available! All guards returned False.')
+                    step = self.algorithm.choose(self.history, available)
                     self.model.execute_optional(f'pre_{step}')
                     try:
                         self._run_step(step)
