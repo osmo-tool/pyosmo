@@ -1,4 +1,7 @@
+import pytest
+
 from pyosmo import Osmo
+from pyosmo.end_conditions import Length
 
 
 def test_empty_model():
@@ -84,3 +87,49 @@ def test_split_model_with_same_name_functions():
     osmo.generate()
     assert tm1.step_execute, 'Osmo did not execute step in first model'
     assert tm2.step_execute, 'Osmo did not execute step in second model'
+
+
+def test_no_available_steps_raises_clear_error():
+    """When all guards return False, engine should raise a clear error"""
+
+    class AllGuardedModel:
+        @staticmethod
+        def step_blocked():
+            pass
+
+        @staticmethod
+        def guard_blocked():
+            return False
+
+    osmo = Osmo(AllGuardedModel())
+    osmo.test_end_condition = Length(10)
+    with pytest.raises(Exception, match='No steps available'):
+        osmo.generate()
+
+
+def test_step_name_in_history_uses_semantic_name():
+    """TestStepLog.name should return the semantic step name, not the function name"""
+
+    class NameModel:
+        @staticmethod
+        def step_login():
+            pass
+
+        @staticmethod
+        def step_logout():
+            pass
+
+    osmo = Osmo(NameModel())
+    osmo.test_end_condition = Length(5)
+    osmo.generate()
+
+    # History should use semantic names (without 'step_' prefix)
+    for tc in osmo.history.test_cases:
+        for step_log in tc.steps_log:
+            assert not step_log.name.startswith('step_'), f'Expected semantic name, got function name: {step_log.name}'
+            assert step_log.name in ('login', 'logout')
+
+    # step_frequency should also use semantic names
+    frequency = osmo.history.step_frequency()
+    for name in frequency:
+        assert not name.startswith('step_')

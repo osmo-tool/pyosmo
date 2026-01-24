@@ -20,7 +20,7 @@ class TestStepLog:
 
     @property
     def name(self) -> str:
-        return self._step.function_name
+        return self._step.name
 
     @property
     def timestamp(self) -> datetime:

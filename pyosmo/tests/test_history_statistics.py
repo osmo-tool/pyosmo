@@ -179,3 +179,38 @@ def test_statistics_str_representation():
     assert 'Total Tests:' in str_repr
     assert 'Total Steps:' in str_repr
     assert 'Duration:' in str_repr
+
+
+def test_test_case_is_running():
+    """is_running() should return True when test is active, False when stopped"""
+    from pyosmo.history.test_case import OsmoTestCaseRecord
+
+    tc = OsmoTestCaseRecord()
+    assert tc.is_running() is True, 'New test case should be running'
+
+    tc.stop()
+    assert tc.is_running() is False, 'Stopped test case should not be running'
+
+
+def test_cannot_add_step_to_stopped_test():
+    """Adding a step to a stopped test case should raise"""
+    import pytest
+
+    from pyosmo.history.test_case import OsmoTestCaseRecord
+    from pyosmo.history.test_step_log import TestStepLog
+    from pyosmo.model import TestStep
+
+    class DummyModel:
+        def step_dummy(self):
+            pass
+
+    tc = OsmoTestCaseRecord()
+    tc.stop()
+
+    dummy_step = TestStep('step_dummy', DummyModel())
+    from datetime import timedelta
+
+    step_log = TestStepLog(dummy_step, timedelta(seconds=0))
+
+    with pytest.raises(Exception, match='not running'):
+        tc.add_step(step_log)
