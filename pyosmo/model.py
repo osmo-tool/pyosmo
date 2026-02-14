@@ -79,6 +79,11 @@ class TestStep(ModelFunction):
     @property
     def is_available(self) -> bool:
         """Check if step is available right now"""
+        # Check model-level guard first (guard_all)
+        guard_all_func = getattr(self.object_instance, 'guard_all', None)
+        if guard_all_func is not None and callable(guard_all_func) and not guard_all_func():
+            return False
+
         # Check if step is disabled by decorator
         if hasattr(self.func, '_osmo_enabled') and not self.func._osmo_enabled:
             return False
