@@ -34,6 +34,9 @@ class ModelFunction:
         return f'{type(self.object_instance).__name__}.{self.function_name}()'
 
 
+_GUARD_NOT_CACHED = object()
+
+
 class TestStep(ModelFunction):
     def __init__(
         self,
@@ -47,6 +50,7 @@ class TestStep(ModelFunction):
         super().__init__(function_name, object_instance)
         self._step_name = step_name
         self._is_decorator_based = is_decorator_based
+        self._decorator_guard_cache: ModelFunction | None | object = _GUARD_NOT_CACHED
 
     @property
     def name(self) -> str:
@@ -114,7 +118,11 @@ class TestStep(ModelFunction):
 
         Uses inspect.getmembers() for robust introspection.
         Supports both instance methods and static methods.
+        Result is cached after first lookup since decorator guards are static.
         """
+        if self._decorator_guard_cache is not _GUARD_NOT_CACHED:
+            return self._decorator_guard_cache  # type: ignore[return-value]
+
         for attr_name, method in inspect.getmembers(self.object_instance, predicate=callable):
             # Skip private/protected methods
             if attr_name.startswith('_'):
@@ -125,7 +133,10 @@ class TestStep(ModelFunction):
                 and hasattr(method, '_osmo_guard_for')
                 and method._osmo_guard_for == self.name
             ):
-                return ModelFunction(attr_name, self.object_instance)
+                self._decorator_guard_cache = ModelFunction(attr_name, self.object_instance)
+                return self._decorator_guard_cache
+
+        self._decorator_guard_cache = None
         return None
 
     @property

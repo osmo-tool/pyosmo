@@ -16,6 +16,8 @@ class OsmoHistory:
         self.test_cases: list[OsmoTestCaseRecord] = []
         self.stop_time: datetime | None = None
         self.start_time: datetime = datetime.now()
+        # Incremental step counter — avoids O(tc*s) history walks
+        self._step_counts: dict[str, int] = {}
 
     def start_new_test(self) -> None:
         # Stop test case timer
@@ -36,6 +38,7 @@ class OsmoHistory:
         if self.current_test_case is None:
             raise Exception('There is no active test case!!')
         self.current_test_case.add_step(TestStepLog(step, duration, error))
+        self._step_counts[step.name] = self._step_counts.get(step.name, 0) + 1
 
     def attach(self, name: str, data: str | bytes) -> None:
         """Attach data to the last step of the current test case."""
@@ -74,7 +77,7 @@ class OsmoHistory:
 
     def get_step_count(self, step: TestStep) -> int:
         """Counts how many times the step is really called during whole history"""
-        return sum(test_case.get_step_count(step) for test_case in self.test_cases)
+        return self._step_counts.get(step.name, 0)
 
     @property
     def step_stats(self) -> str:
