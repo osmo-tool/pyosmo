@@ -7,6 +7,4 @@ class RandomAlgorithm(OsmoAlgorithm):
     """Fully random algorithm"""
 
     def choose(self, history: OsmoHistory, choices: list[TestStep]) -> TestStep:
-        if self.random is None:
-            raise RuntimeError('Algorithm not initialized. Call initialize() first.')
-        return self.random.choice(choices)
+        return self._ensure_initialized().choice(choices)

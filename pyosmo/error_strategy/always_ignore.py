@@ -10,6 +10,3 @@ class AlwaysIgnore(OsmoErrorStrategy):
 
     def failure_in_test(self, history: OsmoHistory, model: OsmoModelCollector, error: BaseException) -> None:
         pass
-
-    def failure_in_suite(self, history: OsmoHistory, model: OsmoModelCollector, error: BaseException) -> None:
-        pass

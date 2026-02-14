@@ -25,66 +25,45 @@ class ConfigValidator:
     """Validates configuration values with comprehensive error messages."""
 
     @staticmethod
-    def validate_algorithm(algorithm: Any) -> None:
-        """Validate algorithm configuration.
-
-        Args:
-            algorithm: Algorithm to validate
-
-        Raises:
-            ConfigurationError: If algorithm is invalid
-        """
-        if algorithm is None:
-            raise ConfigurationError('Algorithm cannot be None. Please provide a valid OsmoAlgorithm instance.')
-
-        if not isinstance(algorithm, OsmoAlgorithm):
+    def _validate_type(value: Any, expected_type: type, name: str, available: str) -> None:
+        """Generic type validation for configuration values."""
+        if value is None:
             raise ConfigurationError(
-                f'Algorithm must be an instance of OsmoAlgorithm, '
-                f'got {type(algorithm).__name__}. '
-                f'Available algorithms: RandomAlgorithm, WeightedAlgorithm, BalancingAlgorithm.'
+                f'{name} cannot be None. Please provide a valid {expected_type.__name__} instance.'
             )
+        if not isinstance(value, expected_type):
+            raise ConfigurationError(
+                f'{name} must be an instance of {expected_type.__name__}, '
+                f'got {type(value).__name__}. '
+                f'Available: {available}.'
+            )
+
+    @staticmethod
+    def validate_algorithm(algorithm: Any) -> None:
+        ConfigValidator._validate_type(
+            algorithm,
+            OsmoAlgorithm,
+            'Algorithm',
+            'RandomAlgorithm, WeightedAlgorithm, BalancingAlgorithm',
+        )
 
     @staticmethod
     def validate_end_condition(condition: Any, name: str = 'End condition') -> None:
-        """Validate end condition configuration.
-
-        Args:
-            condition: End condition to validate
-            name: Name of the condition for error messages
-
-        Raises:
-            ConfigurationError: If end condition is invalid
-        """
-        if condition is None:
-            raise ConfigurationError(f'{name} cannot be None. Please provide a valid OsmoEndCondition instance.')
-
-        if not isinstance(condition, OsmoEndCondition):
-            raise ConfigurationError(
-                f'{name} must be an instance of OsmoEndCondition, '
-                f'got {type(condition).__name__}. '
-                f'Available conditions: Length, Time, StepCoverage, Endless, And, Or.'
-            )
+        ConfigValidator._validate_type(
+            condition,
+            OsmoEndCondition,
+            name,
+            'Length, Time, StepCoverage, Endless, And, Or',
+        )
 
     @staticmethod
     def validate_error_strategy(strategy: Any, name: str = 'Error strategy') -> None:
-        """Validate error strategy configuration.
-
-        Args:
-            strategy: Error strategy to validate
-            name: Name of the strategy for error messages
-
-        Raises:
-            ConfigurationError: If error strategy is invalid
-        """
-        if strategy is None:
-            raise ConfigurationError(f'{name} cannot be None. Please provide a valid OsmoErrorStrategy instance.')
-
-        if not isinstance(strategy, OsmoErrorStrategy):
-            raise ConfigurationError(
-                f'{name} must be an instance of OsmoErrorStrategy, '
-                f'got {type(strategy).__name__}. '
-                f'Available strategies: AlwaysRaise, AlwaysIgnore, IgnoreAsserts, AllowCount.'
-            )
+        ConfigValidator._validate_type(
+            strategy,
+            OsmoErrorStrategy,
+            name,
+            'AlwaysRaise, AlwaysIgnore, IgnoreAsserts, AllowCount',
+        )
 
     @staticmethod
     def validate_seed(seed: Any) -> None:

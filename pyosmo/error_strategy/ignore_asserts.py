@@ -11,7 +11,3 @@ class IgnoreAsserts(OsmoErrorStrategy):
     def failure_in_test(self, history: OsmoHistory, model: OsmoModelCollector, error: BaseException) -> None:
         if not isinstance(error, AssertionError):
             raise error
-
-    def failure_in_suite(self, history: OsmoHistory, model: OsmoModelCollector, error: BaseException) -> None:
-        if not isinstance(error, AssertionError):
-            raise error

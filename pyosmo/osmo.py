@@ -92,41 +92,32 @@ class Osmo(OsmoConfig):
         """
         logger.debug(f'Run step: {step}')
         start_time = datetime.now()
+        error = None
         try:
             step.execute()
-            self.history.add_step(step, datetime.now() - start_time)
         except KeyboardInterrupt:
-            # Preserve keyboard interrupt for user cancellation
-            # Note: KeyboardInterrupt is BaseException, not Exception, so we can't log it
-            duration = datetime.now() - start_time
-            self.history.add_step(step, duration, None)
+            # Record step without error and re-raise immediately
+            self.history.add_step(step, datetime.now() - start_time)
             raise
-        except AssertionError as error:
-            # Test assertion failed
-            duration = datetime.now() - start_time
-            self.history.add_step(step, duration, error)
-            logger.debug(f'Step {step} assertion failed: {error}')
-            raise
-        except AttributeError as error:
-            # Missing attribute/method in model or step
-            duration = datetime.now() - start_time
-            self.history.add_step(step, duration, error)
+        except Exception as e:
+            error = e
+
+        duration = datetime.now() - start_time
+        self.history.add_step(step, duration, error)
+
+        if error is None:
+            return
+
+        if isinstance(error, AttributeError):
             raise RuntimeError(
                 f"Step '{step}' tried to access missing attribute. Check your model implementation."
             ) from error
-        except TypeError as error:
-            # Method signature or type issue
-            duration = datetime.now() - start_time
-            self.history.add_step(step, duration, error)
+        if isinstance(error, TypeError):
             raise RuntimeError(
                 f"Step '{step}' has invalid signature or type mismatch. Check your step method implementation."
             ) from error
-        except Exception as error:
-            # Other runtime errors
-            duration = datetime.now() - start_time
-            self.history.add_step(step, duration, error)
-            logger.debug(f'Step {step} failed with {type(error).__name__}: {error}')
-            raise
+        logger.debug(f'Step {step} failed with {type(error).__name__}: {error}')
+        raise error
 
     def run(self) -> None:
         """Same as generate but in online usage this sounds more natural"""

@@ -240,4 +240,4 @@ class OsmoModelCollector:
     @property
     def available_steps(self) -> list[TestStep]:
         """Return iterator for all available steps"""
-        return list(filter(lambda x: x.is_available, self.all_steps))
+        return [x for x in self.all_steps if x.is_available]

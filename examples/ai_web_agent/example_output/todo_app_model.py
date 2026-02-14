@@ -22,16 +22,16 @@ class TodoAppModel:
     def before_test(self):
         """Navigate to app and reset state."""
         self.page.goto(self.url)
-        self.page.wait_for_selector(".new-todo")
+        self.page.wait_for_selector('.new-todo')
         self.todo_count = 0
         self.completed_count = 0
 
     # --- Add a todo item ---
 
     def step_add_todo(self):
-        input_field = self.page.locator(".new-todo")
-        input_field.fill(f"Task {self.todo_count + 1}")
-        input_field.press("Enter")
+        input_field = self.page.locator('.new-todo')
+        input_field.fill(f'Task {self.todo_count + 1}')
+        input_field.press('Enter')
         self.todo_count += 1
 
     def guard_add_todo(self):
@@ -43,7 +43,7 @@ class TodoAppModel:
     # --- Toggle a todo as complete ---
 
     def step_toggle_todo(self):
-        items = self.page.locator(".todo-list li:not(.completed) .toggle")
+        items = self.page.locator('.todo-list li:not(.completed) .toggle')
         items.first.click()
         self.completed_count += 1
 
@@ -54,9 +54,9 @@ class TodoAppModel:
     # --- Delete a todo item ---
 
     def step_delete_todo(self):
-        item = self.page.locator(".todo-list li").first
+        item = self.page.locator('.todo-list li').first
         item.hover()
-        item.locator(".destroy").click()
+        item.locator('.destroy').click()
         self.todo_count -= 1
 
     def guard_delete_todo(self):
@@ -92,18 +92,18 @@ class TodoAppModel:
         """Verify todo count display matches model state."""
         active_count = self.todo_count - self.completed_count
         if active_count > 0:
-            count_text = self.page.locator(".todo-count").text_content()
+            count_text = self.page.locator('.todo-count').text_content()
             assert str(active_count) in count_text
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     from playwright.sync_api import sync_playwright
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=False)
         page = browser.new_page()
 
-        model = TodoAppModel(page=page, url="https://todomvc.com/examples/react/dist/")
+        model = TodoAppModel(page=page, url='https://todomvc.com/examples/react/dist/')
 
         osmo = Osmo(model)
         osmo.test_end_condition = Length(30)

@@ -12,7 +12,6 @@ Requires:
 import argparse
 import asyncio
 import sys
-from pathlib import Path
 
 from prompt_template import PYOSMO_MODEL_REFERENCE
 
@@ -21,17 +20,17 @@ async def generate_model(url: str, output_path: str) -> None:
     try:
         from claude_agent_sdk import Agent, AgentConfig, MCPServer
     except ImportError:
-        print("Error: claude-agent-sdk is required. Install with: pip install claude-agent-sdk")
+        print('Error: claude-agent-sdk is required. Install with: pip install claude-agent-sdk')
         sys.exit(1)
 
     playwright_mcp = MCPServer(
-        name="playwright",
-        command="npx",
-        args=["@playwright/mcp@latest"],
+        name='playwright',
+        command='npx',
+        args=['@playwright/mcp@latest'],
     )
 
     agent = Agent(
-        model="claude-sonnet-4-5-20250929",
+        model='claude-sonnet-4-5-20250929',
         config=AgentConfig(
             system_prompt=PYOSMO_MODEL_REFERENCE,
             mcp_servers=[playwright_mcp],
@@ -51,20 +50,22 @@ Steps:
 Save the model to: {output_path}
 """
 
-    print(f"Exploring {url} and generating model...")
+    print(f'Exploring {url} and generating model...')
     result = await agent.run(user_prompt)
-    print(f"Agent completed. Model saved to {output_path}")
-    print(f"Result: {result}")
+    print(f'Agent completed. Model saved to {output_path}')
+    print(f'Result: {result}')
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Generate a PyOsmo model from a web application")
-    parser.add_argument("url", help="URL of the web application to model")
-    parser.add_argument("--output", "-o", default="generated_model.py", help="Output file path (default: generated_model.py)")
+    parser = argparse.ArgumentParser(description='Generate a PyOsmo model from a web application')
+    parser.add_argument('url', help='URL of the web application to model')
+    parser.add_argument(
+        '--output', '-o', default='generated_model.py', help='Output file path (default: generated_model.py)'
+    )
     args = parser.parse_args()
 
     asyncio.run(generate_model(args.url, args.output))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

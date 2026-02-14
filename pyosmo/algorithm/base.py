@@ -22,6 +22,12 @@ class OsmoAlgorithm(ABC):
         self.random = random
         self.model = model
 
+    def _ensure_initialized(self) -> Random:
+        """Return the Random instance, raising if not yet initialized."""
+        if self.random is None:
+            raise RuntimeError('Algorithm not initialized. Call initialize() first.')
+        return self.random
+
     @abstractmethod
     def choose(self, history: OsmoHistory, choices: list[TestStep]) -> TestStep:
         raise Exception('This is just abstract class, not implementation')

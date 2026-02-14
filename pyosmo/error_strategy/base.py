@@ -13,6 +13,6 @@ class OsmoErrorStrategy(ABC):
     def failure_in_test(self, history: OsmoHistory, model: OsmoModelCollector, error: BaseException) -> None:
         raise Exception('This is not implemented!')
 
-    @abstractmethod
     def failure_in_suite(self, history: OsmoHistory, model: OsmoModelCollector, error: BaseException) -> None:
-        raise Exception('This is not implemented!')
+        """Handle suite-level failures. By default delegates to failure_in_test."""
+        self.failure_in_test(history, model, error)

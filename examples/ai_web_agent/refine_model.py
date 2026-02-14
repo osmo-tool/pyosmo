@@ -32,7 +32,7 @@ def run_model_and_get_history(model_path: str, url: str, steps: int) -> tuple[st
     source = Path(model_path).read_text()
 
     # Dynamically load the model module
-    spec = importlib.util.spec_from_file_location("generated_model", model_path)
+    spec = importlib.util.spec_from_file_location('generated_model', model_path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
 
@@ -40,12 +40,12 @@ def run_model_and_get_history(model_path: str, url: str, steps: int) -> tuple[st
     model_class = None
     for attr_name in dir(module):
         attr = getattr(module, attr_name)
-        if isinstance(attr, type) and any(m.startswith("step_") for m in dir(attr)):
+        if isinstance(attr, type) and any(m.startswith('step_') for m in dir(attr)):
             model_class = attr
             break
 
     if model_class is None:
-        print("Error: No PyOsmo model class found in the file")
+        print('Error: No PyOsmo model class found in the file')
         sys.exit(1)
 
     with sync_playwright() as p:
@@ -70,18 +70,18 @@ async def refine_model(model_path: str, url: str, steps: int) -> None:
     try:
         from claude_agent_sdk import Agent, AgentConfig
     except ImportError:
-        print("Error: claude-agent-sdk is required. Install with: pip install claude-agent-sdk")
+        print('Error: claude-agent-sdk is required. Install with: pip install claude-agent-sdk')
         sys.exit(1)
 
     from prompt_template import REFINEMENT_PROMPT
 
-    print(f"Running model {model_path}...")
+    print(f'Running model {model_path}...')
     source, history_json = run_model_and_get_history(model_path, url, steps)
 
-    print("Analyzing results and refining model...")
+    print('Analyzing results and refining model...')
 
     agent = Agent(
-        model="claude-sonnet-4-5-20250929",
+        model='claude-sonnet-4-5-20250929',
         config=AgentConfig(system_prompt=REFINEMENT_PROMPT),
     )
 
@@ -107,22 +107,22 @@ Output ONLY the complete updated Python file.
 
     # Write refined model back
     Path(model_path).write_text(result)
-    print(f"Refined model written to {model_path}")
+    print(f'Refined model written to {model_path}')
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Refine a PyOsmo model based on test results")
-    parser.add_argument("model_file", help="Path to the PyOsmo model file")
-    parser.add_argument("--url", required=True, help="URL of the web application")
-    parser.add_argument("--steps", type=int, default=20, help="Steps per test (default: 20)")
-    parser.add_argument("--iterations", type=int, default=1, help="Refinement iterations (default: 1)")
+    parser = argparse.ArgumentParser(description='Refine a PyOsmo model based on test results')
+    parser.add_argument('model_file', help='Path to the PyOsmo model file')
+    parser.add_argument('--url', required=True, help='URL of the web application')
+    parser.add_argument('--steps', type=int, default=20, help='Steps per test (default: 20)')
+    parser.add_argument('--iterations', type=int, default=1, help='Refinement iterations (default: 1)')
     args = parser.parse_args()
 
     for i in range(args.iterations):
         if args.iterations > 1:
-            print(f"\n--- Refinement iteration {i + 1}/{args.iterations} ---")
+            print(f'\n--- Refinement iteration {i + 1}/{args.iterations} ---')
         asyncio.run(refine_model(args.model_file, args.url, args.steps))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
