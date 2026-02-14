@@ -1,4 +1,5 @@
 import importlib
+import importlib.machinery
 import inspect
 import sys
 from logging import getLogger

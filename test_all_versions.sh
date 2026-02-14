@@ -24,8 +24,8 @@ for version in "${VERSIONS[@]}"; do
   source "$venv_dir/bin/activate"
   ruff check --fix
   ruff format
-  mypy pyosmo/
-  mypy examples/
+  ty check pyosmo/
+  ty check examples/
   pytest pyosmo/tests/
   deactivate
 done

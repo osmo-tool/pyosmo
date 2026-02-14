@@ -22,7 +22,7 @@ class ModelFunction:
 
     @property
     def func(self) -> Callable[[], Any]:
-        return getattr(self.object_instance, self.function_name)  # type: ignore[no-any-return]
+        return getattr(self.object_instance, self.function_name)
 
     def execute(self) -> Any:
         try:
@@ -63,7 +63,7 @@ class TestStep(ModelFunction):
     def weight(self) -> float:
         # Check decorator-based weight first
         if hasattr(self.func, '_osmo_weight') and self.func._osmo_weight is not None:
-            return float(self.func._osmo_weight)
+            return float(self.func._osmo_weight)  # type: ignore[arg-type]
 
         # Check weight function (naming convention)
         weight_function = self.return_function_if_exists(f'weight_{self.name}')
@@ -72,7 +72,7 @@ class TestStep(ModelFunction):
 
         # Check weight attribute (legacy decorator)
         if hasattr(self.func, 'weight'):
-            return float(self.func.weight)
+            return float(self.func.weight)  # type: ignore[arg-type]
 
         return self.default_weight  # Default value
 
@@ -85,7 +85,7 @@ class TestStep(ModelFunction):
 
         # Check for inline guard (decorator-based)
         if hasattr(self.func, '_osmo_guard_inline'):
-            result = bool(self.func._osmo_guard_inline(self.object_instance))
+            result = bool(self.func._osmo_guard_inline(self.object_instance))  # type: ignore[operator]
             # Apply invert if specified
             if hasattr(self.func, '_osmo_guard_invert') and self.func._osmo_guard_invert:
                 result = not result

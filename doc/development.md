@@ -54,7 +54,7 @@ ruff format --check pyosmo/
 ### Run type checking
 
 ```bash
-mypy pyosmo/
+ty check pyosmo/
 ```
 
 ### Run mutation testing

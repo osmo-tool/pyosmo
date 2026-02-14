@@ -214,7 +214,7 @@ class ModelCollector(Collector):
             # Extract sequences from history
             sequences = []
             for test_case in osmo.history.test_cases:
-                sequence = [step_log.name for step_log in test_case.steps_log]
+                sequence = [step_log.step.function_name for step_log in test_case.steps_log]
                 sequences.append(sequence)
         except Exception as e:
             yield ModelError.from_parent(

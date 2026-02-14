@@ -117,6 +117,8 @@ def test_step_coverage_mid_range():
     # With 2 steps and 50% coverage, at least 1 step must have been used
     step_first = osmo.model.get_step_by_name('step_first')
     step_second = osmo.model.get_step_by_name('step_second')
+    assert step_first is not None
+    assert step_second is not None
     used_first = osmo.history.get_step_count(step_first) > 0
     used_second = osmo.history.get_step_count(step_second) > 0
     assert used_first or used_second
@@ -154,5 +156,7 @@ def test_step_coverage_end_suite_cumulative():
     # Suite should stop once both steps have been used across multiple tests
     step_first = osmo.model.get_step_by_name('step_first')
     step_second = osmo.model.get_step_by_name('step_second')
+    assert step_first is not None
+    assert step_second is not None
     assert osmo.history.get_step_count(step_first) > 0
     assert osmo.history.get_step_count(step_second) > 0

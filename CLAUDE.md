@@ -49,7 +49,7 @@ ruff format pyosmo/
 ruff format --check pyosmo/
 
 # Type checking
-mypy pyosmo/
+ty check pyosmo/
 ```
 
 ### Installation & Building
@@ -202,7 +202,7 @@ See `doc/strategic_vision_2025.md` for detailed roadmap and competitive analysis
 
 1. Make changes to `pyosmo/` code
 2. Run `ruff check pyosmo/ --fix` and `ruff format pyosmo/` to lint and format
-3. Run `mypy pyosmo/` for type checking
+3. Run `ty check pyosmo/` for type checking
 4. Run `pytest pyosmo/tests/` to verify tests pass
 5. Add/update tests in `pyosmo/tests/` for new functionality
 6. Verify coverage with `pytest pyosmo/tests/ --cov=pyosmo`

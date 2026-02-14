@@ -10,7 +10,7 @@ def weight(value: int | float) -> Callable[[F], F]:
     """Make able to put weight in classes or functions by decorator @weight"""
 
     def decorator(func: F) -> F:
-        func.weight = value  # type: ignore[attr-defined]
+        func.weight = value
         return func
 
     return decorator
@@ -34,11 +34,11 @@ class StepDecorator:
         def wrapper(*args: Any, **kwargs: Any) -> Any:
             return func(*args, **kwargs)
 
-        # Attach metadata
-        wrapper._osmo_step = True  # type: ignore[attr-defined]
-        wrapper._osmo_step_name = self.name or func.__name__  # type: ignore[attr-defined]
-        wrapper._osmo_weight = self.weight_value  # type: ignore[attr-defined]
-        wrapper._osmo_enabled = self.enabled  # type: ignore[attr-defined]
+        # Attach metadata (dynamic attributes for model discovery)
+        wrapper._osmo_step = True  # type: ignore[unresolved-attribute]
+        wrapper._osmo_step_name = self.name or func.__name__  # type: ignore[unresolved-attribute]
+        wrapper._osmo_weight = self.weight_value  # type: ignore[unresolved-attribute]
+        wrapper._osmo_enabled = self.enabled  # type: ignore[unresolved-attribute]
 
         return wrapper
 
@@ -102,17 +102,17 @@ def guard(step_name_or_func: str | Callable[..., Any], *, invert: bool = False) 
         guard_func = step_name_or_func
 
         def inline_decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-            func._osmo_guard_inline = guard_func  # type: ignore[attr-defined]
-            func._osmo_guard_invert = invert  # type: ignore[attr-defined]
+            func._osmo_guard_inline = guard_func  # type: ignore[unresolved-attribute]
+            func._osmo_guard_invert = invert  # type: ignore[unresolved-attribute]
             return func
 
         return inline_decorator
 
     # Named guard
     def named_decorator(func: Callable[..., Any]) -> Callable[..., Any]:
-        func._osmo_guard = True  # type: ignore[attr-defined]
-        func._osmo_guard_for = step_name_or_func  # type: ignore[attr-defined]
-        func._osmo_guard_invert = invert  # type: ignore[attr-defined]
+        func._osmo_guard = True  # type: ignore[unresolved-attribute]
+        func._osmo_guard_for = step_name_or_func  # type: ignore[unresolved-attribute]
+        func._osmo_guard_invert = invert  # type: ignore[unresolved-attribute]
         return func
 
     return named_decorator
@@ -134,8 +134,8 @@ def pre(step_name: str) -> Callable[[F], F]:
     """
 
     def decorator(func: F) -> F:
-        func._osmo_pre = True  # type: ignore[attr-defined]
-        func._osmo_pre_for = step_name  # type: ignore[attr-defined]
+        func._osmo_pre = True
+        func._osmo_pre_for = step_name
         return func
 
     return decorator
@@ -157,8 +157,8 @@ def post(step_name: str) -> Callable[[F], F]:
     """
 
     def decorator(func: F) -> F:
-        func._osmo_post = True  # type: ignore[attr-defined]
-        func._osmo_post_for = step_name  # type: ignore[attr-defined]
+        func._osmo_post = True
+        func._osmo_post_for = step_name
         return func
 
     return decorator
@@ -181,7 +181,7 @@ def requires(*requirements: str) -> Callable[[F], F]:
     """
 
     def decorator(func: F) -> F:
-        func._osmo_requires = list(requirements)  # type: ignore[attr-defined]
+        func._osmo_requires = list(requirements)
         return func
 
     return decorator
@@ -204,8 +204,8 @@ def requires_all(*requirements: str) -> Callable[[F], F]:
     """
 
     def decorator(func: F) -> F:
-        func._osmo_requires = list(requirements)  # type: ignore[attr-defined]
-        func._osmo_requires_all = True  # type: ignore[attr-defined]
+        func._osmo_requires = list(requirements)
+        func._osmo_requires_all = True
         return func
 
     return decorator
@@ -228,8 +228,8 @@ def requires_any(*requirements: str) -> Callable[[F], F]:
     """
 
     def decorator(func: F) -> F:
-        func._osmo_requires = list(requirements)  # type: ignore[attr-defined]
-        func._osmo_requires_any = True  # type: ignore[attr-defined]
+        func._osmo_requires = list(requirements)
+        func._osmo_requires_any = True
         return func
 
     return decorator
@@ -254,9 +254,9 @@ def variable(name: str, categories: list[str] | None = None) -> Callable[[F], F]
     """
 
     def decorator(func: F) -> F:
-        func._osmo_variable = True  # type: ignore[attr-defined]
-        func._osmo_variable_name = name  # type: ignore[attr-defined]
-        func._osmo_variable_categories = categories  # type: ignore[attr-defined]
+        func._osmo_variable = True
+        func._osmo_variable_name = name
+        func._osmo_variable_categories = categories
         return func
 
     return decorator
@@ -276,5 +276,5 @@ def state(func: F) -> F:
     Returns:
         Decorated function
     """
-    func._osmo_state = True  # type: ignore[attr-defined]
+    func._osmo_state = True
     return func

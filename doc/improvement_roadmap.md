@@ -85,8 +85,8 @@ This document provides a comprehensive roadmap for improving pyosmo based on:
 - [ ] Add type hints to algorithm classes
 - [ ] Add type hints to end_conditions classes
 - [ ] Add type hints to error_strategy classes
-- [ ] Run mypy for validation
-- [ ] Add mypy to CI/CD pipeline
+- [ ] Run ty for validation
+- [ ] Add ty to CI/CD pipeline
 
 #### 1.6 Docstring Coverage
 **Status**: Only 25.5% documented

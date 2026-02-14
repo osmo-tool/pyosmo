@@ -286,7 +286,7 @@ ruff format .
 
 ### Type Checking
 ```bash
-mypy pyosmo/
+ty check pyosmo/
 ```
 
 ## Testing
