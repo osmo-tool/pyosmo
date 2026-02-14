@@ -37,6 +37,12 @@ class OsmoHistory:
             raise Exception('There is no active test case!!')
         self.current_test_case.add_step(TestStepLog(step, duration, error))
 
+    def attach(self, name: str, data: str | bytes) -> None:
+        """Attach data to the last step of the current test case."""
+        if self.current_test_case is None or not self.current_test_case.steps_log:
+            raise Exception('No step to attach to!')
+        self.current_test_case.steps_log[-1].attach(name, data)
+
     @property
     def error_count(self) -> int:
         """Total count of errors in all tests cases"""
@@ -168,7 +174,22 @@ class OsmoHistory:
             'step_pairs': {f'{a} -> {b}': count for (a, b), count in self.step_pairs().items()},
             'test_cases': [
                 {
-                    'steps': [step_log.name for step_log in tc.steps_log],
+                    'steps': [
+                        {
+                            'name': step_log.name,
+                            'attachments': [
+                                {
+                                    'name': att_name,
+                                    'type': 'bytes' if isinstance(att_data, bytes) else 'str',
+                                    'size': len(att_data),
+                                }
+                                for att_name, att_data in step_log.attachments.items()
+                            ],
+                        }
+                        if step_log.attachments
+                        else step_log.name
+                        for step_log in tc.steps_log
+                    ],
                     'duration_seconds': tc.duration.total_seconds(),
                     'error_count': tc.error_count,
                     'errors': [
@@ -199,6 +220,36 @@ class OsmoHistory:
             path: File path to write JSON to
         """
         Path(path).write_text(self.to_json())
+
+    def save(self, directory: str | Path) -> None:
+        """Save history with attachments to a directory.
+
+        Creates a directory structure with history.json and per-test attachment files:
+            directory/
+                history.json
+                test_0/
+                    step_000_screenshot.png
+                    step_000_dom.html
+                test_1/
+                    ...
+        """
+        directory = Path(directory)
+        directory.mkdir(parents=True, exist_ok=True)
+
+        for tc_index, tc in enumerate(self.test_cases):
+            for step_index, step_log in enumerate(tc.steps_log):
+                if not step_log.attachments:
+                    continue
+                test_dir = directory / f'test_{tc_index}'
+                test_dir.mkdir(exist_ok=True)
+                for att_name, att_data in step_log.attachments.items():
+                    file_path = test_dir / f'step_{step_index:03d}_{att_name}'
+                    if isinstance(att_data, bytes):
+                        file_path.write_bytes(att_data)
+                    else:
+                        file_path.write_text(att_data)
+
+        (directory / 'history.json').write_text(self.to_json())
 
     def __str__(self) -> str:
         ret = ''

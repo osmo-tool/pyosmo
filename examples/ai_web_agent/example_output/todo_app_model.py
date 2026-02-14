@@ -86,14 +86,18 @@ class TodoAppModel:
     def guard_filter_completed(self):
         return self.completed_count > 0
 
-    # --- Assertions (run after every step) ---
+    # --- Assertions and capture (run after every step) ---
 
     def after(self):
-        """Verify todo count display matches model state."""
+        """Verify todo count display and capture DOM snapshot."""
         active_count = self.todo_count - self.completed_count
         if active_count > 0:
             count_text = self.page.locator('.todo-count').text_content()
             assert str(active_count) in count_text
+
+        # Attach DOM snapshot and screenshot for analysis
+        self.osmo_history.attach('dom.html', self.page.content())
+        self.osmo_history.attach('screenshot.png', self.page.screenshot())
 
 
 if __name__ == '__main__':

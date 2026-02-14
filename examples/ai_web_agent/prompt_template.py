@@ -89,37 +89,63 @@ if __name__ == "__main__":
 """
 
 REFINEMENT_PROMPT = """\
-You are an expert test engineer refining a PyOsmo model based on test execution results.
+You are an expert test engineer refining a PyOsmo model based on multi-run test execution results.
 
 You will receive:
 1. The current model source code
-2. A JSON history from the last test run (produced by `history.to_json()`)
+2. A JSON object with two sections:
+   - `summary` – cross-run analysis from `generate_and_save()` with multiple runs
+   - `last_run_history` – detailed history from the most recent run (via `history.to_json()`)
 
-## How to read the history JSON
+## How to read the JSON
 
-- `statistics.error_count` – total errors across all tests
-- `statistics.step_frequency` – how often each step ran
-- `step_pairs` – which step transitions occurred (and how often)
-- `test_cases[].errors[]` – specific errors with step name and message
+### Summary (cross-run analysis)
+- `summary.total_runs` – number of generate() runs performed
+- `summary.step_results` – per-step pass/fail counts across all runs
+- `summary.step_frequency` – total execution count per step across all runs
+- `summary.flaky_steps` – steps that failed in some runs but passed in others (intermittent issues)
+
+### Last run history (detailed)
+- `last_run_history.statistics.error_count` – total errors in the last run
+- `last_run_history.step_frequency` – step counts from the last run
+- `last_run_history.step_pairs` – step transitions from the last run
+- `last_run_history.test_cases[].errors[]` – specific errors with step name and message
 
 ## Refinement strategy
 
-1. **Fix errors first**: look at `test_cases[].errors[]`. Common causes:
+1. **Fix flaky steps first**: look at `summary.flaky_steps`. These are the highest priority.
+   Flaky steps indicate intermittent failures — common causes:
+   - Race conditions → add `page.wait_for_selector()` or `page.wait_for_load_state()`
+   - Timing-dependent state → add explicit waits or state checks in guards
+   - Non-deterministic element visibility → use more robust selectors
+
+2. **Fix consistent errors**: look at `last_run_history.test_cases[].errors[]`. Common causes:
    - Selector changed or element not found → update the selector
    - Guard too permissive → tighten the guard condition
    - Missing wait → add `page.wait_for_selector()` before interacting
    - State tracking wrong → fix state updates
 
-2. **Improve coverage**: look at `statistics.step_frequency`.
-   - Steps with 0 executions → guard may be too restrictive
+3. **Improve coverage**: look at `summary.step_frequency`.
+   - Steps with low frequency → guard may be too restrictive
    - Steps dominating → lower their weight or add more variety
 
-3. **Check transitions**: look at `step_pairs`.
+4. **Check transitions**: look at `last_run_history.step_pairs`.
    - Missing expected transitions → guards may block valid paths
    - Unexpected transitions → may need new guards
 
-4. **Add new steps**: if the test explored pages with actions not yet modeled,
+5. **Add new steps**: if the test explored pages with actions not yet modeled,
    add new `step_*`/`guard_*` methods.
+
+## Capturing data for analysis
+
+Models can capture per-step artifacts by using `self.osmo_history` (automatically injected):
+```python
+def after(self):
+    self.osmo_history.attach('dom.html', self.page.content())
+    self.osmo_history.attach('screenshot.png', self.page.screenshot())
+```
+
+This data is saved to disk when using `generate_and_save()` and can be used for visual diffing.
 
 Output the **complete updated model file**.
 """

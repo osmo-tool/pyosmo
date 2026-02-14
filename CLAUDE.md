@@ -206,3 +206,5 @@ See `doc/strategic_vision_2025.md` for detailed roadmap and competitive analysis
 4. Run `pytest pyosmo/tests/` to verify tests pass
 5. Add/update tests in `pyosmo/tests/` for new functionality
 6. Verify coverage with `pytest pyosmo/tests/ --cov=pyosmo`
+
+**Before committing:** Always run `bash license_to_commit.sh` and verify it passes with exit code 0. This script runs the full validation pipeline: `uv sync`, ruff lint+format, ty type checking (pyosmo/ and examples/), pytest (pyosmo/tests/ and pytest_pyosmo/), and must complete without errors.

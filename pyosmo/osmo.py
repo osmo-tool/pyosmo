@@ -1,5 +1,8 @@
+import json
 import logging
+from collections.abc import Callable
 from datetime import datetime, timedelta
+from pathlib import Path
 from random import Random
 from typing import TYPE_CHECKING
 
@@ -33,13 +36,15 @@ class Osmo(OsmoConfig):
         """
         super().__init__()
         self.model = OsmoModelCollector()
+        self.runs: list[OsmoHistory] = []
+        self._capture_callbacks: list[Callable[[], dict[str, str | bytes]]] = []
+        self.history = OsmoHistory()
         if model:
             if isinstance(model, list):
                 for m in model:
                     self.add_model(m)
             else:
                 self.add_model(model)
-        self.history = OsmoHistory()
 
     @property
     def seed(self) -> int:
@@ -77,6 +82,7 @@ class Osmo(OsmoConfig):
         self._check_model(model)
         # Set osmo_random
         model.osmo_random = self._random  # type: ignore[attr-defined]
+        model.osmo_history = self.history  # type: ignore[attr-defined]
         self.model.add_model(model)
 
     def _run_step(self, step: TestStep) -> None:
@@ -126,6 +132,9 @@ class Osmo(OsmoConfig):
     def generate(self) -> None:
         """Generate / run tests"""
         self.history = OsmoHistory()  # Restart the history
+        # Re-inject osmo_history into all models
+        for sub_model in self.model.sub_models:
+            sub_model.osmo_history = self.history  # type: ignore[attr-defined]
         logger.debug('Start generation..')
         logger.info(f'Using seed: {self.seed}')
         # Initialize algorithm
@@ -155,6 +164,10 @@ class Osmo(OsmoConfig):
                     except BaseException as error:
                         # Let error strategy decide how to handle
                         self.test_error_strategy.failure_in_test(self.history, self.model, error)
+                    # Run capture callbacks after each step
+                    for callback in self._capture_callbacks:
+                        for att_name, att_data in callback().items():
+                            self.history.attach(att_name, att_data)
                     self.model.execute_optional(f'post_{step.name}')
                     # General after step which is run after each step
                     self.model.execute_optional('after')
@@ -172,6 +185,7 @@ class Osmo(OsmoConfig):
                 break
         self.model.execute_optional('after_suite')
         self.history.stop()
+        self.runs.append(self.history)
 
     # Fluent Configuration API
 
@@ -266,6 +280,83 @@ class Osmo(OsmoConfig):
         """
         self.test_suite_error_strategy = strategy
         return self
+
+    def capture_after_step(self, callback: Callable[[], dict[str, str | bytes]]) -> 'Osmo':
+        """Register a callback to capture attachments after each step (fluent API).
+
+        The callback is called after every step execution. It should return a dict
+        mapping attachment names to data (str for text, bytes for binary).
+
+        Args:
+            callback: Callable returning dict of attachment name to data
+
+        Returns:
+            Self for method chaining
+        """
+        self._capture_callbacks.append(callback)
+        return self
+
+    def generate_and_save(self, directory: str | Path, runs: int = 10) -> None:
+        """Run generate() multiple times and save all results to a directory.
+
+        Args:
+            directory: Output directory for all run data
+            runs: Number of generate() runs (default: 10)
+        """
+        for _ in range(runs):
+            self.generate()
+        self.save_runs(directory)
+
+    def save_runs(self, directory: str | Path) -> None:
+        """Save all accumulated runs to a directory with summary.
+
+        Creates:
+            directory/
+                summary.json    — cross-run flakiness analysis
+                run_0/          — per-run history + attachments
+                run_1/
+                ...
+        """
+        directory = Path(directory)
+        directory.mkdir(parents=True, exist_ok=True)
+
+        for run_index, run_history in enumerate(self.runs):
+            run_history.save(directory / f'run_{run_index}')
+
+        # Build summary with flakiness analysis
+        step_results: dict[str, dict[str, int]] = {}
+        step_frequency: dict[str, int] = {}
+
+        for run_history in self.runs:
+            # Track which steps passed/failed in this run
+            run_step_errors: dict[str, bool] = {}
+            for tc in run_history.test_cases:
+                for step_log in tc.steps_log:
+                    name = step_log.name
+                    step_frequency[name] = step_frequency.get(name, 0) + 1
+                    if step_log.error is not None:
+                        run_step_errors[name] = True
+                    elif name not in run_step_errors:
+                        run_step_errors[name] = False
+
+            for name, had_error in run_step_errors.items():
+                if name not in step_results:
+                    step_results[name] = {'pass': 0, 'fail': 0}
+                if had_error:
+                    step_results[name]['fail'] += 1
+                else:
+                    step_results[name]['pass'] += 1
+
+        flaky_steps = [name for name, counts in step_results.items() if counts['pass'] > 0 and counts['fail'] > 0]
+
+        summary = {
+            'total_runs': len(self.runs),
+            'step_results': step_results,
+            'step_frequency': step_frequency,
+            'flaky_steps': flaky_steps,
+        }
+
+        (directory / 'summary.json').write_text(json.dumps(summary, indent=2))
 
     def build(self) -> 'Osmo':
         """

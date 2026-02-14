@@ -9,6 +9,7 @@ class TestStepLog:
         self._timestamp = datetime.now()
         self._duration = duration
         self._error = error
+        self._attachments: dict[str, str | bytes] = {}
 
     @property
     def step(self) -> TestStep:
@@ -29,3 +30,10 @@ class TestStepLog:
     @property
     def duration(self) -> timedelta:
         return self._duration
+
+    @property
+    def attachments(self) -> dict[str, str | bytes]:
+        return self._attachments
+
+    def attach(self, name: str, data: str | bytes) -> None:
+        self._attachments[name] = data

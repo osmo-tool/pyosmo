@@ -21,8 +21,13 @@ import sys
 from pathlib import Path
 
 
-def run_model_and_get_history(model_path: str, url: str, steps: int) -> tuple[str, str]:
-    """Run a PyOsmo model and return (model_source, history_json)."""
+def run_model_and_get_history(
+    model_path: str, url: str, steps: int, runs: int = 10, output_dir: str | None = None
+) -> tuple[str, str]:
+    """Run a PyOsmo model multiple times and return (model_source, summary_json).
+
+    Uses generate_and_save() to run multiple times and produce flakiness analysis.
+    """
     from playwright.sync_api import sync_playwright
 
     from pyosmo import Osmo
@@ -48,6 +53,8 @@ def run_model_and_get_history(model_path: str, url: str, steps: int) -> tuple[st
         print('Error: No PyOsmo model class found in the file')
         sys.exit(1)
 
+    save_dir = Path(output_dir) if output_dir else Path(model_path).parent / 'test_results'
+
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
@@ -58,15 +65,25 @@ def run_model_and_get_history(model_path: str, url: str, steps: int) -> tuple[st
         osmo.test_end_condition = Length(steps)
         osmo.on_error(AlwaysIgnore())
 
-        osmo.generate()
+        osmo.generate_and_save(save_dir, runs=runs)
 
-        history_json = osmo.history.to_json()
+        # Read the summary for LLM analysis
+        summary_json = (save_dir / 'summary.json').read_text()
+        # Also include the last run's history for detailed step info
+        last_run_json = osmo.history.to_json()
         browser.close()
 
-    return source, history_json
+    # Combine summary + last run history for the LLM
+    import json
+
+    combined = {
+        'summary': json.loads(summary_json),
+        'last_run_history': json.loads(last_run_json),
+    }
+    return source, json.dumps(combined, indent=2)
 
 
-async def refine_model(model_path: str, url: str, steps: int) -> None:
+async def refine_model(model_path: str, url: str, steps: int, runs: int = 10) -> None:
     try:
         from claude_agent_sdk import Agent, AgentConfig
     except ImportError:
@@ -75,8 +92,8 @@ async def refine_model(model_path: str, url: str, steps: int) -> None:
 
     from prompt_template import REFINEMENT_PROMPT
 
-    print(f'Running model {model_path}...')
-    source, history_json = run_model_and_get_history(model_path, url, steps)
+    print(f'Running model {model_path} ({runs} runs)...')
+    source, history_json = run_model_and_get_history(model_path, url, steps, runs=runs)
 
     print('Analyzing results and refining model...')
 
@@ -92,14 +109,20 @@ Here is the current PyOsmo model:
 {source}
 ```
 
-Here are the test execution results (JSON):
+Here are the multi-run test results (JSON with summary + last run details):
 
 ```json
 {history_json}
 ```
 
+The JSON includes:
+- `summary.flaky_steps` — steps that failed in some runs but not all (intermittent issues)
+- `summary.step_results` — per-step pass/fail counts across all runs
+- `summary.step_frequency` — how often each step ran across all runs
+- `last_run_history` — detailed history from the most recent run
+
 Analyze the results and output an improved version of the model.
-Fix any errors, improve coverage, and add missing steps if needed.
+Fix any errors (especially flaky steps), improve coverage, and add missing steps if needed.
 Output ONLY the complete updated Python file.
 """
 
@@ -115,13 +138,16 @@ def main() -> None:
     parser.add_argument('model_file', help='Path to the PyOsmo model file')
     parser.add_argument('--url', required=True, help='URL of the web application')
     parser.add_argument('--steps', type=int, default=20, help='Steps per test (default: 20)')
+    parser.add_argument(
+        '--runs', type=int, default=10, help='Runs per refinement iteration for flakiness detection (default: 10)'
+    )
     parser.add_argument('--iterations', type=int, default=1, help='Refinement iterations (default: 1)')
     args = parser.parse_args()
 
     for i in range(args.iterations):
         if args.iterations > 1:
             print(f'\n--- Refinement iteration {i + 1}/{args.iterations} ---')
-        asyncio.run(refine_model(args.model_file, args.url, args.steps))
+        asyncio.run(refine_model(args.model_file, args.url, args.steps, runs=args.runs))
 
 
 if __name__ == '__main__':
