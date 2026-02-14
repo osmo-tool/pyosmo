@@ -87,6 +87,26 @@ Static model analysis before execution:
 - Detect always-enabled steps (missing guards)
 - CLI command: `pyosmo validate mymodel.py`
 
+### Model Visualization
+
+Generate visual representations of models for communication and debugging:
+- Mermaid and GraphViz diagram export of steps, guards, and transitions
+- Coverage heatmaps showing step execution frequency
+- CLI command: `pyosmo visualize mymodel.py`
+- Inline rendering in Jupyter notebooks
+
+```bash
+pyosmo visualize mymodel.py --format mermaid
+# Output: steps, guards, and transitions as a Mermaid state diagram
+```
+
+### Test Case Minimization / Shrinking
+
+When a failure is found, automatically find the shortest step sequence that reproduces it (similar to Hypothesis shrinking):
+- Replay and reduce failing sequences
+- Binary search and delta-debugging strategies
+- Output minimal reproduction script
+
 ### Tutorials & Documentation
 
 - Tutorial series: Getting Started, Data-Driven Testing, Scenario-Based Testing
@@ -115,7 +135,29 @@ Greedy step selection to accelerate coverage:
 Save and replay generated test sequences:
 - Save sequences to JSON
 - Replay saved sequences for regression
-- Test case minimization for failure reproduction
+
+### Hypothesis Integration
+
+Bridge MBT with property-based testing:
+- Provide a Hypothesis strategy that generates step sequences from a PyOsmo model
+- Leverage Hypothesis shrinking for automatic failure minimization
+- Combine random model exploration with Hypothesis's database of interesting examples
+
+```python
+from pyosmo.hypothesis import osmo_strategy
+
+@given(osmo_strategy(MyModel))
+def test_model(steps):
+    # Hypothesis drives step selection, shrinks on failure
+    pass
+```
+
+### Jupyter Notebook Integration
+
+First-class support for interactive model development:
+- Inline model visualization (Mermaid/SVG diagrams)
+- Live coverage display after `osmo.run()` in a cell
+- Interactive step-by-step execution for debugging
 
 ### Performance Profiling
 
@@ -137,7 +179,8 @@ Richer error context:
 
 - **Parallel execution**: Multi-process test generation
 - **Adaptive algorithms**: Runtime-adapting step selection
-- **Model visualization**: State machine graphs (GraphViz/Mermaid)
+- **LLM-assisted model generation**: Generate model skeletons from requirements, user stories, or API specs using LLMs — extending the `model-creator/` concept to general-purpose model scaffolding
+- **Live testing dashboard**: Web-based dashboard for long-running online tests showing real-time coverage progress, step execution heatmap, and current model state
 - **Distributed testing**: Multi-machine coordination
 - **Constraint solving**: Z3/OR-Tools integration
 - **Probability-based end condition**: Random stopping with configurable probability
