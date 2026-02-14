@@ -135,6 +135,9 @@ class Osmo(OsmoConfig):
         # Re-inject osmo_history into all models
         for sub_model in self.model.sub_models:
             sub_model.osmo_history = self.history  # type: ignore[attr-defined]
+        # Propagate timeout to model collector and cached steps
+        self.model.timeout = self._timeout
+        self.model._cache_valid = False  # Force step re-discovery with new timeout
         logger.debug('Start generation..')
         logger.info(f'Using seed: {self.seed}')
         # Initialize algorithm
@@ -522,3 +525,16 @@ class Osmo(OsmoConfig):
         from pyosmo.error_strategy import IgnoreAsserts
 
         return self.on_error(IgnoreAsserts())
+
+    def with_timeout(self, seconds: float | None) -> 'Osmo':
+        """
+        Set timeout for model function calls (fluent API).
+
+        Args:
+            seconds: Timeout in seconds (positive number) or None to disable
+
+        Returns:
+            Self for method chaining
+        """
+        self.timeout = seconds
+        return self

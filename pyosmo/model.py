@@ -1,17 +1,55 @@
 import inspect
 import logging
+import threading
 from collections.abc import Callable, Iterator
 from typing import Any, Optional
 
 logger = logging.getLogger('osmo')
 
 
+def _call_with_timeout(func: Callable[[], Any], timeout: float, description: str) -> Any:
+    """Call a function with a timeout using a daemon thread.
+
+    Args:
+        func: Zero-argument callable to execute
+        timeout: Maximum seconds to wait
+        description: Human-readable description for error messages
+
+    Returns:
+        The function's return value
+
+    Raises:
+        TimeoutError: If the function exceeds the timeout
+        Any exception raised by the function
+    """
+    result: list[Any] = []
+    error: list[BaseException] = []
+    completed = threading.Event()
+
+    def wrapper() -> None:
+        try:
+            result.append(func())
+        except BaseException as e:
+            error.append(e)
+        finally:
+            completed.set()
+
+    thread = threading.Thread(target=wrapper, daemon=True)
+    thread.start()
+    if not completed.wait(timeout=timeout):
+        raise TimeoutError(f'{description} timed out after {timeout} seconds')
+    if error:
+        raise error[0]
+    return result[0] if result else None
+
+
 class ModelFunction:
     """Generic function class containing basic functionality of model functions"""
 
-    def __init__(self, function_name: str, object_instance: object) -> None:
+    def __init__(self, function_name: str, object_instance: object, timeout: float | None = 60.0) -> None:
         self.function_name = function_name
         self.object_instance = object_instance  # Instance of model class
+        self.timeout = timeout
 
     @property
     def default_weight(self) -> float:
@@ -24,9 +62,15 @@ class ModelFunction:
     def func(self) -> Callable[[], Any]:
         return getattr(self.object_instance, self.function_name)
 
+    def _with_timeout(self, func: Callable[[], Any], description: str) -> Any:
+        """Call func with timeout if configured, otherwise call directly."""
+        if self.timeout is not None:
+            return _call_with_timeout(func, self.timeout, description)
+        return func()
+
     def execute(self) -> Any:
         try:
-            return self.func()
+            return self._with_timeout(self.func, str(self))
         except AttributeError as e:
             raise Exception(f'Osmo cannot find function {self.object_instance}.{self.function_name} from model') from e
 
@@ -44,10 +88,11 @@ class TestStep(ModelFunction):
         object_instance: object,
         step_name: str | None = None,
         is_decorator_based: bool = False,
+        timeout: float | None = 60.0,
     ) -> None:
         if not is_decorator_based:
             assert function_name.startswith('step_'), 'Wrong name function'
-        super().__init__(function_name, object_instance)
+        super().__init__(function_name, object_instance, timeout=timeout)
         self._step_name = step_name
         self._is_decorator_based = is_decorator_based
         self._decorator_guard_cache: ModelFunction | None | object = _GUARD_NOT_CACHED
@@ -85,8 +130,10 @@ class TestStep(ModelFunction):
         """Check if step is available right now"""
         # Check model-level guard first (guard_all)
         guard_all_func = getattr(self.object_instance, 'guard_all', None)
-        if guard_all_func is not None and callable(guard_all_func) and not guard_all_func():
-            return False
+        if guard_all_func is not None and callable(guard_all_func):
+            guard_all_result = self._with_timeout(guard_all_func, f'{type(self.object_instance).__name__}.guard_all()')
+            if not guard_all_result:
+                return False
 
         # Check if step is disabled by decorator
         if hasattr(self.func, '_osmo_enabled') and not self.func._osmo_enabled:
@@ -94,7 +141,14 @@ class TestStep(ModelFunction):
 
         # Check for inline guard (decorator-based)
         if hasattr(self.func, '_osmo_guard_inline'):
-            result = bool(self.func._osmo_guard_inline(self.object_instance))  # type: ignore[operator]
+            inline_guard = self.func._osmo_guard_inline
+            instance = self.object_instance
+            result = bool(
+                self._with_timeout(
+                    lambda: inline_guard(instance),  # type: ignore[operator]
+                    f'{type(self.object_instance).__name__}.{self.function_name}() inline guard',
+                )
+            )
             # Apply invert if specified
             if hasattr(self.func, '_osmo_guard_invert') and self.func._osmo_guard_invert:
                 result = not result
@@ -133,7 +187,7 @@ class TestStep(ModelFunction):
                 and hasattr(method, '_osmo_guard_for')
                 and method._osmo_guard_for == self.name
             ):
-                self._decorator_guard_cache = ModelFunction(attr_name, self.object_instance)
+                self._decorator_guard_cache = ModelFunction(attr_name, self.object_instance, timeout=self.timeout)
                 return self._decorator_guard_cache
 
         self._decorator_guard_cache = None
@@ -152,7 +206,7 @@ class TestStep(ModelFunction):
         if hasattr(self.object_instance, name):
             attr = getattr(self.object_instance, name)
             if callable(attr):
-                return ModelFunction(name, self.object_instance)
+                return ModelFunction(name, self.object_instance, timeout=self.timeout)
         return None
 
 
@@ -163,6 +217,7 @@ class OsmoModelCollector:
         # Format: functions[function_name] = link_of_instance
         self.sub_models: list[object] = []
         self.debug: bool = False
+        self.timeout: float | None = 60.0
         # Performance optimization: cache discovered steps
         self._steps_cache: list[TestStep] | None = None
         self._cache_valid: bool = False
@@ -185,7 +240,7 @@ class OsmoModelCollector:
             if hasattr(method, '_osmo_step'):
                 step_name = method._osmo_step_name  # type: ignore[attr-defined]
                 discovered_step_names.add(attr_name)
-                yield TestStep(attr_name, sub_model, step_name, is_decorator_based=True)
+                yield TestStep(attr_name, sub_model, step_name, is_decorator_based=True, timeout=self.timeout)
 
         # Then, discover naming convention steps (skip if already found via decorator)
         for attr_name, _method in inspect.getmembers(sub_model, predicate=callable):
@@ -194,7 +249,7 @@ class OsmoModelCollector:
                 continue
 
             if attr_name.startswith('step_'):
-                yield TestStep(attr_name, sub_model)
+                yield TestStep(attr_name, sub_model, timeout=self.timeout)
 
     @property
     def all_steps(self) -> Iterator[TestStep]:
@@ -231,7 +286,7 @@ class OsmoModelCollector:
         for sub_model in self.sub_models:
             for attr_name, _method in inspect.getmembers(sub_model, predicate=callable):
                 if attr_name == name:
-                    yield ModelFunction(attr_name, sub_model)
+                    yield ModelFunction(attr_name, sub_model, timeout=self.timeout)
 
     def add_model(self, model: object) -> None:
         """Add model for osmo.

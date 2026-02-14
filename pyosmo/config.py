@@ -66,6 +66,23 @@ class ConfigValidator:
         )
 
     @staticmethod
+    def validate_timeout(timeout: Any) -> None:
+        """Validate timeout value.
+
+        Args:
+            timeout: Timeout value to validate (positive number or None)
+
+        Raises:
+            ConfigurationError: If timeout is invalid
+        """
+        if timeout is None:
+            return
+        if not isinstance(timeout, (int, float)):
+            raise ConfigurationError(f'Timeout must be a positive number or None, got {type(timeout).__name__}.')
+        if timeout <= 0:
+            raise ConfigurationError(f'Timeout must be a positive number, got {timeout}.')
+
+    @staticmethod
     def validate_seed(seed: Any) -> None:
         """Validate random seed value.
 
@@ -98,6 +115,7 @@ class OsmoConfig:
         self._test_suite_end_condition: OsmoEndCondition = Length(1)  # pragma: no mutate
         self._test_error_strategy: OsmoErrorStrategy = AlwaysRaise()
         self._test_suite_error_strategy: OsmoErrorStrategy = AlwaysRaise()
+        self._timeout: float | None = 60.0
 
     @property
     def random(self) -> Random:
@@ -187,3 +205,20 @@ class OsmoConfig:
         """
         ConfigValidator.validate_error_strategy(value, 'Test suite error strategy')
         self._test_suite_error_strategy = value
+
+    @property
+    def timeout(self) -> float | None:
+        return self._timeout
+
+    @timeout.setter
+    def timeout(self, value: float | None) -> None:
+        """Set timeout for model function calls with validation.
+
+        Args:
+            value: Timeout in seconds (positive number) or None to disable
+
+        Raises:
+            ConfigurationError: If timeout is invalid
+        """
+        ConfigValidator.validate_timeout(value)
+        self._timeout = value
