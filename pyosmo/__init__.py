@@ -3,6 +3,7 @@ import pyosmo.end_conditions
 import pyosmo.models
 from pyosmo.decorators import (
     guard,
+    model_guard,
     post,
     pre,
     requires,
@@ -22,6 +23,7 @@ __all__ = [
     'weight',
     'step',
     'guard',
+    'model_guard',
     'pre',
     'post',
     'requires',

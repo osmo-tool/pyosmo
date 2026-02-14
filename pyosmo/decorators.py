@@ -164,6 +164,25 @@ def post(step_name: str) -> Callable[[F], F]:
     return decorator
 
 
+def model_guard(guard_func: Callable[..., Any]) -> Callable[[type], type]:
+    """Class decorator that adds a model-level guard to all steps.
+
+    Usage:
+        @model_guard(lambda self: self.state.current_page == "home")
+        class HomePage:
+            ...
+    """
+
+    def decorator(cls: type) -> type:
+        def guard_all(self: Any) -> Any:
+            return guard_func(self)
+
+        cls.guard_all = guard_all  # type: ignore[attr-defined]
+        return cls
+
+    return decorator
+
+
 def requires(*requirements: str) -> Callable[[F], F]:
     """Mark a step as satisfying one or more requirements.
 
