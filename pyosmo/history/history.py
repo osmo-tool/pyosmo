@@ -1,4 +1,6 @@
+import json
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pyosmo.history.test_case import OsmoTestCaseRecord
@@ -153,6 +155,50 @@ class OsmoHistory:
                 step_index += 1
 
         return timeline
+
+    def to_dict(self) -> dict:
+        """Serialize history to a dictionary for JSON export.
+
+        Returns:
+            Dictionary with statistics, step frequency, step pairs, and per-test details.
+        """
+        return {
+            'statistics': self.statistics().to_dict(),
+            'step_frequency': self.step_frequency(),
+            'step_pairs': {f'{a} -> {b}': count for (a, b), count in self.step_pairs().items()},
+            'test_cases': [
+                {
+                    'steps': [step_log.name for step_log in tc.steps_log],
+                    'duration_seconds': tc.duration.total_seconds(),
+                    'error_count': tc.error_count,
+                    'errors': [
+                        {'step': step_log.name, 'error': str(step_log.error)}
+                        for step_log in tc.steps_log
+                        if step_log.error is not None
+                    ],
+                }
+                for tc in self.test_cases
+            ],
+        }
+
+    def to_json(self, indent: int = 2) -> str:
+        """Serialize history to a JSON string.
+
+        Args:
+            indent: JSON indentation level (default: 2)
+
+        Returns:
+            JSON string representation of history
+        """
+        return json.dumps(self.to_dict(), indent=indent)
+
+    def save_json(self, path: str | Path) -> None:
+        """Save history as JSON to a file.
+
+        Args:
+            path: File path to write JSON to
+        """
+        Path(path).write_text(self.to_json())
 
     def __str__(self) -> str:
         ret = ''
